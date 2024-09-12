@@ -1,0 +1,158 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.MessageModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    
+}
+
+
+<div class="containerColor text-center" id="initialContainer" >
+    <img id="ransomwareImage" src="~/Prod/images/ransomware.jpg" style="width: 30%; "> 
+    <h1 style="color:ghostwhite">WARNING!!! <br />Your system is hacked and we have encrypted your files!</h1>
+    <p style="font-size:18px;">
+       I have encrypted your systems with a encryption used during the 58 BC. 
+    </p>
+  
+    <p style="font-size:18px;">
+        Decrypt it within 3 minutes if you can, OR ALL YOUR FILES WILL BE LOST FOREVER~HAHAHAHAHA
+       </p>
+    <p style="font-size:18px;"> >>>DO NOT RESTART, SHUTDOWN OR DISCONNECT!!<<< </p>
+   
+    <p style="font-size:40px">
+        Press <strong>ENTER</strong> to decrypt your files now!!!
+    </p>
+    <p id="loading" ; style="color:red; position:relative;"; >
+        f2498504d6625543309ba0e2b47b55ed8243968723311fbf2e3b377ca77412c8
+        c54817af3bd2a6f1dc15329647c37ad01ad625a4c39d61a109765f12053a0664
+        b46083eeb7e8e28a972a2a5623014aedd432eff3c8b51a1f5f2c2c2193a30a3e
+        042ebba85c5e39a78bdb07e3d7a3cb9ffe3838c4bf9c73333383547b2946c196
+        608a04429fc1b49c1856eb5aea47dca4dd2e00a26756acd0c66ba7913cbbf127
+        151999a9b5169b65377d9a46aad7e9ed7f685c45bbf43a02cb0a66e1dbbe19af
+        u2189d4c39d61a109765f1s
+    </p>
+    
+</div>
+<!-- Add an invisible button with a unique ID -->
+<button id="invisibleButton" style="display: none;"></button>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+
+
+    // Attach a click event listener to the invisible button
+    document.getElementById('invisibleButton').addEventListener('click', function () {
+        // Redirect to the desired page
+        window.location.href = '/CaesarCipher/quiz';
+    });
+
+    // Attach a keydown event listener to the document
+    document.addEventListener('keydown', function (event) {
+        // Check if the pressed key is Enter (key code 13)
+        if (event.keyCode === 13) {
+            // Trigger a click on the invisible button when Enter is pressed
+            document.getElementById('invisibleButton').click();
+        }
+    });
+
+
+    
+    alphabet = new Array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0");
+    letter_count = 0;
+    el = $("#loading");
+    word = el.html().trim();
+    finished = false;
+    el.html("");
+    for (var i = 0; i < word.length; i++) {
+        el.append("<span>" + word.charAt(i) + "</span>");
+    }
+
+    setTimeout(write, 75);
+    incrementer = setTimeout(inc, 50);
+
+    function write() {
+        for (var i = letter_count; i < word.length; i++) {
+            var c = Math.floor(Math.random() * 36);
+            $("span")[i].innerHTML = alphabet[c];
+        }
+        if (!finished) {
+            setTimeout(write, 75);
+        }
+    }
+
+    function inc() {
+        $("span")[letter_count].innerHTML = word[letter_count];
+        $("span:eq(" + letter_count + ")").addClass("glow");
+        letter_count++;
+        if (letter_count >= word.length) {
+            finished = true;
+            setTimeout(reset, 1500);
+        } else {
+            setTimeout(inc, 50);
+        }
+    }
+
+    function reset() {
+        letter_count = 0;
+        finished = false;
+        setTimeout(inc, 1000);
+        setTimeout(write, 75);
+        $("span").removeClass("glow");
+    }
+  
+    
+    
+</script>
+
+<style>
+   /* img {
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        left:0;
+        z-index: -1;
+
+        }*/
+
+   
+    #initialContainer {
+        border: 2px solid #ff0000;
+        padding-top: 32px;
+        padding-bottom: 32px;
+        border-radius: 10px;
+        background-color:black;
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        
+        font-family: 'OCR-A', sans-serif;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        position: fixed;
+        
+        
+    }
+
+    body {
+        
+        font-family: 'OCR A', sans-serif;
+        
+        
+        color: #ff0000; 
+        text-align: center;
+        background-color:black;
+    }
+   
+
+    .glow {
+        color: green;
+        text-shadow: 0px 0px 10px green;
+    }
+
+    span {
+        display: inline-block;
+       
+    }
+    
+    
+</style>
+

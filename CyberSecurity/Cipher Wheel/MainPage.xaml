@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Testing.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+
+            <Label
+               
+                Text="Caesar Cipher Wheel"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+
+
+
+
+
+            <!-- Original is 500 by 368-->
+            <!-- Margin -460-->
+            
+            
+
+            <!-- Margin 230 -->
+            <Label
+                x:Name="Key"
+                Text="Shift: 0"
+                Style="{StaticResource SubHeadline}"
+                 Margin="220"
+                SemanticProperties.HeadingLevel="Level1"
+                ZIndex="100"
+                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
+
+
+            <Grid HorizontalOptions="Fill" VerticalOptions="Start">
+
+
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.GestureRecognizers>
+                    <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated" />
+
+                </Grid.GestureRecognizers>
+                <Image
+                  x:Name="bot"
+                 Source="outer.png"
+                 HeightRequest="500"
+  
+                 SemanticProperties.Description="dot net bot in a race car number eight" 
+              
+                Grid.Column="0"
+                     Margin="-255,-495"
+                HorizontalOptions="End" VerticalOptions="Start"
+                 />
+
+
+                <Image
+                 Grid.Column="0"
+                 Source="inner.png"
+    
+                 HeightRequest="368"
+                  Margin="-190,-430"
+                    HorizontalOptions="End" VerticalOptions="Start"
+    
+                 SemanticProperties.Description="dot net bot in a race car number eight" 
+    
+    
+                 />
+
+                <!-- From here on is the added part. to add button to rotate the wheel -->
+
+
+
+                <!-- This is the button to shift right/increase shift -->
+                <!-- I added bnorderwidth, so the button will have border effect, help me see if should keep or take away border -->
+                <!-- The margin is by, (horizontal position, vertical position)   -500. -330-->
+                <!-- Grid column to align the 2 button -->
+                <!-- To change size of button, modify the WidthRequest/HeightRequest 150, 150 border 20-->
+                <Button
+
+                Text="" 
+                Background="white"    
+                WidthRequest="150"
+                HeightRequest="150"
+                ImageSource="right_arrow.png"
+                Clicked="ClickRight"
+                 Grid.Column="0"
+                Margin="-500,-330"
+               HorizontalOptions="End" VerticalOptions="Start"/>
+
+                <!-- This is the button to shift left/decrease shift -->
+                <Button
+                
+                Margin="-500,-330"
+                Grid.Column="1"
+                HorizontalOptions="Start" VerticalOptions="Start"
+                Background="white"
+                ImageSource="left_arrow.png"
+                Text="" 
+                WidthRequest="150"
+                HeightRequest="150"
+                
+                Clicked="ClickLeft"
+                 />
+                <Button
+
+                  WidthRequest="150"
+                  HeightRequest="150"
+                  Background="Transparent"
+                  ImageSource="restart_icon.png"
+                  Clicked="ClickReset"
+                 Margin="-75,-280"
+                 Grid.Column="3"
+                 HorizontalOptions="Start" VerticalOptions="Start"
+                    
+                 />
+                <Image
+                Source="hint_for_3.jpeg"
+                HeightRequest="150"
+                Margin="-380,-500"  
+                
+                
+                HorizontalOptions="End" VerticalOptions="Start"
+                 />
+                <Image
+                Source="hint_for_11.jpg"
+                HeightRequest="160"
+                Margin="-480,-500"  
+
+
+                HorizontalOptions="End" VerticalOptions="Start"
+                 />
+                <Image
+                Source="hint_for_16.jpg"
+                HeightRequest="160"
+                Margin="-660,-500"  
+
+
+                HorizontalOptions="End" VerticalOptions="Start"
+                 />
+
+            </Grid>
+            <Image
+             Source="swipe_icon.jpg"
+             HeightRequest="100"
+             Margin="0,-20"  
+             HorizontalOptions="Center" VerticalOptions="Start"
+               />
+            
+
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

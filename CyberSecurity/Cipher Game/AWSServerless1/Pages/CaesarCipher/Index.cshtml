@@ -1,0 +1,68 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.IndexModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+
+
+<!-- Set the iframe source directly in the HTML -->
+
+<div id="loading" class="holder">
+    <iframe id="IFrameId" src="https://cybermap.kaspersky.com/en/widget/dynamic/dark" frameborder="0"></iframe>
+    <!-- Add an invisible button with a unique ID -->
+</div>
+
+<div style="width: 100%;height:100%; position:fixed">
+    <button id="invisibleButton" style="display:block; width:100%; height:100%; background-color:transparent;border:none; border-color:transparent;" autofocus></button>
+</div>
+
+
+<script>
+
+    // Attach a click event listener to the invisible button
+    document.getElementById('invisibleButton').addEventListener('click', function () {
+        console.log('Invisible Button Clicked!');
+        // Redirect to the desired page
+        window.location.href = '/CaesarCipher/Countdown';
+    });
+    // Attach a keydown event listener to the document
+    document.getElementById('invisibleButton').addEventListener('keydown', function (event) {
+        console.log('Invisible Button Down!');
+        // Check if the pressed key is Enter (key code 13)
+        if (event.keyCode === 13) {
+            // Trigger a click on the invisible button when Enter is pressed
+            document.getElementById('invisibleButton').click();
+        }
+    });
+
+    // Attach a keydown event listener to the document
+    document.addEventListener('keydown', function (event) {
+        console.log('Document Down!');
+        // Check if the pressed key is Enter (key code 13)
+        if (event.keyCode === 13) {
+            // Trigger a click on the invisible button when Enter is pressed
+            document.getElementById('invisibleButton').click();
+        }
+    });
+</script>
+
+<style>
+
+    invisibleButton,
+    iframe {
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: black;
+        z-index: -1;
+    }
+
+    .holder {
+        position: relative;
+        height: 100%;
+    }
+
+</style>

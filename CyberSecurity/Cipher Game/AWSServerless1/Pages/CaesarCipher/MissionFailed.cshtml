@@ -1,0 +1,104 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.MissionFailedModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<div id="missionFailedContainer">
+    <h1>YOUR PC IS LOCKED FOREVER</h1>
+    <p>DATA ENCRYPTED...100%</p>
+    <p>All of your data has been encrypted forever without any key to decrypt!!!!</p>
+    <p>There is no second chance...but press <strong style="font-size:50px;">Backspace</strong> to try again anyway.</p>
+    <!-- Add an invisible button with a unique ID -->
+    <button id="invisibleButton" style="display: none;"></button>
+    <button id="Re-Button" style="display: none;"></button>
+    <script>
+        // Attach a click event listener to the invisible button
+        document.getElementById('invisibleButton').addEventListener('click', function () {
+            // Redirect to the desired page
+            window.location.href = '/CaesarCipher';
+        });
+
+        // Attach a keydown event listener to the document
+        document.addEventListener('keydown', function (event) {
+            // Check if the pressed key is Enter (key code 13)
+            if (event.keyCode === 13) {
+                // Trigger a click on the invisible button when Enter is pressed
+                document.getElementById('invisibleButton').click();
+            }
+        });
+
+
+         // Attach a click event listener to the invisible button
+        document.getElementById('Re-Button').addEventListener('click', function () {
+            // Redirect to the desired page
+            window.location.href = '/CaesarCipher/Message';
+        });
+
+        // Attach a keydown event listener to the document
+        document.addEventListener('keydown', function (event) {
+            // Check if the pressed key is Enter (key code 13)
+            if (event.keyCode === 8) {
+                // Trigger a click on the invisible button when Enter is pressed
+                document.getElementById('Re-Button').click();
+            }
+        });
+    </script>
+</div>
+
+
+<style>
+  
+  body {
+        
+        background-color: #000;
+        color: orangered;
+        text-align: center;
+        
+         background-image: url('/images/binary.gif');
+         background-repeat: repeat;
+         background-size:300px;
+        
+        
+    }
+
+    #missionFailedContainer{
+        
+        padding-top: 25px;
+        padding-bottom: 10px;
+        padding-left:15px;
+        padding-right:15px;
+   
+        
+        background-color:black;
+        
+        width:95%;
+        height:100%;
+        margin-top: 350px;
+    }
+
+
+    h1 {
+        font-size: 60px;
+        margin-bottom: 30px;
+        font-family: 'OCR-A', sans-serif;
+    }
+
+    p {
+        font-size: 28px;
+        margin-bottom: 20px;
+        font-family: 'OCR-A', sans-serif;
+          
+    }
+
+
+    #retryButton {
+        font-size: 22px;
+        padding: 15px 30px;
+        background-color: #ff0000;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+</style>

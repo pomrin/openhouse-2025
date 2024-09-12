@@ -1,0 +1,55 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.CountdownModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<video loop autoplay preload="auto" playsinline="true">
+    <source src="https://media.tenor.com/c21cN54oERsAAAPo/alarm.mp4" type="video/mp4">
+    <source src="https://media.tenor.com/c21cN54oERsAAAPs/alarm.webm" type="video/webm">
+</video>
+<audio controls autoplay>
+    <source src="~/Siren/attack2t22wav-14511.mp3" type="audio/mpeg">
+</audio>
+
+<div id="countdown"></div>
+
+<script>
+    async function startCountdown(duration) {
+        var timer = duration, seconds;
+        var countdown = document.getElementById("countdown");
+
+        async function updateTimer() {
+            seconds = timer;
+
+            if (seconds <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = "/CaesarCipher/Message";
+            } else {
+                countdown.textContent = seconds;
+                timer--;
+            }
+        }
+
+        updateTimer(); // Display initial time
+
+        var countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    window.onload = function () {
+        startCountdown(10); // 4 seconds countdown
+    };
+</script>
+
+
+<style>
+    video {
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        left: 0;
+        object-fit: cover;
+    }
+    audio {
+        display: none;
+    }
+</style>

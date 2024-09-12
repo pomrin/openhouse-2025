@@ -1,0 +1,14 @@
+﻿@page
+@model AWSServerless1.Pages.Codes.IndexModel
+@{
+    Layout = "_Layout";
+}
+<h2>2nd page model</h2>
+<p>
+    @Model.Message
+</p>
+<form method="post">
+    <input type="text" name="emailaddress">
+    <button type="submit" class="btn btn-primary">Submit</button>
+    @Html.AntiForgeryToken()
+</form>

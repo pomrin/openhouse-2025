@@ -1,0 +1,45 @@
+﻿@page
+@model AWSServerless1.Pages.ManageCodes.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Index";
+}
+
+<div class="containerColor">
+
+    <h1>Index</h1>
+
+    <p>
+        <a asp-page="Create">Create New</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Code[0].Codes)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+@*             @{
+                var random = new Random();
+                var item = Model.Code[random.Next(Model.Code.Count)];
+            } *@
+            @foreach (var item in Model.Code)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Codes)
+                    </td>
+                    <td>
+                        <a asp-page="./Edit" asp-route-id="@item.Codes">Edit</a> |
+                        <a asp-page="./Details" asp-route-id="@item.Codes">Details</a> |
+                        <a asp-page="./Delete" asp-route-id="@item.Codes">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

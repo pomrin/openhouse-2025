@@ -1,0 +1,385 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.QuizModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.7.8"></script>
+
+
+
+<div class="text-center" id="mainContainer">
+
+    <div class="wrap">
+        <p >Time Left:</p>
+        <p id="timer" >03:00</p>
+      
+    </div>
+    
+     <div class="wrap_message" >
+        <h1>Code:</h1>
+        <h1 id="cipher_message" style="text-align:left;">@Model.EncryptedMessage</h1>
+        <h1 id="cipher_overlay" style="color:green;background-color:transparent;"></h1>
+     </div>
+    <!--- 915.4px confi-->
+    <!-- -579px integ -->
+    <!-- -750px availability -->
+    <!-- <h1 id="cipher_overlay" style="color:green; margin-top:-230px;margin-left:805.5px;text-align:left;"></h1>  -->
+ 
+
+        
+    
+
+    
+    
+    
+
+    <form method="post" onsubmit="stopTimerAndSubmit()" class="d-inline-block" style="background-color:transparent; padding-top:0px;">
+        <input type="hidden" name="timeTaken" id="timeTaken" value="">
+        <input asp-for="UserInput" class="form-control" type="text" id="userInput" name="userInput" placeholder="Enter decrypted code here"><br>
+        <input class="btn btn-primary btn-lg" id="submitButton" type="submit" value="Decrypt">
+        @Html.AntiForgeryToken()
+    </form>
+
+    @if (TempData["Message"] != null)
+    {
+        <div id="lottieContainer" style="width: 300px; height: 300px;"></div>
+    }
+    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+</div>
+
+
+<script>
+    console.log(Object.keys(sessionStorage));
+
+    var totalTime = 180 * 1000;
+    var startTime;
+    var timerInterval;
+    var str = "";
+    var message = "@Model.EncryptedMessage";
+    sam = document.getElementById("cipher_message");
+    sem = document.getElementById("cipher_overlay");
+    sem.textContent = "";
+
+    function startTimer() {
+     
+        
+        // Check if there's a stored timer value in the session
+        var storedTimerValue = sessionStorage.getItem('TimerValue');
+        if (storedTimerValue) {
+            stopTimer();
+            startTime = performance.now() - (parseFloat(storedTimerValue) * 1000);
+            // Set the timer start time based on the stored value
+           
+        } 
+        else {
+            
+            startTime = performance.now();
+        }
+
+        timerInterval = setInterval(updateTimer, 100);
+    }
+
+    function updateTimer() {
+        var elapsedTime = performance.now() - startTime;
+        var timeTaken = Math.max(totalTime - elapsedTime, 0);
+
+        var minutes = Math.floor(timeTaken / 60000);
+        var seconds = Math.floor((timeTaken % 60000) / 1000);
+        var milliseconds = Math.floor(timeTaken % 1000);
+
+        var timerString =
+            (minutes < 10 ? "0" : "") + minutes + ":" +
+            (seconds < 10 ? "0" : "") + seconds + "." +
+            ("00" + milliseconds).slice(-3);
+
+        document.getElementById("timer").textContent = timerString;
+
+        // Save the timer value to the session every millisecond
+        saveTimerToSession(elapsedTime / 1000);
+
+        if (timeTaken <= 0) {
+            stopTimer();
+            sessionStorage.removeItem('TimerValue');
+            window.location.href = "/CaesarCipher/MissionFailed";
+        }
+        
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    window.onload = function () {
+        
+        document.getElementById("userInput").focus();
+        startTimer();
+        //document.getElementById("stopButton").addEventListener("click", stopTimer);
+
+    };
+
+    function stopTimerAndSubmit() {
+        stopTimer();
+        
+        var elapsedTime = performance.now() - startTime;
+        var secondsWithMilliseconds = (elapsedTime / 1000).toFixed(2); // Convert elapsed time to seconds with 2 decimal places
+        document.getElementById('timeTaken').value = secondsWithMilliseconds;
+        
+        
+    }
+
+    function saveTimerToSession(timerValue) {
+        // Save the timer value to the session
+        sessionStorage.setItem('TimerValue', timerValue);
+       
+    }
+
+    var animation = lottie.loadAnimation({
+
+        container: document.getElementById('lottieContainer'),
+        renderer: 'svg',
+        loop: false,
+        autoplay: true,
+        path: 'https://lottie.host/3b5bf8d0-ba5e-497c-8d9f-dd9dfd8cc976/6STAjmxEUh.json'
+    });
+
+    animation.addEventListener('complete', function () {
+        
+        setTimeout(function () {
+            
+            // Play a reverse animation
+            animation.setDirection(-1);
+            animation.play();
+
+            // Listen for the reverse animation to complete
+            animation.addEventListener('complete', function () {
+                var lottieContainer = document.getElementById('lottieContainer');
+                if (lottieContainer) {
+                    lottieContainer.remove();
+                   
+                }
+            });
+        },);
+    });
+
+    document.getElementById('userInput').addEventListener('input', function (event) {
+        event.target.value = event.target.value.toUpperCase();
+        str = event.target.value;
+
+        str_len = message;
+        str_len.toString;
+        str_len = event.target.value;
+        
+        console.log(message.length);
+        sem.textContent = "";
+        console.log(message);
+       
+        if (str.length > 0 && str.length <= message.length) {
+            //integrity
+            if (message.length == 9) {
+                if (message == "YDJUWHYJO") {
+                    sem.style.marginLeft = "-570.9px";
+                }
+                else if (message == "TYEPRCTEJ") {
+                    sem.style.marginLeft = "-579.1px";
+                }
+                else{
+                    sem.style.marginLeft = "-578.7px";
+                }
+                    
+            }
+            //availability
+            else if (message.length == 12) {
+                if (message == "LGLTWLMTWTEJ") {
+                    sem.style.marginLeft = "-738.1px";
+                }
+                else if (message == "QLQYBQRYBYJO") {
+                    sem.style.marginLeft = "-739.7px";
+                }
+                else {
+                    sem.style.marginLeft = "-747.9px";
+                }
+                //sem.style.marginLeft = "-747.90px";
+            }
+            //confidentiality
+            else {
+
+                if (message == "SEDVYTUDJYQBYJO") {
+                    sem.style.marginLeft = "-894.5px";
+                }
+                else if (message == "NZYQTOPYETLWTEJ") {
+                    sem.style.marginLeft = "-898.8px";
+                }
+                else {
+                    sem.style.marginLeft = "-915.6px";
+                }
+                //sem.style.marginLeft = "-915.4px";
+            }
+           
+            for (i = 0; i < str_len.length; i++) {
+
+                
+
+                console.log("Message: " +str_len.length);
+                console.log("Input: "+str.length);
+                
+
+                sem.textContent += sam.textContent[i];
+                
+            }
+            
+          
+
+           
+            //document.getElementById("cipher_message").style.color = 'Green';
+            //document.getElementById("cipher_message").style.color = 'Green';
+            
+        }
+        else {
+            sem.textContent = "";
+        }
+    });
+    
+</script>
+
+
+
+<style>
+    
+
+    body {
+        margin: 0;
+    }
+
+    #lottieContainer {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+    }
+
+    #initialContainer, #mainContainer {
+        
+        padding: 20px;
+      
+        
+        background-color:black;
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        width:100%;
+        height:100%;
+        left:0;
+        position:fixed;
+        
+    }
+
+    #initialContainer h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
+        font-family: 'OCR-A', sans-serif;
+      
+        color: #ff0000;
+        text-align: center;
+        padding: 50px;
+        margin: 0;
+    }
+
+    #initialContainer p {
+        font-size: 24px;
+        font-family: 'OCR-A', sans-serif;
+       
+        color: #ff0000;
+        text-align: center;
+        padding: 50px;
+        margin: 0;
+    }
+
+    h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
+        font-family: 'OCR-A', sans-serif;
+       
+        color: #ff0000;
+        text-align: center;
+        padding: 50px;
+        margin: 0;
+    }
+
+    p {
+        font-size: 24px;
+        font-family: 'OCR-A', sans-serif;
+
+        color: #ff0000;
+        text-align: center;
+        padding: 50px;
+        margin: 0;
+    }
+
+    #mainContainer #timer {
+        font-size: 60px; 
+        color: #ff0000;
+        
+        margin-left:-90px;
+        
+    }
+
+    #mainContainer h1 {
+        font-size: 92px; 
+        margin-bottom: 20px;
+        background-color:black;
+    }
+
+    #mainContainer form {
+        display: inline-block;
+        background-color:black;
+        
+    }
+
+    #mainContainer input {
+        font-family: 'OCR-A', sans-serif;
+        margin: 10px 0;
+        padding: 10px; 
+        font-size: 18px; 
+        width: 100%; 
+        box-sizing: border-box; 
+        border:none;
+    }
+
+    #mainContainer input:focus{
+            
+            box-shadow:none;
+            
+    }
+
+ 
+
+
+    #mainContainer #submitButton {
+        font-size: 18px; 
+        background-color:red;
+        border: none;
+        
+    }
+
+    
+
+    .wrap {
+        display: flex;
+        margin-top: 200px;
+        margin-left:550px;
+        
+    }
+    .wrap p{
+        font-size:60px;
+    }
+
+    .wrap_message {
+        display: flex;
+        margin-top: -70px;
+        margin-left: 450px;
+    }
+  
+    
+</style>
+

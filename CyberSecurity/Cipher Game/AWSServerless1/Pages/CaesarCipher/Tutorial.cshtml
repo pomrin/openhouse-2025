@@ -1,0 +1,57 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.TutorialModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    
+}
+
+<div class=" text-center" id="initialContainer" >
+    
+    <h1> Introduction to Caesar Cipher <img src="~/images/caesarcipher.png" style="height:100px; width:100px;"></img></h1>
+    <br>
+    
+    <br>
+    <h2>What is a plaintext?</h2>
+    <p> Plaintext is the original message in the plain that you can make sense of. When a plaintext goes through <strong>encryption</strong>, it is made <strong>unreadable</strong>, and only the intended recipient with the decryption key can view the original message.</p>
+    <br>
+    <h2>What is a ciphertext?</h2>
+    <p> When a plaintext is encrypted, it is now called a ciphertext.</p>
+    <img src="~/images/Encrypt_Decrypt.jpg"> </img>
+    <p >Let's look at how Caesar Cipher aka substitution/shift cipher can be used for encryption.</p> 
+    <br>
+    <h2>How does Caesar Cipher work?</h2>
+    <p >Caesar Cipher is about substituting/shifting the current position of a plaintext letter to another letter down the position.</p> 
+    <p>E.g. When the key/shift is 3, all the plaintext letter are shifted 3 position/letter down</p>
+    <img src="~/images/caesar_1.jpg"></img>
+    <img src="~/images/caesar_2.png"></img>
+
+    <P>Click <a href="~/CaesarCipher/Countdown">here</a> to go next page...</P>
+</div>
+
+<style>
+    
+    img{
+        width:70%;
+        height:30%;
+    }
+    #initialContainer
+    {
+    padding-top:30px;
+     padding-bottom:30px;
+    padding-left:30px;
+    padding-right:30px;
+    margin-bottom:-15px;
+    background-color:white;
+    opacity:0.9;
+    font-family: 'sans-serif';
+   
+    }
+    h1{
+        font-size:72px;
+    }
+    p{
+        font-size:24px;
+    }
+
+
+</style>

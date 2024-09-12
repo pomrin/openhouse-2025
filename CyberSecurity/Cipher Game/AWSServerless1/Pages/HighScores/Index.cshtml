@@ -1,0 +1,232 @@
+﻿@page
+@model AWSServerless1.Pages.HighScores.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="containerColor">
+    @if (ViewData["RankMessage"] != null)
+    {
+        <h1 style=" font-family: 'OCR-A', sans-serif;">@ViewData["RankMessage"]</h1>
+    }
+    <table id="highscoreTable" class="table">
+        <thead>
+            <tr >
+                <th style="padding-left: 8px; ">
+                    Rank
+                </th>
+                <th style="padding-left: 30px; ">
+                    
+                    
+                    @Html.DisplayNameFor(model => model.Highscore[0].Username)
+                </th>
+                <th style="padding-left: 12px; ">
+                    @Html.DisplayNameFor(model => model.Highscore[0].Timetaken) (s)
+                </th>
+            </tr>
+            
+        </thead>
+       
+    </table>
+
+    <table id="highscoreTableblank" class="tableblank">
+        <thead>
+        
+            <tr>
+                <td style="background-color:transparent;"></td>
+                <td style="background-color:transparent;"></td>
+                <td style="background-color:transparent;"></td>
+            </tr>
+        </thead>
+
+    </table>
+
+
+    <table id="highscoreTable2" class="table2">
+       
+        <tbody>
+            @for (var i = 0; i < Model.Highscore.Count; i++)
+            {
+                System.Diagnostics.Debug.WriteLine("Testing: " + Model.Highscore[i].Id + "Date: " + Model.Highscore[i].Datecreated);
+                
+                var rank = i + 1;
+                //This should be the issue
+                var isCurrentUser = Model.Highscore[i].Id == Model.UserId;
+                System.Diagnostics.Debug.WriteLine(Model.UserId);
+                
+                @if (isCurrentUser)
+                {   
+                    //Code cannot tell user of same name by id
+                    System.Diagnostics.Debug.WriteLine("Testing Current User.: " + Model.Highscore[i].Id + "Name: " + Model.Highscore[i].Username);
+                    <tr style="@(isCurrentUser ? "font-weight: bold;" : ""); background-color:orange; ">
+                    <td style="padding-left: 20px; ">
+                        @rank
+                    </td>
+                    <td style="padding-left: 30px;">
+                        @Html.DisplayFor(modelItem => Model.Highscore[i].Username)
+                    </td>
+                        <td style="padding-left: 12px;">
+                        @Html.DisplayFor(modelItem => Model.Highscore[i].Timetaken) s
+                    </td>
+                </tr>
+
+            }
+                @if (!isCurrentUser)
+                {
+                    <tr style="@(isCurrentUser ? "font-weight: bold;" : "") ">
+                        <td style="padding-left: 20px; ">
+                            @rank
+                        </td>
+                        <td style="padding-left: 30px; ">
+                            @Html.DisplayFor(modelItem => Model.Highscore[i].Username)
+                        </td>
+                        <td style="padding-left: 12px; ">
+                            @Html.DisplayFor(modelItem => Model.Highscore[i].Timetaken) s
+                        </td>
+                    </tr>
+                
+            }
+            }
+            @if (!Model.Highscore.Any(h => h.Id == Model.UserId))
+            {
+                // If the user's ID is not present, add a new row for the user
+                <tr >
+                    <td colspan="3">.<br />.<br />.<br />.<br />.<br /></td>
+                </tr>
+                <tr style="font-weight: bold; background-color:orange;" >
+                    <td style="padding-left: 18px; ">
+                        @ViewData["UserRank"]
+                    </td>
+                    <td style="padding-left: 20px; ">
+                        @Html.DisplayFor(modelItem => modelItem.Username)
+                    </td>
+                    <td style="padding-right: 30px; ">
+                        @Html.DisplayFor(modelItem => modelItem.TimeTaken) s
+                    </td>
+                </tr>
+            }
+            
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Add an invisible button with a unique ID -->
+<button id="invisibleButton" style="display: none;"></button>
+
+<script>
+
+    // Attach a click event listener to the invisible button
+    document.getElementById('invisibleButton').addEventListener('click', function () {
+        // Redirect to the desired page
+        window.location.href = '/CaesarCipher';
+    });
+
+    // Attach a keydown event listener to the document
+    document.addEventListener('keydown', function (event) {
+        // Check if the pressed key is Enter (key code 13)
+        if (event.keyCode === 13) {
+            // Trigger a click on the invisible button when Enter is pressed
+            document.getElementById('invisibleButton').click();
+        }
+    });
+</script>
+
+<style>
+    tr:first-child th:first-child {
+        border-top-left-radius: 60px;
+        border-bottom-left-radius: 60px;
+        
+    }
+
+    tr:first-child th:last-child {
+        border-top-right-radius: 60px;
+        border-bottom-right-radius: 60px;
+        
+    }
+
+    
+
+  
+
+    .containerColor {
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+        border-radius: 10px;
+        /*box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);*/
+        text-align:center;
+        margin-top:210px;
+    }
+
+    #highscoreTable {
+        font-family: Arial, sans-serif;
+        width: 100%;
+        font-weight: bold;
+        margin-top: 20px;
+        font-size:24px;
+        overflow: hidden;
+        border-spacing: 0;
+        border-collapse: separate;
+        border-radius: 25px;
+        border: 8px solid black;
+        background-color: black;
+        text-align:match-parent;
+    }
+
+    #highscoreTable2 {
+        font-family: Courier New, sans-serif;
+        width: 100%;
+       
+        font-size: 24px;
+     
+        color:white;
+        background-color:black;
+        overflow: hidden;
+        border-spacing: 0;
+        border-collapse: separate;
+        border-radius: 25px;
+        border: 8px solid black;
+        text-align:center;
+      
+        
+    }
+
+   
+
+   
+
+        /* #highscoreTable th, */ #highscoreTable td {
+       
+        text-align: center;
+       border:none;
+       
+    }
+ 
+
+    #highscoreTable th {
+        background-color: black;
+        color: #fff;
+        border:none;
+        
+    }
+
+  
+    
+
+    
+
+ 
+
+    #highscoreTable2 td {
+        background-color: transparent;
+        color:white;
+        
+    }
+    #highscoreTable2 tbody tr:hover {
+        background-color: orangered;
+    }
+</style>

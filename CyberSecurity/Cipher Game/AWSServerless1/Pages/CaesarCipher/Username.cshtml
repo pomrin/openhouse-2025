@@ -1,0 +1,151 @@
+﻿@page
+@model AWSServerless1.Pages.CaesarCipher.UsernameModel
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<div class="containerColor text-center">
+    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+
+    <div class="animation-overlay">
+        <dotlottie-player src="https://lottie.host/43153676-c773-4154-bdfc-380b2d5647ac/ZoEIFdKG3K.json" background="transparent" speed="1" style="width: 1200px; height: 1200px;" autoplay></dotlottie-player>
+    </div>
+
+
+    <div class="overlay-content">
+        <h1 style="font-size: 60px; margin-bottom: 20px; color: #000;">Congratulations, Hero!</h1>
+        <p style="font-size: 24px; margin-bottom: 40px; color: #000;">You have successfully decrypted the code and saved the day. <br />Now, enter your name and join the ranks of those who have triumphed over the encryption challenge!</p>
+
+        <form method="post" form class="row g-3 needs-validation" novalidate onsubmit="return validateForm();" name="myForm">
+            <input type="hidden" name="Answer" value="@Model.Answer">
+            <input type="hidden" name="TimeTaken" value="@Model.TimeTaken">
+            <input type="hidden" name="DecryptedMessage" value="@Model.DecryptedMessage">
+
+           
+            <div class="col-md-6" style="margin-left:300px;">
+                <label for="validationCustom03" class="form-label"></label>
+                <input  required 
+                       asp-for="UserName" class="form-control" type="text" id="userName" name="userName" style="font-size: 24px;margin-left:160px; margin-bottom: 20px; padding: 15px; border-radius: 10px; border: 2px solid #000; background-color: #f8f9fa; color: #000;">
+                <div class="invalid-feedback" style="padding-bottom:30px; font-size:24px;">
+                    Please put a valid name
+                </div>
+            <button id="test"class="btn btn-success btn-lg" type="submit" style="font-size: 24px; padding: 15px; border-radius: 10px; #000; border-color: #000; color: #fff;">Join the Hall of Fame</button>
+            @Html.AntiForgeryToken()
+        </form>
+
+        <div style="font-size: 24px; margin-top: 40px; color: #000;">
+            <h2>Your Stats:</h2>
+            <p>Your Answer: @Model.Answer</p>
+            <p>Time Taken: @Model.TimeTaken Seconds</p>
+        </div>
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="incorrect-message" style="font-size: 24px; margin-top: 40px; color: #dc3545;">
+                @TempData["Message"].ToString();
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+
+    function validateForm() {
+        let x = document.forms["myForm"]["userName"].value;
+        
+        if (x == "" || x == null) {
+            alert("Name cannot be empty.");
+            return false;
+        }
+        else if (x.match(/^ *$/) != null) {
+            alert("Do not start with space or enter space only.");
+            
+            return false;
+            
+        }
+        
+    }
+
+
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+
+
+    window.onload = function () {
+        document.getElementById("userName").focus();
+    };
+
+    //To remove the sessionStorage local storage to fix the bug where ransomwarelockout page will not start from 3 minutes
+    sessionStorage.removeItem('TimerValue');
+</script>
+
+<style>
+    body {
+        overflow: hidden; /* Disable scrolling */
+        background-color: #f8f9fa; /* Set a light background color */
+        margin: 0; /* Remove default margin */
+    }
+
+    .containerColor {
+        padding: 20px; /* Add padding for better spacing */
+        border-radius: 10px; /* Add rounded corners */
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+        margin-top:235px;
+    }
+
+    .animation-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-35%, -40%);
+        width: 100%;
+        height: 100%;
+        z-index: 1; /* Send it to the background */
+    }
+
+    .overlay-content {
+        font-family: 'OCR A',sans-serif;
+        position: relative;
+        z-index: 1; /* Ensure content is above the animation */
+
+    }
+
+        .overlay-content h1,
+        .overlay-content h2,
+        .overlay-content .incorrect-message {
+            position: relative;
+            z-index: 2; /* Make sure content is clickable and above the animation */
+        }
+
+    .form-control {
+        width: 300px; /* Adjust the input width */
+        
+    }
+
+    .btn-success {
+        background-color: #000; /* Set a success button color */
+        border-color: #000;
+        color: #fff; /* Set text color to white */
+    }
+
+     
+
+</style>
