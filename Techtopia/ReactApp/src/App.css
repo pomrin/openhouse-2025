@@ -1,0 +1,116 @@
+.ps-sidebar-container {
+  background-color: #3A4F63 !important;
+  overflow-y: auto !important;
+}
+
+.ps-menu-button .ps-open {
+  color: white !important;
+}
+
+.snackbarSuccess .css-1eqdgzv-MuiPaper-root-MuiSnackbarContent-root {
+  color: #205a0b !important;
+}
+
+.snackbarError {
+  color: red !important;
+}
+
+@media (min-width: 600px) {
+  .css-1oqqzyl-MuiContainer-root {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}
+
+.modalBox {
+  position: absolute;
+  overflow-y: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: auto;
+  background-color: #dbdbdb;
+  padding: 14px 14px 20px 14px;
+}
+
+.stubbornRow {
+  font-size: 0.625rem !important;
+}
+
+.ps-menu-button {
+  background-color: #3A4F63 !important;
+  margin: 0 !important;
+  color: white !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: bold !important;
+}
+
+.ps-menu-button:hover {
+  background-color: #092041 !important;
+  color: #a29be0 !important;
+  font-weight: bolder !important;
+}
+
+.ps-submenu-content .ps-menu-button {
+  padding: 0px 20px 0px 60px !important;
+  font-size: 12px !important;
+}
+
+.ps-submenu-content .ps-submenu-content .ps-menu-button {
+  padding: 0px 20px 0px 80px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.ps-menu-button.ps-active {
+  color: #a29be0 !important;
+  font-weight: bolder !important;
+}
+
+.react-datepicker-wrapper input {
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding-right: 10px;
+}
+
+.react-datepicker-ignore-onclickoutside {
+  background-color: #ccc !important;
+}
+
+.MuiSelect-nativeInput {
+  color: black !important;
+}
+
+.css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper {
+  max-height: calc(100% - 350px) !important;
+}
+
+.css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input.Mui-disabled {
+  background-color: #878484;
+  color: #fff
+}
+
+.sidebar-stick {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 0px grey;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a2940;
+}
+
+/* Remove whitespace in the manage users page */
+.simplebar-placeholder {
+  display: none;
+}
