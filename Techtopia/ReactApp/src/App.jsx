@@ -52,6 +52,7 @@ import EditStaffPage from "./pages/admin/users/EditStaffPage";
 import AddUserPage from './pages/admin/users/AddUserPage';
 import SignInPage from './pages/SignInPage';
 import LoanReceipt from './pages/loans/LoanReceipt';
+import UserLanding from './pages/UserLanding'
 
 function App() {
   return (
@@ -62,7 +63,8 @@ function App() {
           {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
-              <Route path={"/"} element={<SignInPage />} />
+              <Route path={"/"} element={<UserLanding />} />
+              <Route path={"/SignInPage"} element={<SignInPage />} />
               <Route path={"/Error"} element={<Error />} />
               <Route path={"/MyAssets"} element={<MyAssets />} />
               <Route path={"/ReqLoan"} element={<ReqLoan />} />
