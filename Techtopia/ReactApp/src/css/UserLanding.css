@@ -1,4 +1,41 @@
 .BoardingPass{
-    border:solid 1px black;
-    border-radius:10px;
+    width:100%;
+}
+
+.BoardingPassContent{
+    padding:14px;
+}
+
+.travelBox{
+    display:flex;
+    justify-content:space-between;
+    text-align:center;
+}
+
+.planeImage{
+    text-align:center;
+}
+
+.fromBox{
+    text-align:left;
+}
+
+.toBox{
+    text-align:right;
+}
+
+.bold{
+    font-weight:bold;
+}
+
+.detailsBox{
+    display:flex;
+    text-align:center;
+    justify-content:space-around;
+    padding-bottom:10px;
+}
+
+.QRBox{
+    padding:20px;
+    text-align:center;
 }
