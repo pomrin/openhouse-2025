@@ -1,3 +1,17 @@
+.profilePicture{
+    height:150px;
+    width:150px;
+    border:solid 1px black;
+    text-align:center;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.profileImage{
+    height:150px;
+    width:150px;
+}
+
 .BoardingPass{
     width:100%;
 }
@@ -39,3 +53,4 @@
     padding:20px;
     text-align:center;
 }
+

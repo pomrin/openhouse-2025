@@ -4,6 +4,7 @@ import Paper from '@mui/material/Paper';
 import nyp_logo from "./../assets/nyp_logo.png";
 import '../css/UserLanding.css';
 import plane_image from './../assets/images/plane_image.png';
+import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
 function UserLanding() {
     function generateUniqueId(lastId) {
@@ -16,21 +17,41 @@ function UserLanding() {
     const [uniqueId, setUniqueId] = useState(generateUniqueId(0));
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+    const [currentBooth, setCurrentBooth] = useState('Fintech');
+    const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
     const handleGenerateId = () => {
         setUniqueId(generateUniqueId(parseInt(uniqueId)));
     };
 
-     //placeholder qr function
-    // State to hold the QR code image source
+    // List of booths
+    const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
+    
+    // Function to cycle through the booth names
+    const handleCycleBooth = () => {
+        setCurrentBooth((prevBooth) => {
+            const currentIndex = booths.indexOf(prevBooth);
+            const nextIndex = (currentIndex + 1) % booths.length;
+            return booths[nextIndex];
+        });
+    };
+
+    // Function to increment the queue number and format it as a 4-digit string
+    const handleIncrementQueue = () => {
+        setQueueNumber((prevQueueNumber) => {
+            const nextQueueNumber = (parseInt(prevQueueNumber) + 1).toString().padStart(4, '0');
+            return nextQueueNumber;
+        });
+    };
+
+    // Placeholder QR function
     const [qrImage, setQrImage] = useState('');
 
-    // Function to generate the QR code
     const generateQR = () => {
         const url = "https://www.google.com"; // URL to encode
         const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(url);
         setQrImage(qrSrc);
-      };
+    };
 
     useEffect(() => {
         generateQR();
@@ -61,6 +82,9 @@ function UserLanding() {
     return (
         <Box>
             <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
+            <Box class="profilePicture">
+                <img src={profile_picture} class="profileImage"/>
+            </Box>
             <h1>NYP BOARDING PASS</h1>
             <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderBottom: "1px dotted black"}}>
                 <Box className="BoardingPassContent">
@@ -100,7 +124,7 @@ function UserLanding() {
                     <Box class="detailsBox">
                         <Box>
                             <Typography class="bold">
-                                Passenger
+                                Passenger ID
                             </Typography>
                             <Typography>
                                 {uniqueId}
@@ -108,25 +132,25 @@ function UserLanding() {
                         </Box>
                         <Box>
                             <Typography class="bold">
-                                Flight
+                                Next Booth
                             </Typography>
                             <Typography>
-                                A 0137
+                                {currentBooth} {/* Updated to show current booth */}
                             </Typography>
                         </Box>
                     </Box>
                     <Box class="detailsBox">
                         <Box>
                                 <Typography class="bold">
-                                    Seat
+                                    Queue
                                 </Typography>
                                 <Typography>
-                                    27F
+                                    {queueNumber} {/* Queue number state */}
                                 </Typography>
                         </Box>
                         <Box>
                                 <Typography class="bold">
-                                    Gate
+                                    Placeholder
                                 </Typography>
                                 <Typography>
                                     2B
@@ -134,7 +158,7 @@ function UserLanding() {
                         </Box>
                         <Box>
                                 <Typography class="bold">
-                                    Terminal
+                                    Placeholder
                                 </Typography>
                                 <Typography>
                                     1A
@@ -147,10 +171,22 @@ function UserLanding() {
                 <Box class="QRBox">
                     <a href="#"><img src={qrImage} alt="QR Code" /></a>
                 </Box>
-                <Button variant="contained" color="primary" onClick={handleGenerateId} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                <Button variant="contained" color="primary" onClick={handleGenerateId} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto', width:'60%'}}>
                     Generate New ID
                 </Button>
+                {/* Button to cycle through booth names */}
+                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                    Change Booth
+                </Button>
+                {/* New button to increment queue number */}
+                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                    Add Queue Number
+                </Button>
             </Paper>
+            <Box>
+                <h1>MONTAGE APP</h1>
+
+            </Box>
         </Box>
     );
 }
