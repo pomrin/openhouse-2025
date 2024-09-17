@@ -4,6 +4,15 @@ import Paper from '@mui/material/Paper';
 import nyp_logo from "./../assets/nyp_logo.png";
 import '../css/UserLanding.css';
 import plane_image from './../assets/images/plane_image.png';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import aiStamp from './../assets/images/ai_stamp.svg';
+import csStamp from './../assets/images/cs_stamp.svg';
+import ftStamp from './../assets/images/ft_stamp.svg';
+import itStamp from './../assets/images/it_stamp.svg';
+
+
+
 
 function UserLanding() {
     function generateUniqueId(lastId) {
@@ -16,6 +25,11 @@ function UserLanding() {
     const [uniqueId, setUniqueId] = useState(generateUniqueId(0));
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+    const [isAiStampVisible, setAiStampVisible] = useState(false); // State to manage visibility
+    const [isCsStampVisible, setCsStampVisible] = useState(false); // State to manage visibility
+    const [isFtStampVisible, setFtStampVisible] = useState(false); // State to manage visibility
+    const [isItStampVisible, setItStampVisible] = useState(false); // State to manage visibility
+
 
     const handleGenerateId = () => {
         setUniqueId(generateUniqueId(parseInt(uniqueId)));
@@ -58,9 +72,117 @@ function UserLanding() {
         return () => clearInterval(intervalId); 
     }, []);
 
+    const ModalContent = ({ close }) => (
+        <div style={modalContentStyle}>
+            <div style={contentStyle}>
+                <button onClick={() => close()} style={buttonStyle}>Close Modal</button>
+                <h2 style={titleStyle}>All Collected Stamps</h2>
+                <p>Here you can see all your collected stamps.</p>
+                <img
+                    src={aiStamp}
+                    alt="aiStamp"
+                    width='70%'
+                    style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} // Conditional rendering
+                />
+                <img src={csStamp} alt="csStamp" width='70%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} id='csStamp' />
+                <img src={ftStamp} alt="ftStamp" width='70%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} id='ftStamp' />
+                <img src={itStamp} alt="itStamp" width='70%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} id='itStamp' />
+            </div>
+        </div>
+    );
+      
+    // Function to toggle AI stamp visibility
+    const toggleAiStamp = () => {
+        setAiStampVisible(prev => !prev); // Toggle visibility
+    };
+    // Function to toggle Cs stamp visibility
+    const toggleCsStamp = () => {
+        setCsStampVisible(prev => !prev); // Toggle visibility
+    };
+    // Function to toggle Ft stamp visibility
+    const toggleFtStamp = () => {
+        setFtStampVisible(prev => !prev); // Toggle visibility
+    };
+    // Function to toggle It stamp visibility
+    const toggleItStamp = () => {
+        setItStampVisible(prev => !prev); // Toggle visibility
+    };
+
+
+      // Styles
+    const displayStamp = {
+        display: 'none'
+    };
+
+    const overlayStyle = {
+        background: 'rgba(0, 0, 0, 0.7)' // Transparent black background
+    };
+    const contentStyle = {
+        maxHeight: 'calc(100vh - 40px)', // Ensure modal content area is scrollable if it overflows
+        overflowY: 'auto', // Enable vertical scrolling within the content area
+      };
+    
+    const popupContentStyle = {
+        width: '100vw', // Full width
+        height: '100vh', // Full height
+        padding: '0', // Remove default padding
+        border: 'none', // Remove default border
+        display: 'flex',
+        alignItems: 'center', // Center content vertically
+        justifyContent: 'center', // Center content horizontally
+        background: 'rgba(0, 0, 0, 0.7)' // Transparent black background
+
+    };
+    
+    const modalContentStyle = {
+        width: '80%', // Adjust the width as needed
+        height: '80%', // Adjust the height as needed
+        overflowY: 'auto', // Allow vertical scrolling
+        backgroundColor: '#fff', // Background color of the modal content
+        borderRadius: '8px', // Optional: rounded corners
+        padding: '20px', // Optional: padding inside the modal
+        position: 'relative', // For absolute positioning of internal elements if needed
+        alignItems: 'center'
+    };
+    
+    const titleStyle = {
+        marginBottom: '20px'
+    };
+    
+    const buttonStyle = {
+        marginTop: '20px'
+    };
+
     return (
         <Box>
             <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
+
+
+        {/* Show All Stamp Button */}
+        
+        <Popup trigger={<button>All Collected Stamps</button>}
+                position="right center"
+                modal
+                overlayStyle={overlayStyle}
+                contentStyle={popupContentStyle}>
+                {close => <ModalContent close={close} />}
+        </Popup>
+
+        {/* Gained a stamp upon each completion of booth */}
+        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 1
+        </Button>
+        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 2   
+        </Button>
+        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 3
+        </Button>
+        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 4
+        </Button>
+
+
             <h1>NYP BOARDING PASS</h1>
             <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderBottom: "1px dotted black"}}>
                 <Box className="BoardingPassContent">
