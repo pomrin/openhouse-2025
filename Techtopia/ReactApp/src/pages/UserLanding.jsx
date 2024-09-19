@@ -10,6 +10,7 @@ import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
+import clickHereStamp from './../assets/images/clickHere_stamp.svg'
 
 
 
@@ -181,27 +182,36 @@ function UserLanding() {
 
         {/* Show All Stamp Button */}
         
-        <Popup trigger={<button>All Collected Stamps</button>}
+        <div style={{ position: 'absolute', top: '55px', right: '75px' }}>
+            <Popup
+                trigger={
+                    <button style={{ border: 'none', 
+                        background: 'transparent', 
+                        cursor: 'pointer', 
+                        borderRadius: '50%', // Circular shape
+                        width: '100px', // Set width and height for hitbox
+                        height: '100px',
+                        padding: '0',
+                        overflow: 'hidden'}}>
+                        <img 
+                            src={clickHereStamp} 
+                            alt="Click Here" 
+                            style={{ width: '100%', 
+                                height: '100%', 
+                                objectFit: 'cover' }} // Adjust size here
+                        />
+                    </button>
+                }
                 position="right center"
                 modal
                 overlayStyle={overlayStyle}
-                contentStyle={popupContentStyle}>
+                contentStyle={popupContentStyle}
+            >
                 {close => <ModalContent close={close} />}
-        </Popup>
+            </Popup>
+        </div>
 
-        {/* Gained a stamp upon each completion of booth */}
-        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 1
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 2   
-        </Button>
-        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 3
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 4
-        </Button>
+        
 
 
             <Box class="profilePicture">
@@ -309,6 +319,19 @@ function UserLanding() {
                 <h1>MONTAGE APP</h1>
 
             </Box>
+            {/* Gained a stamp upon each completion of booth */}
+        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 1
+        </Button>
+        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 2   
+        </Button>
+        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 3
+        </Button>
+        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 4
+        </Button>
         </Box>
     );
 }
