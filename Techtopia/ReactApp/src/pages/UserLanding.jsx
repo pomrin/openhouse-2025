@@ -17,7 +17,7 @@ import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
 function UserLanding() {
-    const [ticket_id, setUniqueId] = useState(''); // State for ticket ID
+    const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
 
@@ -71,7 +71,10 @@ function UserLanding() {
             const token = await response.text(); // Get the raw token string
             const decodedToken = parseJwt(token); // Decode the token
             const staffData = JSON.parse(decodedToken.Staff); // Parse the Staff JSON
-            setUniqueId(staffData.TicketId); // Set the unique ID to the TicketId
+            const newTicketId = staffData.TicketId; // Set the unique ID to the TicketId
+            
+            setUniqueId(newTicketId);
+            localStorage.setItem('ticket_id', newTicketId); // Store in local storage
 
         } catch (error) {
             console.error("Error fetching ticket ID:", error);
@@ -108,7 +111,9 @@ function UserLanding() {
     };
 
     useEffect(() => {
-        fetchTicketId(); // Call the function to fetch ticket ID on component mount
+        if (!ticket_id) {
+            fetchTicketId(); // Fetch ticket ID if not in local storage
+        } // Call the function to fetch ticket ID on component mount
         generateQR();
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -135,7 +140,7 @@ function UserLanding() {
         }
         const intervalId = setInterval(updateDateTime, 60000); 
         return () => clearInterval(intervalId); 
-    }, []);
+    }, [ticket_id]);
 
     const toggleDropdownBooth = () => {
         // Toggle booth dropdown and close workshop if it's open
