@@ -17,14 +17,7 @@ import clickHereStamp from './../assets/images/clickHere_stamp.svg'
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
 function UserLanding() {
-    function generateUniqueId(lastId) {
-        const firstTwoDigits = Math.floor(10 + Math.random() * 90);
-        const lastFourDigits = (lastId % 10000) + 1;
-        const lastFourDigitsPadded = String(lastFourDigits).padStart(4, '0');
-        return `${firstTwoDigits}${lastFourDigitsPadded}`;
-    }
-
-    const [uniqueId, setUniqueId] = useState(generateUniqueId(0));
+    const [ticket_id, setUniqueId] = useState(''); // State for ticket ID
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
     const [isAiStampVisible, setAiStampVisible] = useState(false); // State to manage visibility
@@ -35,8 +28,36 @@ function UserLanding() {
     const [currentBooth, setCurrentBooth] = useState('Fintech');
     const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
-    const handleGenerateId = () => {
-        setUniqueId(generateUniqueId(parseInt(uniqueId)));
+    const parseJwt = (token) => {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Fix for URL-safe base64
+        const jsonPayload = decodeURIComponent(escape(atob(base64))); // Decode base64 to string
+        return JSON.parse(jsonPayload);
+    };
+
+    // Fetch the ticket ID
+    const fetchTicketId = async () => {
+        try {
+            const response = await fetch("https://6117kul8qd.execute-api.ap-southeast-1.amazonaws.com/Prod/api/Register", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const token = await response.text(); // Get the raw token string
+            const decodedToken = parseJwt(token); // Decode the token
+            const staffData = JSON.parse(decodedToken.Staff); // Parse the Staff JSON
+            setUniqueId(staffData.TicketId); // Set the unique ID to the TicketId
+
+        } catch (error) {
+            console.error("Error fetching ticket ID:", error);
+        }
     };
 
     // List of booths
@@ -69,6 +90,7 @@ function UserLanding() {
     };
 
     useEffect(() => {
+        fetchTicketId(); // Call the function to fetch ticket ID on component mount
         generateQR();
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -218,7 +240,12 @@ function UserLanding() {
                 <img src={profile_picture} class="profileImage"/>
             </Box>
             <h1>NYP BOARDING PASS</h1>
-            <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderBottom: "1px dotted black"}}>
+            <Paper elevation={2} sx={{ borderRadius: "20px", paddingBottom: "10px"}}>
+                <Box class="QRBox">
+                    <a href="#"><img src={qrImage} alt="QR Code" /></a>
+                </Box>
+            </Paper>
+            <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", border: "1px dotted black"}}>
                 <Box className="BoardingPassContent">
                     <Box className="travelBox">
                         <Box className="fromBox">
@@ -259,7 +286,7 @@ function UserLanding() {
                                 Passenger ID
                             </Typography>
                             <Typography>
-                                {uniqueId}
+                                {ticket_id}
                             </Typography>
                         </Box>
                         <Box>
@@ -299,13 +326,6 @@ function UserLanding() {
                     </Box>
                 </Box>
             </Paper>
-            <Paper elevation={2} sx={{ borderRadius: "20px", paddingBottom: "10px", marginBottom:"10px"}}>
-                <Box class="QRBox">
-                    <a href="#"><img src={qrImage} alt="QR Code" /></a>
-                </Box>
-                <Button variant="contained" color="primary" onClick={handleGenerateId} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto', width:'60%'}}>
-                    Generate New ID
-                </Button>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
                     Change Booth
@@ -314,11 +334,6 @@ function UserLanding() {
                 <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
                     Add Queue Number
                 </Button>
-            </Paper>
-            <Box>
-                <h1>MONTAGE APP</h1>
-
-            </Box>
             {/* Gained a stamp upon each completion of booth */}
         <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Completed Booth 1
