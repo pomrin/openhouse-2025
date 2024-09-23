@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Link } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import nyp_logo from "./../assets/nyp_logo.png";
 import '../css/UserLanding.css';
@@ -10,7 +10,7 @@ import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
-import clickHereStamp from './../assets/images/clickHere_stamp.svg'
+import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 
 
 
@@ -27,14 +27,32 @@ function UserLanding() {
     const [uniqueId, setUniqueId] = useState(generateUniqueId(0));
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
-    const [isAiStampVisible, setAiStampVisible] = useState(false); // State to manage visibility
-    const [isCsStampVisible, setCsStampVisible] = useState(false); // State to manage visibility
-    const [isFtStampVisible, setFtStampVisible] = useState(false); // State to manage visibility
-    const [isItStampVisible, setItStampVisible] = useState(false); // State to manage visibility
+
+    const [isAiStampVisible, setAiStampVisible] = useState(() => {
+        return localStorage.getItem('aiStampVisible') === 'true';
+    });
+    const [isCsStampVisible, setCsStampVisible] = useState(() => {
+        return localStorage.getItem('csStampVisible') === 'true';
+    });
+    const [isFtStampVisible, setFtStampVisible] = useState(() => {
+        return localStorage.getItem('ftStampVisible') === 'true';
+    });
+    const [isItStampVisible, setItStampVisible] = useState(() => {
+        return localStorage.getItem('itStampVisible') === 'true';
+    });
 
     const [currentBooth, setCurrentBooth] = useState('Fintech');
     const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
+    const [file, setFile] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [output, setOutput] = useState(null);
+
+    const [isDropdownBoothOpen, setDropdownBoothOpen] = useState(false);
+    const [isDropdownWorkshopOpen, setDropdownWorkshopOpen] = useState(false);
+
+    
     const handleGenerateId = () => {
         setUniqueId(generateUniqueId(parseInt(uniqueId)));
     };
@@ -89,49 +107,117 @@ function UserLanding() {
         };
 
         updateDateTime(); 
-
+        const savedImage = localStorage.getItem('uploadedImage');
+        if (savedImage) {
+        setOutput(savedImage);
+        }
         const intervalId = setInterval(updateDateTime, 60000); 
         return () => clearInterval(intervalId); 
     }, []);
 
+    const toggleDropdownBooth = () => {
+        // Toggle booth dropdown and close workshop if it's open
+        setDropdownBoothOpen(prev => !prev);
+        if (isDropdownWorkshopOpen) {
+            setDropdownWorkshopOpen(false);
+        }
+    };
+    
+    const toggleDropdownWorkshop = () => {
+        // Toggle workshop dropdown and close booth if it's open
+        setDropdownWorkshopOpen(prev => !prev);
+        if (isDropdownBoothOpen) {
+            setDropdownBoothOpen(false);
+        }
+    };
+
+
     const ModalContent = ({ close }) => (
         <div style={modalContentStyle}>
             <div style={contentStyle}>
-                <button onClick={() => close()} style={buttonStyle}>Close Modal</button>
+                <button onClick={() => close()} className='close-button'>&times;</button>
                 <h2 style={titleStyle}>All Collected Stamps</h2>
                 <p>Here you can see all your collected stamps.</p>
-                <img
-                    src={aiStamp}
-                    alt="aiStamp"
-                    width='70%'
-                    style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} // Conditional rendering
-                />
-                <img src={csStamp} alt="csStamp" width='70%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} id='csStamp' />
-                <img src={ftStamp} alt="ftStamp" width='70%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} id='ftStamp' />
-                <img src={itStamp} alt="itStamp" width='70%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} id='itStamp' />
+    
+                <div className='button-container'>
+                    <button className="dropdown-button" onClick={toggleDropdownBooth} style={{ marginBottom: '10px', transition: 'background-color 0.3s' }}>
+                        {isDropdownBoothOpen ? 'Hide Booth Stamps' : 'Show Booth Stamps'}
+                    </button>
+
+                    <button className="dropdown-button" onClick={toggleDropdownWorkshop} style={{ marginBottom: '10px', transition: 'background-color 0.3s' }}>
+                        {isDropdownWorkshopOpen ? 'Hide Workshop Stamps' : 'Show Workshop Stamps'}
+                    </button>
+                </div>
+                
+    
+                {isDropdownBoothOpen && (
+                    <div class='dropdown' style={{ ...dropdownStyle }}>
+                        <div style={gridStyle}>
+                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
+                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
+                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
+                        </div>
+                        {/* Display message if no stamps are visible */}
+                        {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
+                            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+                                You have not collected anything.
+                            </div>
+                        )}
+                    </div>
+                )}
+    
+                {isDropdownWorkshopOpen && (
+                    <div class='dropdown' style={{ ...dropdownStyle }}>
+                        {/* Workshop stamps would go here */}
+                        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+                                You have not collected anything.
+                            </div>
+                    </div>
+                )}
             </div>
         </div>
     );
       
     // Function to toggle AI stamp visibility
     const toggleAiStamp = () => {
-        setAiStampVisible(prev => !prev); // Toggle visibility
+        const newValue = !isAiStampVisible;
+        setAiStampVisible(newValue);
+        localStorage.setItem('aiStampVisible', newValue);
     };
+
     // Function to toggle Cs stamp visibility
     const toggleCsStamp = () => {
-        setCsStampVisible(prev => !prev); // Toggle visibility
+        const newValue = !isCsStampVisible;
+        setCsStampVisible(newValue);
+        localStorage.setItem('csStampVisible', newValue);
     };
+
     // Function to toggle Ft stamp visibility
     const toggleFtStamp = () => {
-        setFtStampVisible(prev => !prev); // Toggle visibility
+        const newValue = !isFtStampVisible;
+        setFtStampVisible(newValue);
+        localStorage.setItem('ftStampVisible', newValue);
     };
+
     // Function to toggle It stamp visibility
     const toggleItStamp = () => {
-        setItStampVisible(prev => !prev); // Toggle visibility
+        const newValue = !isItStampVisible;
+        setItStampVisible(newValue);
+        localStorage.setItem('itStampVisible', newValue);
     };
+
 
 
       // Styles
+    const dropdownStyle = {
+        overflow: 'hidden',
+        transition: 'height 0.3s ease-in-out',
+        border: '1px solid #ddd', // Optional: border to visually separate the dropdown
+        backgroundColor: '#fafafa'
+    };
+        
+    
     const displayStamp = {
         display: 'none'
     };
@@ -171,150 +257,231 @@ function UserLanding() {
         marginBottom: '20px'
     };
     
-    const buttonStyle = {
-        marginTop: '20px'
+
+    const gridStyle = {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)', // 2 columns
+        gap: '10px', // Space between stamps
+        justifyItems: 'center', // Center items in their grid cells
+        marginTop: '20px', // Space above the grid
+      };
+    
+
+    // Handle File Upload Cartoonify
+
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
+      };
+
+    const handleUpload = async () => {
+    if (!file) {
+        alert("Please select a file first.");
+        return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch('https://www.cutout.pro/api/v1/cartoonSelfie?cartoonType=1', {
+        method: 'POST',
+        headers: {
+            'APIKEY': '618aec9118be4ef49838a46064692ad9',
+        },
+        body: formData,
+        });
+
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        setOutput(imageUrl);
+
+        // Save the image URL to local storage
+        localStorage.setItem('uploadedImage', imageUrl);
+    } catch (err) {
+        setError(err.message);
+    } finally {
+        setLoading(false);
+    }
     };
 
+    const handleRemoveImage = () => {
+        setOutput(null);
+        localStorage.removeItem('uploadedImage');
+      };
+
+    const handleDropChange = (event) => {
+    setSelectedValue(event.target.value);
+    };
+
+    const ticket_id = 'NYP1234A'
+    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/profile.png`
+    const form_sg = `https://form.gov.sg/66e14a264cccbc8d098f46d1?66e14a409253225fefacaf1a=${ticket_id}`
+    
     return (
         <Box>
             <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
 
 
-        {/* Show All Stamp Button */}
-        
-        <div style={{ position: 'absolute', top: '55px', right: '75px' }}>
-            <Popup
-                trigger={
-                    <button style={{ border: 'none', 
-                        background: 'transparent', 
-                        cursor: 'pointer', 
-                        borderRadius: '50%', // Circular shape
-                        width: '100px', // Set width and height for hitbox
-                        height: '100px',
-                        padding: '0',
-                        overflow: 'hidden'}}>
-                        <img 
-                            src={clickHereStamp} 
-                            alt="Click Here" 
-                            style={{ width: '100%', 
-                                height: '100%', 
-                                objectFit: 'cover' }} // Adjust size here
-                        />
-                    </button>
-                }
-                position="right center"
-                modal
-                overlayStyle={overlayStyle}
-                contentStyle={popupContentStyle}
-            >
-                {close => <ModalContent close={close} />}
-            </Popup>
-        </div>
-
-        
+            {/* Show All Stamp Button */}
+            
+            <div style={{ position: 'absolute', top: '55px', right: '75px' }}>
+                <Popup
+                    trigger={
+                        <button style={{ border: 'none', 
+                            background: 'transparent', 
+                            cursor: 'pointer', 
+                            borderRadius: '50%', // Circular shape
+                            width: '100px', // Set width and height for hitbox
+                            height: '100px',
+                            padding: '0',
+                            overflow: 'hidden'}}>
+                            <img 
+                                src={clickHereStamp} 
+                                alt="Click Here" 
+                                style={{ width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover' }} // Adjust size here
+                            />
+                        </button>
+                    }
+                    position="right center"
+                    modal
+                    overlayStyle={overlayStyle}
+                    contentStyle={popupContentStyle}
+                >
+                    {close => <ModalContent close={close} />}
+                </Popup>
+            </div>
 
 
             <Box class="profilePicture">
-                <img src={profile_picture} class="profileImage"/>
+                {/* <img src={profile_picture} class="profileImage"/> */}
+                    {/* {output && <img src={output} alt="Output" class="profileImage"/>} */}
+                    <img src={photo_link} alt="Output" class="profileImage"/>
+                
+                
             </Box>
-            <h1>NYP BOARDING PASS</h1>
-            <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderBottom: "1px dotted black"}}>
-                <Box className="BoardingPassContent">
-                    <Box className="travelBox">
-                        <Box className="fromBox">
-                            <Typography variant="h3">
-                                SCH
-                            </Typography>
-                            <Typography class="bold">
-                                Previous School    
-                            </Typography>
-                            <Typography>
-                                {currentDate}
-                            </Typography>
-                            <Typography>
-                                {currentTime}
-                            </Typography>
-                        </Box>
-                        <Box className="toBox">
-                            <Typography variant="h3">
-                                NYP
-                            </Typography>
-                            <Typography class="bold">
-                                Nanyang Polytechnic
-                            </Typography>
-                            <Typography>
-                                21/04/2025 
-                            </Typography>
-                            <Typography>
-                                9:00 AM
-                            </Typography>
-                        </Box>
-                    </Box>
-                    <Box className="planeImage">
-                        <img src={plane_image} alt="Plane Image" width="70%" />
-                    </Box>
-                    <Box class="detailsBox">
-                        <Box>
-                            <Typography class="bold">
-                                Passenger ID
-                            </Typography>
-                            <Typography>
-                                {uniqueId}
-                            </Typography>
-                        </Box>
-                        <Box>
-                            <Typography class="bold">
-                                Next Booth
-                            </Typography>
-                            <Typography>
-                                {currentBooth} {/* Updated to show current booth */}
-                            </Typography>
-                        </Box>
-                    </Box>
-                    <Box class="detailsBox">
-                        <Box>
+            
+            <Box class="boxForm">
+                <a href={form_sg} target="_blank" rel="noopener noreferrer">
+                    <button class="formSg">Go to Form Page</button>
+                </a>
+            </Box>
+            
+
+            {/* <input type="file" onChange={handleFileChange} /> 
+                    <button onClick={handleUpload} disabled={loading}>
+                        {loading ? 'Uploading...' : 'Upload'}
+                    </button>
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    <button onClick={handleRemoveImage}>Remove Image</button>
+             */}
+                
+                <h1>NYP BOARDING PASS</h1>
+                <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderBottom: "1px dotted black"}}>
+                    <Box className="BoardingPassContent">
+                        <Box className="travelBox">
+                            <Box className="fromBox">
+                                <Typography variant="h3">
+                                    SCH
+                                </Typography>
                                 <Typography class="bold">
-                                    Queue
+                                    Previous School    
                                 </Typography>
                                 <Typography>
-                                    {queueNumber} {/* Queue number state */}
-                                </Typography>
-                        </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
+                                    {currentDate}
                                 </Typography>
                                 <Typography>
-                                    2B
+                                    {currentTime}
                                 </Typography>
-                        </Box>
-                        <Box>
+                            </Box>
+                            <Box className="toBox">
+                                <Typography variant="h3">
+                                    NYP
+                                </Typography>
                                 <Typography class="bold">
-                                    Placeholder
+                                    Nanyang Polytechnic
                                 </Typography>
                                 <Typography>
-                                    1A
+                                    21/04/2025 
                                 </Typography>
+                                <Typography>
+                                    9:00 AM
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <Box className="planeImage">
+                            <img src={plane_image} alt="Plane Image" width="70%" />
+                        </Box>
+                        <Box class="detailsBox">
+                            <Box>
+                                <Typography class="bold">
+                                    Passenger ID
+                                </Typography>
+                                <Typography>
+                                    {uniqueId}
+                                </Typography>
+                            </Box>
+                            <Box>
+                                <Typography class="bold">
+                                    Next Booth
+                                </Typography>
+                                <Typography>
+                                    {currentBooth} {/* Updated to show current booth */}
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <Box class="detailsBox">
+                            <Box>
+                                    <Typography class="bold">
+                                        Queue
+                                    </Typography>
+                                    <Typography>
+                                        {queueNumber} {/* Queue number state */}
+                                    </Typography>
+                            </Box>
+                            <Box>
+                                    <Typography class="bold">
+                                        Placeholder
+                                    </Typography>
+                                    <Typography>
+                                        2B
+                                    </Typography>
+                            </Box>
+                            <Box>
+                                    <Typography class="bold">
+                                        Placeholder
+                                    </Typography>
+                                    <Typography>
+                                        1A
+                                    </Typography>
+                            </Box>
                         </Box>
                     </Box>
-                </Box>
-            </Paper>
-            <Paper elevation={2} sx={{ borderRadius: "20px", paddingBottom: "10px", marginBottom:"10px"}}>
-                <Box class="QRBox">
-                    <a href="#"><img src={qrImage} alt="QR Code" /></a>
-                </Box>
-                <Button variant="contained" color="primary" onClick={handleGenerateId} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto', width:'60%'}}>
-                    Generate New ID
-                </Button>
-                {/* Button to cycle through booth names */}
-                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                    Change Booth
-                </Button>
-                {/* New button to increment queue number */}
-                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                    Add Queue Number
-                </Button>
-            </Paper>
+                </Paper>
+                <Paper elevation={2} sx={{ borderRadius: "20px", paddingBottom: "10px", marginBottom:"10px"}}>
+                    <Box class="QRBox">
+                        <a href="#"><img src={qrImage} alt="QR Code" /></a>
+                    </Box>
+                    <Button variant="contained" color="primary" onClick={handleGenerateId} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto', width:'60%'}}>
+                        Generate New ID
+                    </Button>
+                    {/* Button to cycle through booth names */}
+                    <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                        Change Booth
+                    </Button>
+                    {/* New button to increment queue number */}
+                    <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                        Add Queue Number
+                    </Button>
+                </Paper>
             <Box>
                 <h1>MONTAGE APP</h1>
 
