@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, Link } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import nyp_logo from "./../assets/nyp_logo.png";
@@ -11,6 +11,7 @@ import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
+
 
 
 
@@ -44,8 +45,9 @@ function UserLanding() {
 
     const [isDropdownBoothOpen, setDropdownBoothOpen] = useState(false);
     const [isDropdownWorkshopOpen, setDropdownWorkshopOpen] = useState(false);
+    const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
+    const [boothButtonColor, setBoothButtonColor] = useState('#4CAF50'); // Original color
 
-    
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Fix for URL-safe base64
@@ -110,6 +112,13 @@ function UserLanding() {
         setQrImage(qrSrc);
     };
 
+
+    const arrayBufferToBlob = (arrayBuffer) => {
+        return new Blob([arrayBuffer]);
+    };
+
+    const hasFetchedDataRef = useRef(false);
+
     useEffect(() => {
         if (!ticket_id) {
             fetchTicketId(); // Fetch ticket ID if not in local storage
@@ -136,26 +145,89 @@ function UserLanding() {
         updateDateTime(); 
         const savedImage = localStorage.getItem('uploadedImage');
         if (savedImage) {
-        setOutput(savedImage);
+            setOutput(savedImage);
+            
         }
+
+        const fetchData = async () => {
+            // Check if uploadedImage exists in localStorage
+            if (ticket_id && !hasFetchedDataRef.current) {
+                hasFetchedDataRef.current = true; // Mark as fetched
+                const uploadedImage = localStorage.getItem('uploadedImage');
+                if (uploadedImage) {
+                    console.log('Uploaded image already exists. Skipping fetch.');
+                }
+                else {
+                    // Only fetch cartoonify data if ticket_id is available and not fetched before
+                    try {
+                        const response = await fetch(`http://localhost:3001/cartoonify/${ticket_id}`);
+                        if (!response.ok) {
+                            throw new Error('ID not found');
+                        }
+                        const data = await response.json();
+                        console.log('File data:', data);
+                        const newBlob = base64ToBlob(data.file, "image/jpeg");
+                        console.log('File blob:', newBlob);
+
+                        const imageUrl = URL.createObjectURL(newBlob);
+                        setOutput(imageUrl);
+                        localStorage.setItem('uploadedImage', imageUrl);
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                    }
+                }
+        };
+        
+        fetchData(); // Call the fetch function
+
+
         const intervalId = setInterval(updateDateTime, 60000); 
         return () => clearInterval(intervalId); 
     }, [ticket_id]);
 
     const toggleDropdownBooth = () => {
-        // Toggle booth dropdown and close workshop if it's open
-        setDropdownBoothOpen(prev => !prev);
-        if (isDropdownWorkshopOpen) {
-            setDropdownWorkshopOpen(false);
-        }
+        setDropdownBoothOpen(prev => {
+            const newBoothState = !prev;
+
+            if (newBoothState) {
+                // If booth is now open, set workshop button color to original
+                //setWorkshopButtonColor('red');
+               // setBoothButtonColor('#4CAF50'); // Set booth button color to red
+               setBoothButtonColor('red');
+               setWorkshopButtonColor('#4CAF50'); // Set booth button color to red
+            } else {
+                // If booth is closing, reset booth button color
+                setBoothButtonColor('#4CAF50');
+            }
+
+            if (isDropdownWorkshopOpen) {
+                setDropdownWorkshopOpen(false);
+            }
+
+            return newBoothState;
+        });
     };
-    
+
     const toggleDropdownWorkshop = () => {
-        // Toggle workshop dropdown and close booth if it's open
-        setDropdownWorkshopOpen(prev => !prev);
-        if (isDropdownBoothOpen) {
-            setDropdownBoothOpen(false);
-        }
+        setDropdownWorkshopOpen(prev => {
+            const newWorkshopState = !prev;
+
+            if (newWorkshopState) {
+                // If workshop is now open, set booth button color to original
+                setBoothButtonColor('#4CAF50');
+                setWorkshopButtonColor('red'); // Set workshop button color to red
+            } else {
+                // If workshop is closing, reset workshop button color
+                setWorkshopButtonColor('#4CAF50');
+            }
+
+            if (isDropdownBoothOpen) {
+                setDropdownBoothOpen(false);
+            }
+
+            return newWorkshopState;
+        });
     };
 
 
@@ -167,11 +239,11 @@ function UserLanding() {
                 <p>Here you can see all your collected stamps.</p>
     
                 <div className='button-container'>
-                    <button className="dropdown-button" onClick={toggleDropdownBooth} style={{ marginBottom: '10px', transition: 'background-color 0.3s' }}>
+                    <button className="dropdown-button" onClick={toggleDropdownBooth} style={{ marginBottom: '10px', transition: 'background-color 0.3s', backgroundColor: boothButtonColor }}>
                         {isDropdownBoothOpen ? 'Hide Booth Stamps' : 'Show Booth Stamps'}
                     </button>
 
-                    <button className="dropdown-button" onClick={toggleDropdownWorkshop} style={{ marginBottom: '10px', transition: 'background-color 0.3s' }}>
+                    <button className="dropdown-button" onClick={toggleDropdownWorkshop} style={{ marginBottom: '10px', transition: 'background-color 0.3s', backgroundColor: workshopButtonColor }}>
                         {isDropdownWorkshopOpen ? 'Hide Workshop Stamps' : 'Show Workshop Stamps'}
                     </button>
                 </div>
@@ -295,53 +367,102 @@ function UserLanding() {
     
 
     // Handle File Upload Cartoonify
-
     const handleFileChange = (event) => {
         setFile(event.target.files[0]);
-      };
+    };
+
+    function uint8ArrayToBase64(uint8Array) {
+        let binaryString = '';
+        const len = uint8Array.byteLength;
+        for (let i = 0; i < len; i++) {
+            binaryString += String.fromCharCode(uint8Array[i]);
+        }
+        return btoa(binaryString);
+    }
+
+    const base64ToBlob = (base64, type) => {
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: type });
+    };
 
     const handleUpload = async () => {
-    if (!file) {
-        alert("Please select a file first.");
-        return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const response = await fetch('https://www.cutout.pro/api/v1/cartoonSelfie?cartoonType=1', {
-        method: 'POST',
-        headers: {
-            'APIKEY': '618aec9118be4ef49838a46064692ad9',
-        },
-        body: formData,
-        });
-
-        if (!response.ok) {
-        throw new Error('Network response was not ok');
+        if (!file) {
+            alert("Please select a file first.");
+            return;
         }
+    
+        setLoading(true);
+        setError(null);
 
-        const blob = await response.blob();
-        const imageUrl = URL.createObjectURL(blob);
-        setOutput(imageUrl);
+        const formData = new FormData();
+        
+    
+        // Check if the file is a valid File object
+        if (file instanceof File) {
+            console.log('File Name:', file.name);
+            console.log('File Type:', file.type);
+            console.log('File Size:', file.size); // Size in bytes
+    
+            // Convert the file to a Uint8Array to access the binary data
+            const byteArray = new Uint8Array(await file.arrayBuffer());
+            const base64String = uint8ArrayToBase64(byteArray);
+            console.log('Base64 Representation:', base64String);
 
-        // Save the image URL to local storage
-        localStorage.setItem('uploadedImage', imageUrl);
-    } catch (err) {
-        setError(err.message);
-    } finally {
-        setLoading(false);
-    }
+            // Convert Base64 back to Blob
+            const blob = base64ToBlob(base64String, file.type);
+            console.log('Blob created from Base64:', blob);
+
+            formData.append('file', blob); // Use 'file' as the key
+    
+            try {
+                const response = await fetch('https://www.cutout.pro/api/v1/cartoonSelfie?cartoonType=1', {
+                    method: 'POST',
+                    headers: {
+                        'APIKEY': '06a1432f9bae48819435d328baea99b4', // Replace with your API key
+                    },
+                    body: formData,
+                });
+    
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Network response was not ok: ${errorText}`);
+                }
+    
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                setOutput(imageUrl);
+
+                localStorage.setItem('uploadedImage', imageUrl);
+                // Create a link element to trigger download
+                const link = document.createElement('a');
+                link.href = imageUrl;
+                link.download = 'out.png'; // Name of the downloaded file
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            console.error('The provided input is not a valid File object');
+            setError('Invalid file input.');
+        }
     };
+
+    
+    
 
     const handleRemoveImage = () => {
         setOutput(null);
         localStorage.removeItem('uploadedImage');
-      };
+    };
 
     const handleDropChange = (event) => {
     setSelectedValue(event.target.value);
@@ -389,12 +510,50 @@ function UserLanding() {
 
             <Box class="profilePicture">
                 {/* <img src={profile_picture} class="profileImage"/> */}
-                    {/* {output && <img src={output} alt="Output" class="profileImage"/>} */}
-                    <img src={photo_link} alt="Output" class="profileImage"/>
-                
-                
+                    {/* {output && <img src={output} alt="Output" class="profileImage"/>}  */}
+                    {/* <img src={photo_link} alt="Output" class="profileImage"/> */}
+                    {/* <img src={GET_base64} alt="Output" class="profileImage"/> */}
+                    {output ? (
+                        <img src={output} alt="Output" className="profileImage" />
+                    ) : (
+                        <p className='profileImage'>No image uploaded yet</p>
+                    )}
             </Box>
+
             
+            <div>
+                {/* 
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileChange} 
+                    style={{ display: 'none' }} 
+                    id="fileInput"
+                />
+                <label htmlFor="fileInput" style={{
+                    cursor: 'pointer', 
+                    padding: '10px 20px', 
+                    background: '#007BFF', 
+                    color: '#fff', 
+                    borderRadius: '5px', 
+                    textAlign: 'center'
+                }}>
+                    Choose File
+                </label>
+
+                <button onClick={handleUpload} disabled={loading || !file} style={{ marginLeft: '10px' }}>
+                    Upload
+                </button>
+                <button onClick={handleRemoveImage} style={{ marginLeft: '10px' }}>
+                    Remove
+                </button> 
+                */}
+            </div>
+
+            {loading && <p>Loading...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+
             <Box class="boxForm">
                 <a href={form_sg} target="_blank" rel="noopener noreferrer">
                     <button class="formSg">Go to Form Page</button>
