@@ -95,6 +95,12 @@ function UserLanding() {
         });
     };
 
+    // Function to set the new ID in localStorage and update the UI
+    const refreshId = () => {
+        const newId = fetchTicketId(); // Generate a new ID or fetch from an API
+        localStorage.setItem('ticket_id', newId); // Update the localStorage with the new ID
+};
+
     // Function to increment the queue number and format it as a 4-digit string
     const handleIncrementQueue = () => {
         setQueueNumber((prevQueueNumber) => {
@@ -477,48 +483,58 @@ function UserLanding() {
 
 
             {/* Show All Stamp Button */}
-            
-            <div style={{ position: 'absolute', top: '55px', right: '75px' }}>
-                <Popup
-                    trigger={
-                        <button style={{ border: 'none', 
-                            background: 'transparent', 
-                            cursor: 'pointer', 
-                            borderRadius: '50%', // Circular shape
-                            width: '100px', // Set width and height for hitbox
-                            height: '100px',
-                            padding: '0',
-                            overflow: 'hidden'}}>
-                            <img 
-                                src={clickHereStamp} 
-                                alt="Click Here" 
-                                style={{ width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'cover' }} // Adjust size here
-                            />
-                        </button>
-                    }
-                    position="right center"
-                    modal
-                    overlayStyle={overlayStyle}
-                    contentStyle={popupContentStyle}
-                >
-                    {close => <ModalContent close={close} />}
-                </Popup>
-            </div>
+            <Box className="profile_box" style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '5%', right: '10%' }}>
+                    <Popup
+                        trigger={
+                            <button
+                                style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    cursor: 'pointer',
+                                    borderRadius: '50%', // Circular shape
+                                    width: '100px', // Set width and height for hitbox
+                                    height: '100px',
+                                    padding: '0',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <img
+                                    src={clickHereStamp}
+                                    alt="Click Here"
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover', // Adjust size here
+                                    }}
+                                />
+                            </button>
+                        }
+                        position="right center"
+                        modal
+                        overlayStyle={overlayStyle}
+                        contentStyle={popupContentStyle}
+                    >
+                        {close => <ModalContent close={close} />}
+                    </Popup>
+                </div>
 
 
-            <Box class="profilePicture">
                 {/* <img src={profile_picture} class="profileImage"/> */}
                     {/* {output && <img src={output} alt="Output" class="profileImage"/>}  */}
                     {/* <img src={photo_link} alt="Output" class="profileImage"/> */}
                     {/* <img src={GET_base64} alt="Output" class="profileImage"/> */}
-                    {output ? (
+                    
+                <Box className="profilePicture">
+                {output ? (
                         <img src={output} alt="Output" className="profileImage" />
                     ) : (
                         <p className='profileImage'>No image uploaded yet</p>
                     )}
+                </Box>
             </Box>
+
+            
 
             
             <div>
@@ -565,7 +581,7 @@ function UserLanding() {
                     <a href="#"><img src={qrImage} alt="QR Code" /></a>
                 </Box>
             </Paper>
-            <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", border: "1px dotted black"}}>
+            <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderTop: "1px dotted black"}}>
                 <Box className="BoardingPassContent">
                     <Box className="travelBox">
                         <Box className="fromBox">
@@ -646,6 +662,9 @@ function UserLanding() {
                     </Box>
                 </Box>
             </Paper>
+            <Button variant="contained" color="primary" onClick={refreshId} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                Refresh ID
+            </Button>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
                     Change Booth

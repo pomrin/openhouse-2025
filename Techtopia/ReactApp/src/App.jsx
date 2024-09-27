@@ -53,6 +53,7 @@ import AddUserPage from './pages/admin/users/AddUserPage';
 import SignInPage from './pages/SignInPage';
 import LoanReceipt from './pages/loans/LoanReceipt';
 import UserLanding from './pages/UserLanding'
+import BoothRedemptionPage from './pages/BoothRedemption'
 
 function App() {
   return (
@@ -71,6 +72,7 @@ function App() {
               <Route path={"/MyLoanReq"} element={<MyLoanReq />} />
               <Route path={"/MyLoanReceipt"} element={<LoanReceipt />} />
               <Route path={"/MyLoanReqExt"} element={<MyLoanReqExt />} />
+              <Route path={"/BHRedemption"} element={<BoothRedemptionPage />} />
 
               {/* TSO, TSO Manager, AD/DD */}
               <Route path={"/Dashboard"} element={<StaffElement><Dashboard /></StaffElement>} />
