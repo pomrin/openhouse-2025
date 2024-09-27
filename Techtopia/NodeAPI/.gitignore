@@ -1,0 +1,9 @@
+node_modules/*
+.serverless
+/.env
+/node_modules
+serverless.yml
+/tmp
+/.esbuild
+/.webpack
+/test.js
