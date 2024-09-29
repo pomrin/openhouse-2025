@@ -1,0 +1,108 @@
+# org: dustywildcat
+# console: true
+service: oh2025-api
+
+useDotenv: true
+
+provider:
+  name: aws
+  httpApi:
+    cors:
+      allowCredentials: true
+      allowedOrigins:
+        - "*"
+      allowedHeaders:
+        - Authorization
+        - Content-Type
+        - X-Api-Key
+        - Refresh
+      allowedMethods:
+        - GET
+        - POST
+        - PATCH
+        - DELETE
+        - OPTIONS
+        - HEAD
+        - PUT
+  runtime: nodejs18.x
+  memorySize: 512
+  timeout: 30
+  stage: staging # change between testing, staging and production
+  region: ap-southeast-1
+  versionFunctions: false
+  environment: # add environment propertyc
+    NODE_ENV: production # change between production and development
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+    S3_ACCESS_KEY_ID: ${env:S3_ACCESS_KEY_ID}
+    S3_SECRET_KEY: ${env:S3_SECRET_KEY}
+    PROD_DB_HOST: ${env:PROD_DB_HOST}
+    PROD_DB_NAME: ${env:PROD_DB_NAME}
+    PROD_DB_USER: ${env:PROD_DB_USER}
+    PROD_DB_PASS: ${env:PROD_DB_PASS}
+    DEV_DB_HOST: ${env:DEV_DB_HOST}
+    DEV_DB_NAME: ${env:DEV_DB_NAME}
+    DEV_DB_USER: ${env:DEV_DB_USER}
+    DEV_DB_PASS: ${env:DEV_DB_PASS}
+    # Application URL for CORS
+    APPLICATION_URL: ${env:APPLICATION_URL}
+    # Form SG config
+    FORM_SG_POST_URL: ${env:FORM_SG_POST_URL}
+    FORM_SECRET_KEY: ${env:FORM_SECRET_KEY}
+    # CutOutPro
+    CUT_OUT_PRO_API: ${env:CUT_OUT_PRO_API}
+
+
+functions:
+  # api:
+  #   handler: lambda.handler
+  #   events:
+  #     - http: ANY /{proxy+}
+  #     - http: ANY /
+
+  # Post --------------------------------------------------
+
+  formsgpost:
+    handler: routes/formsgsubmission.postRequest
+    events:
+      - http:
+          path: /formsg/imageuploaded
+          method: POST
+          cors: true
+
+  riydhopost:
+    handler: routes/formsgsubmission.riydhoPostRequest
+    events:
+      - http:
+          path: /formsg/riydhopost
+          method: POST
+          cors: true
+  # Get --------------------------------------------------
+  formsgget:
+    handler: routes/formsgsubmission.getRequest
+    events:
+      - http:
+          path: /formsg
+          method: GET
+          cors: true
+
+
+
+plugins:
+  - serverless-esbuild
+  - serverless-bundle
+  - serverless-offline
+  - serverless-prune-plugin
+
+custom:
+  prune:
+    automatic: true
+    number: 3
+  bundle:
+    packagerOptions:
+      scripts:
+        - npm install --platform=linux --arch=x64 sharp
+  serverless-offline:
+    httpPort: 5000
+    websocketPort: 5001
+    lambdaPort: 5002
+    noPrependStageInUrl: true
