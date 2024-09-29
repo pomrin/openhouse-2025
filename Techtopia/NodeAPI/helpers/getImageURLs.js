@@ -63,7 +63,7 @@ async function saveBase64ToTmp(base64file, folderPath, fileName, fileExt) {
 }
 module.exports.saveBase64ToTmp = saveBase64ToTmp;
 
-async function saveBase64VehicleImage(base64file, ticketId, fileExt) {
+async function saveBase64UserImage(base64file, ticketId, fileExt) {
   // const format = "YYYY-MM-DD-HHmmss";
   // let currentDateTime = new Date();
   // let dateTimeString = moment(currentDateTime).format(format);
@@ -72,4 +72,4 @@ async function saveBase64VehicleImage(base64file, ticketId, fileExt) {
   // console.log(`vehicleTempFolder: ${vehicleTempFolder}`);
   return await saveBase64ToTmp(base64file, userTicketFolder, fileName, fileExt);
 }
-module.exports.saveBase64UserImage = saveBase64VehicleImage;
+module.exports.saveBase64UserImage = saveBase64UserImage;

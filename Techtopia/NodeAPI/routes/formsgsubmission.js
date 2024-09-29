@@ -9,10 +9,12 @@ const formsg = require('@opengovsg/formsg-sdk')({
 });
 
 var path = require('path');
-const Blob = require('buffer');
-// const { Readable } = require("stream");
+// const Blob = require('buffer');
+const { Readable } = require("stream");
 const { default: axios } = require("axios");
-// const { blob } = require('node:stream/consumers');
+const { blob } = require('node:stream/consumers');
+var request = require('request');
+var fs = require('fs');
 
 // ##### Form SG
 // This is where your domain is hosted, and should match
@@ -23,7 +25,7 @@ const POST_URI = process.env.FORM_SG_POST_URL;
 const formSecretKey = process.env.FORM_SECRET_KEY;
 
 // Set to true if you need to download and decrypt attachments from submissions
-const HAS_ATTACHMENTS = true;
+// const HAS_ATTACHMENTS = true;
 
 // #### Cut Out Pro
 const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
@@ -72,37 +74,67 @@ module.exports.postRequest = async (event, context) => {
         // console.log(`submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content: ${JSON.stringify(submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content)}`);
         const imageBase64 = submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content;
         console.log(`imageBase64: ${JSON.stringify(imageBase64)}`);
-        const test_blob = base64ToBlob(imageBase64, `image/${photoExt}`);
-        const formData = new FormData();
-        formData.append('file', test_blob, 'filename.png'); // Specify filename
-        console.log(`${JSON.stringify(formData)}`);
-
-
-        // const byteCharacters = Buffer.from(imageBase64, 'base64');
-        // const stream = Readable.from(byteCharacters);
-        // const file = await blob(stream);
-
+        // const test_blob = base64ToBlob(imageBase64, `image/${photoExt}`);
         // const formData = new FormData();
-        // formData.append('file', file, "bar.png"); // Specify filename
-        console.log(`here!`);
+        // formData.append('file', test_blob, 'filename.png'); // Specify filename
+        // console.log(`${JSON.stringify(formData)}`);
+
+
+        const byteCharacters = Buffer.from(imageBase64, 'base64');
+        const stream = Readable.from(byteCharacters);
+        const myFile = await blob(stream);
+
+        const formData = new FormData();
+        formData.append('file', myFile, "bar.png"); // Specify filename
 
         try {
+            console.log(`Calling Cutout Pro API!`);
             // TODO 2: Pass the image to cutout pro
-            const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie?cartoonType=1', formData, {
+            const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
                 headers: {
                     'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                     'Content-Type': 'multipart/form-data' // Important for file uploads
                 },
                 encoding: null,
-                responseType: 'arraybuffer' // Set responseType to 'arraybuffer' for binary data
             });
 
-            console.log(`response.data - ${JSON.stringify(response.data)}`);
-            const byteArray = new Uint8Array(response.data);
-            const base64String = uint8ArrayToBase64(byteArray);
-            // TODO 3: Save the image into S3 based on the <S3_Bucket>/user_profile/<ticket_id>/cartoonify.png
-            var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
-            console.log(`response: ${response2}`);
+            var responseCode = response.data.code;
+            console.log(`responseCode - ${responseCode}`);
+            if (responseCode == 4001) {
+                console.log("Insufficient Credit!");
+            } else {
+
+                // var responseBody = JSON.parse(response.data.code);
+                console.log(`response.data.data - ${response.data.data}`);
+                console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
+                var base64String = response.data.data.imageBase64;
+                console.log(`response.data.data.imageUrl - ${response.data.data.imageUrl}`); // CYL: Possible to save this to User database
+
+                if (base64String) {
+                    var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
+                    console.log(`response: ${response2}`);
+                } else {
+                    console.log(`Unable to read the Cutout Pro response`);
+                }
+            }
+
+            // console.log(`response - ${(response)}`);
+
+            // console.log(`response.data - ${JSON.stringify(response.data)}`);
+
+            // var resposeData = Buffer.from(response.data);
+            // console.log(`resposeData.data - ${resposeData.data}`);
+
+            // const byteArray = new Uint8Array(resposeData.data);
+            // const base64String = uint8ArrayToBase64(byteArray);
+            // console.log(`base64String - ${base64String}`);
+            // if (base64String !== undefined) {
+            //     // TODO 3: Save the image into S3 based on the <S3_Bucket>/user_profile/<ticket_id>/cartoonify.png
+            //     var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
+            //     console.log(`response: ${response2}`);
+            // } else {
+            //     console.log(`Unable to read the Cutout Pro response`);
+            // }
 
         } catch (err) {
             console.error(err);
@@ -110,46 +142,125 @@ module.exports.postRequest = async (event, context) => {
         }
     }
 
-    const submission = formsg.crypto.decrypt(formSecretKey, dataToParse);
-    console.log(`submission without attachment: ${JSON.stringify(submission)}`);
+    // const submission = formsg.crypto.decrypt(formSecretKey, dataToParse);
+    // console.log(`submission without attachment: ${JSON.stringify(submission)}`);
     // TODO 4 (optional): Update a value in Database to indicate user have signed on.
 
     return createLambdaResponse(event, 200, 'Post Success!');
 };
 
-module.exports.riydhoPostRequest = async (event, context) => {
-    console.log(`POST_URI-  ${POST_URI}`);
-    console.log(`formSecretKey-  ${formSecretKey}`);
-    console.log(`HAS_ATTACHMENTS-  ${HAS_ATTACHMENTS}`);
-    console.log(`formsg-  ${formsg}`);
+module.exports.testLocal = async (event, context) => {
 
-    console.log(`event: ${JSON.stringify(event)}`);
-    console.log(`context:   ${JSON.stringify(context)}`);
+    // const imagePath = path.join(__dirname, 'static', 'images', 'student-initiatives-banner-img.png');
+    const readStream = fs.createReadStream(`D:/Users/Cephylite/Pictures/temp - Copy.jpg`);
+
+    var go = true;
+    if (go == true) {
+        await request.post({
+            url: 'https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1',
+            formData: {
+                file: readStream
+            },
+            headers: {
+                'APIKEY': API_KEY_CUT_OUT_PRO
+            },
+            encoding: null
+        }, function (error, response, body) {
+            if (error) {
+                console.log('Error!');
+            }
+            // console.log(`Response - ${response}`);
+            console.log(`Response stringify- ${JSON.stringify(response)}`);
+            // console.log(`response.body - ${response.body}`);
+            console.log(`response.body stringify- ${JSON.stringify(response.body)}`);
+
+            var responseBody = JSON.parse(response.body);
+            // console.log(`responseBody - ${responseBody}`);
+
+            // console.log(`--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------`);
+            // console.log(`responseBody stringify- ${JSON.stringify(responseBody)}`);
+
+            // console.log(`--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------`);
+            // console.log(`responseBody stringify- ${JSON.stringify(responseBody.code)}`);
+            if (responseBody.code == 4001) {
+                console.log("Insufficient Credit!");
+                // // console.log(`responseBody.data - ${responseBody.data}`);
+            } else {
+                console.log(`--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------`);
+                console.log(`responseBody.data.imageBase64 stringify - ${JSON.stringify(responseBody.data.imageBase64)}`);
+                console.log(`responseBody.data.imageUrl stringify - ${JSON.stringify(responseBody.data.imageUrl)}`);
+                console.log(`--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------`);
+            }
+
+        });
+    }
+
+
+    return createLambdaResponse(event, 200, 'Post Success!');
+};
+
+module.exports.testLocalAxios = async (event, context) => {
+
+    // const imagePath = path.join(__dirname, 'static', 'images', 'student-initiatives-banner-img.png');
+    const readStream = fs.createReadStream(`D:/Users/Cephylite/Pictures/temp - Copy.jpg`);
+
+    const myFile = await blob(readStream);
+
+    const formData = new FormData();
+    formData.append('file', myFile, "bar.png"); // Specify filename
+
+    var go = true;
+    if (go == true) {
+        const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
+            headers: {
+                'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
+                'Content-Type': 'multipart/form-data' // Important for file uploads
+            },
+            encoding: null,
+        });
+        console.log(`Response - ${response}`);
+        // console.log(`Response stringify- ${JSON.stringify(response)}`);
+        console.log(`response.data - ${response.data}`);
+        console.log(`response.data stringify- ${JSON.stringify(response.data)}`);
+
+        var responseCode = response.data.code;
+        console.log(`responseCode - ${responseCode}`);
+        if (responseCode == 4001) {
+            console.log("Insufficient Credit!");
+        } else {
+
+            // var responseBody = JSON.parse(response.data.code);
+            console.log(`response.data.data - ${response.data.data}`);
+            console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
+            console.log(`response.data.data.imageUrl - ${response.data.data.imageUrl}`);
+        }
+    }
+
     return createLambdaResponse(event, 200, 'Post Success!');
 };
 
 
-function uint8ArrayToBase64(uint8Array) {
-    console.log(`Converting uint8 to Base64`);
-    let binaryString = '';
-    const len = uint8Array.byteLength;
-    for (let i = 0; i < len; i++) {
-        binaryString += String.fromCharCode(uint8Array[i]);
-    }
-    console.log(`End of conversion.`);
-    return Buffer.from(binaryString, 'utf8').toString('base64');
-    // return btoa(binaryString);
-}
+// function uint8ArrayToBase64(uint8Array) {
+//     console.log(`Converting uint8 to Base64`);
+//     let binaryString = '';
+//     const len = uint8Array.byteLength;
+//     for (let i = 0; i < len; i++) {
+//         binaryString += String.fromCharCode(uint8Array[i]);
+//     }
+//     console.log(`End of conversion.`);
+//     return Buffer.from(binaryString, 'utf8').toString('base64');
+//     // return btoa(binaryString);
+// }
 
-const base64ToBlob = (base64, type) => {
-    const byteCharacters = Buffer.from(base64, 'base64');
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: type });
-};
+// const base64ToBlob = (base64, type) => {
+//     const byteCharacters = Buffer.from(base64, 'base64');
+//     const byteNumbers = new Array(byteCharacters.length);
+//     for (let i = 0; i < byteCharacters.length; i++) {
+//         byteNumbers[i] = byteCharacters.charCodeAt(i);
+//     }
+//     const byteArray = new Uint8Array(byteNumbers);
+//     return new Blob([byteArray], { type: type });
+// };
 
 
 async function saveImageToS3BucketFolder(imageContent, ticketId, fileExt) {
@@ -157,10 +268,10 @@ async function saveImageToS3BucketFolder(imageContent, ticketId, fileExt) {
     if (imageContent) {
         try {
 
-            result = await S3OHImageBucketHelper.saveBase64VehicleImage(imageContent, ticketId, fileExt);
+            result = await S3OHImageBucketHelper.saveBase64UserImage(imageContent, ticketId, fileExt);
             // console.log(`updateVehicle SQL: ${JSON.stringify(results)}`);
         } catch (ex) {
-            console.error(`An Exception have occurred while trying to dal.vehicledal.saveImageToVehicleFolder(imageContent: ${imageContent}, ticketId: ${ticketId}) - ${ex}`);
+            console.error(`An Exception have occurred while trying to saveBase64UserImage(imageContent: ${imageContent}, ticketId: ${ticketId}) - ${ex}`);
             throw ex;
         }
     }

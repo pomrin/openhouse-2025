@@ -69,12 +69,20 @@ functions:
           method: POST
           cors: true
 
-  riydhopost:
-    handler: routes/formsgsubmission.riydhoPostRequest
+  testlocal:
+    handler: routes/formsgsubmission.testLocal
     events:
       - http:
-          path: /formsg/riydhopost
-          method: POST
+          path: /formsg/testLocal
+          method: GET
+          cors: true
+
+  testLocalAxios:
+    handler: routes/formsgsubmission.testLocalAxios
+    events:
+      - http:
+          path: /formsg/testLocalAxios
+          method: GET
           cors: true
   # Get --------------------------------------------------
   formsgget:
