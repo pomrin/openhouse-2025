@@ -5,7 +5,7 @@ var path = require('path');
 
 
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
-const S3_BUCKET_VEHICLE_IMAGE_FOLDER = `user_profile/`;
+const S3_BUCKET_USER_IMAGE_FOLDER = `user_profile/`;
 // const S3_AWS_REGION = process.env.AWS_REGION;
 // const S3_BUCKET_BASE_PATH = `https://${S3_BUCKET_NAME}.s3.${S3_AWS_REGION}.amazonaws.com/`;
 
@@ -68,8 +68,8 @@ async function saveBase64VehicleImage(base64file, ticketId, fileExt) {
   // let currentDateTime = new Date();
   // let dateTimeString = moment(currentDateTime).format(format);
   let fileName = `cartoonprofile`;
-  let vehicleTempFolder = path.join(S3_BUCKET_VEHICLE_IMAGE_FOLDER, `${ticketId}/`);
+  let userTicketFolder = path.join(S3_BUCKET_USER_IMAGE_FOLDER, `${ticketId}/`);
   // console.log(`vehicleTempFolder: ${vehicleTempFolder}`);
-  return await saveBase64ToTmp(base64file, vehicleTempFolder, fileName, fileExt);
+  return await saveBase64ToTmp(base64file, userTicketFolder, fileName, fileExt);
 }
-module.exports.saveBase64VehicleImage = saveBase64VehicleImage;
+module.exports.saveBase64UserImage = saveBase64VehicleImage;

@@ -2,7 +2,7 @@ const {
     createLambdaResponse,
 } = require("../helpers/common");
 
-const S3VehicleImageBucketHelper = require('../helpers/getImageURLs');
+const S3OHImageBucketHelper = require('../helpers/getImageURLs');
 
 const formsg = require('@opengovsg/formsg-sdk')({
     mode: 'production',
@@ -101,7 +101,7 @@ module.exports.postRequest = async (event, context) => {
             const byteArray = new Uint8Array(response.data);
             const base64String = uint8ArrayToBase64(byteArray);
             // TODO 3: Save the image into S3 based on the <S3_Bucket>/user_profile/<ticket_id>/cartoonify.png
-            var response2 = await saveImageToVehicleFolder(base64String, ticketId, photoExt);
+            var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
             console.log(`response: ${response2}`);
 
         } catch (err) {
@@ -152,12 +152,12 @@ const base64ToBlob = (base64, type) => {
 };
 
 
-async function saveImageToVehicleFolder(imageContent, ticketId, fileExt) {
+async function saveImageToS3BucketFolder(imageContent, ticketId, fileExt) {
     let result = null;
     if (imageContent) {
         try {
 
-            result = await S3VehicleImageBucketHelper.saveBase64VehicleImage(imageContent, ticketId, fileExt);
+            result = await S3OHImageBucketHelper.saveBase64VehicleImage(imageContent, ticketId, fileExt);
             // console.log(`updateVehicle SQL: ${JSON.stringify(results)}`);
         } catch (ex) {
             console.error(`An Exception have occurred while trying to dal.vehicledal.saveImageToVehicleFolder(imageContent: ${imageContent}, ticketId: ${ticketId}) - ${ex}`);
@@ -166,4 +166,4 @@ async function saveImageToVehicleFolder(imageContent, ticketId, fileExt) {
     }
     return result;
 }
-module.exports.saveImageToVehicleFolder = saveImageToVehicleFolder;
+module.exports.saveImageToVehicleFolder = saveImageToS3BucketFolder;
