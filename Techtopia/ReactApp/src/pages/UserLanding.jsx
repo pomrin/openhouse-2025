@@ -11,6 +11,7 @@ import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
+import noImageUploaded from './../assets/images/noImageUploaded.png';
 
 
 
@@ -474,9 +475,15 @@ function UserLanding() {
     setSelectedValue(event.target.value);
     };
 
-    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/profile.png`
+    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpg`
+   // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
+    //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
+
+   // const imageSrc = photo_link || fallback_link || fallback2_link;
     const form_sg = `https://form.gov.sg/66e14a264cccbc8d098f46d1?66e14a409253225fefacaf1a=${ticket_id}`
-    
+    function clearLocalStorage() {
+        localStorage.clear();
+      }
     return (
         <Box>
             <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
@@ -526,11 +533,20 @@ function UserLanding() {
                     {/* <img src={GET_base64} alt="Output" class="profileImage"/> */}
                     
                 <Box className="profilePicture">
-                {output ? (
+                {/* {output ? (
                         <img src={output} alt="Output" className="profileImage" />
                     ) : (
                         <p className='profileImage'>No image uploaded yet</p>
-                    )}
+                    )} */}
+                            <img 
+                                src={photo_link} 
+                                alt="Profile" 
+                                className="profileImage" 
+                                onError={(e) => {
+                                    e.target.onerror = null; 
+                                    e.target.src = noImageUploaded; // Clear the src if there's an error
+                                }} 
+                            />
                 </Box>
             </Box>
 
@@ -685,6 +701,9 @@ function UserLanding() {
         </Button>
         <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Completed Booth 4
+        </Button>
+        <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Clear Local Storage
         </Button>
         </Box>
     );
