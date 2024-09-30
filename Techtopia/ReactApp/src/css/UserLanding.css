@@ -1,5 +1,7 @@
 body{
     max-width:400px;
+    background-color: #faf4f2;
+
 }
 
 .profilePicture{
@@ -26,6 +28,7 @@ body{
 
 .BoardingPass{
     width:100%;
+    
 }
 
 .BoardingPassContent{
