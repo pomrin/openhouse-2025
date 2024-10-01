@@ -21,6 +21,7 @@ namespace AWSServerless1.Controllers
 
         /// <summary>
         /// Returns all the queues for all 4 status - In Queue, Engraving, Pending Collection and Collected.
+        /// This method will REQUIRE Authentication and for role BOOTH HELPER OR ABOVE.
         /// </summary>
         /// <param name="limit"></param>
         /// <returns></returns>
@@ -28,7 +29,7 @@ namespace AWSServerless1.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-        public IActionResult Get(int limit = 20)
+        public IActionResult Get(int limit = 1)
         {
             var inQueue = QueueDAL.GetTopQueue(QueueDAL.QUEUE_STATUS.IN_QUEUE, limit);
             var inQueueDTO = from q in inQueue
@@ -57,6 +58,12 @@ namespace AWSServerless1.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Add to Queue. Not yet implemented.
+        /// This method will REQUIRE Authentication and for role BOOTH HELPER OR ABOVE.
+        /// </summary>
+        /// <param name="ticketId"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN

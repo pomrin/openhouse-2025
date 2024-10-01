@@ -177,6 +177,7 @@ namespace AWSServerless1.DTO
                 dateCollected = redemptionQueueEntity.DateCollected,
                 textToEngrave = redemptionQueueEntity.EngravingText,
                 tagColor = redemptionQueueEntity.LuggageTagColor,
+                ticketId = redemptionQueueEntity.Visitor.TicketId
             };
 
 

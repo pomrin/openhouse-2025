@@ -9,6 +9,9 @@ using static AWSServerless1.Authentication.UserRolesProperties;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AWSServerless1.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AWSServerless1.Controllers
 {
@@ -24,12 +27,14 @@ namespace AWSServerless1.Controllers
 
         /// <summary>
         /// Returns the user defined in the JWT token's Ticket Number Queue Status.
+        /// This method will REQUIRE Authentication.
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Queue Status include Engraving, Pending Collection and Collected. If in Queue, includes a Queue Number</response>
         /// <response code="500">Bad Request</response>
         /// <response code="404">User Not in any queue.</response>
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Get()
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;

@@ -1,4 +1,5 @@
-﻿using ProjectEFEntities.OH25EntityModels;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjectEFEntities.OH25EntityModels;
 using System.Collections.Generic;
 
 namespace AWSServerless1.DAL
@@ -115,23 +116,23 @@ namespace AWSServerless1.DAL
             {
                 using (var context = new Openhouse25Context())
                 {
-                    var qTopQueue = from q in context.RedemptionQueues
-                                    where
-                                    (queueStatus == QUEUE_STATUS.IN_QUEUE && q.DateEngravingStart == null && q.DatePendingCollection == null && q.DateCollected == null)
-                                    || (queueStatus == QUEUE_STATUS.ENGRAVING && q.DateEngravingStart != null && q.DatePendingCollection == null && q.DateCollected == null)
-                                    || (queueStatus == QUEUE_STATUS.PENDING_COLLECTION && q.DateEngravingStart != null && q.DatePendingCollection != null && q.DateCollected == null)
-                                    || (queueStatus == QUEUE_STATUS.COLLECTED && q.DateEngravingStart != null && q.DatePendingCollection != null && q.DateCollected != null)
-                                    orderby q.DateJoined ascending // First joined in the first of queue
-                                    select q;
-                    if (qTopQueue != null && qTopQueue.Count() > 0)
+                    var qTopQueue = (from q in context.RedemptionQueues
+                                     where
+                                     (queueStatus == QUEUE_STATUS.IN_QUEUE && q.DateEngravingStart == null && q.DatePendingCollection == null && q.DateCollected == null)
+                                     || (queueStatus == QUEUE_STATUS.ENGRAVING && q.DateEngravingStart != null && q.DatePendingCollection == null && q.DateCollected == null)
+                                     || (queueStatus == QUEUE_STATUS.PENDING_COLLECTION && q.DateEngravingStart != null && q.DatePendingCollection != null && q.DateCollected == null)
+                                     || (queueStatus == QUEUE_STATUS.COLLECTED && q.DateEngravingStart != null && q.DatePendingCollection != null && q.DateCollected != null)
+                                     orderby q.DateJoined ascending // First joined in the first of queue
+                                     select q);
+                    if (qTopQueue != null)
                     {
-                        if (top == -1 || qTopQueue.Count() >= top)
+                        if (top == -1)
                         {
-                            result.AddRange(qTopQueue.ToList());
+                            result.AddRange(qTopQueue.Include(q => q.Visitor).ToList());
                         }
                         else
                         {
-                            result.AddRange(qTopQueue.Take(Math.Min(qTopQueue.Count(), top)));
+                            result.AddRange(qTopQueue.Take(Math.Min(qTopQueue.Count(), top)).Include(q => q.Visitor));
                         }
                     }
                 }
