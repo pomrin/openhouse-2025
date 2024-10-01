@@ -9,11 +9,19 @@ public partial class RedemptionQueue
 
     public int VisitorId { get; set; }
 
-    public string? EngravingText { get; set; }
+    public string LuggageTagColor { get; set; } = null!;
 
-    public DateTime DateCreated { get; set; }
+    public string EngravingText { get; set; } = null!;
 
-    public DateTime? DateCompleted { get; set; }
+    public DateTime DateJoined { get; set; }
+
+    public DateTime? DateEngravingStart { get; set; }
+
+    public DateTime? DatePendingCollection { get; set; }
+
+    public DateTime? DateCollected { get; set; }
+
+    public virtual LuggageTagColor LuggageTagColorNavigation { get; set; } = null!;
 
     public virtual Visitor Visitor { get; set; } = null!;
 }

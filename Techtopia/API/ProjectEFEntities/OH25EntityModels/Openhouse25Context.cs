@@ -82,22 +82,38 @@ public partial class Openhouse25Context : DbContext
 
             entity.ToTable("redemption_queue");
 
+            entity.HasIndex(e => e.LuggageTagColor, "FK_luggage_tag_colors_idx");
+
             entity.HasIndex(e => e.VisitorId, "FK_queue_visitor_id_idx");
 
             entity.Property(e => e.Queueid).HasColumnName("queueid");
-            entity.Property(e => e.DateCompleted)
+            entity.Property(e => e.DateCollected)
                 .HasColumnType("datetime")
-                .HasColumnName("date_completed");
-            entity.Property(e => e.DateCreated)
+                .HasColumnName("date_collected");
+            entity.Property(e => e.DateEngravingStart)
+                .HasColumnType("datetime")
+                .HasColumnName("date_engraving_start");
+            entity.Property(e => e.DateJoined)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
-                .HasColumnName("date_created");
+                .HasColumnName("date_joined");
+            entity.Property(e => e.DatePendingCollection)
+                .HasColumnType("datetime")
+                .HasColumnName("date_pending_collection");
             entity.Property(e => e.EngravingText)
                 .HasMaxLength(12)
                 .HasColumnName("engraving_text")
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
+            entity.Property(e => e.LuggageTagColor)
+                .HasMaxLength(64)
+                .HasColumnName("luggage_tag_color");
             entity.Property(e => e.VisitorId).HasColumnName("visitor_id");
+
+            entity.HasOne(d => d.LuggageTagColorNavigation).WithMany(p => p.RedemptionQueues)
+                .HasForeignKey(d => d.LuggageTagColor)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_luggage_tag_colors");
 
             entity.HasOne(d => d.Visitor).WithMany(p => p.RedemptionQueues)
                 .HasForeignKey(d => d.VisitorId)

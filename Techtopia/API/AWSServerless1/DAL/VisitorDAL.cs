@@ -26,5 +26,42 @@ namespace AWSServerless1.DAL
             return result;
         }
 
+        public static Visitor GetVisitorByTicketId(String ticketId)
+        {
+            Visitor result = null;
+            try
+            {
+                if (!String.IsNullOrEmpty(ticketId))
+                {
+                    ticketId = ticketId.Trim().ToUpper();
+                }
+                using (var context = new Openhouse25Context())
+                {
+
+
+                    var qVisitorByTicketId = from q in context.Visitors
+                                             where q.TicketId.Trim().ToUpper() == ticketId
+                                             select q;
+                    if (qVisitorByTicketId != null && qVisitorByTicketId.Count() > 0)
+                    {
+                        if (qVisitorByTicketId.Count() == 1)
+                        {
+                            result = qVisitorByTicketId.First();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Detected multiple Visitor for Ticket ID - {ticketId}!");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in GetVisitorByTicketId({ticketId} - {ex.Message}");
+            }
+
+            return result;
+        }
+
     }
 }
