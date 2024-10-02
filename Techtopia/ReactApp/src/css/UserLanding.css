@@ -4,6 +4,13 @@ body{
 
 }
 
+.messageDiv{
+    width:80%;
+    border:1px solid black;
+    min-height:50px;
+    
+}
+
 .profilePicture{
     height:150px;
     width:150px;
@@ -43,6 +50,7 @@ body{
 
 .planeImage{
     text-align:center;
+    height:140px;
 }
 
 .fromBox{

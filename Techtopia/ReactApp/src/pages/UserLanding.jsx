@@ -12,6 +12,10 @@ import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import noImageUploaded from './../assets/images/noImageUploaded.png';
+import boothimage1 from './../assets/images/step1.png';
+import boothimage2 from './../assets/images/step2.png';
+import boothimage3 from './../assets/images/step3.png';
+import boothimage4 from './../assets/images/step4.png';
 
 
 
@@ -19,6 +23,69 @@ import noImageUploaded from './../assets/images/noImageUploaded.png';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
 function UserLanding() {
+
+    //websocket stuff
+    const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
+  const socketRef = useRef(null);
+
+  const websocketUrl = 'wss://mnrm12z7q2.execute-api.ap-southeast-1.amazonaws.com/production/';
+
+  const connectWebSocket = () => {
+    socketRef.current = new WebSocket(websocketUrl);
+
+    socketRef.current.onopen = () => {
+      console.log('Connected to WebSocket');
+      setIsConnected(true);
+    };
+
+    socketRef.current.onmessage = (event) => {
+        console.log('Received message:', event.data);
+    
+        // Try to parse the message as JSON
+        try {
+          const messageData = JSON.parse(event.data);
+    
+          // Check if the message is "cycleBooth" in the JSON object
+          if (messageData.message === 'cycleBooth') {
+            handleCycleBooth();
+          }
+    
+          setMessages((prevMessages) => [...prevMessages, messageData]);
+        } catch (error) {
+          console.log('Message is not JSON:', event.data);
+    
+          // Handle plain string messages
+          if (event.data === 'cycleBooth') {
+            handleCycleBooth();
+          }
+    
+          setMessages((prevMessages) => [...prevMessages, { message: event.data }]);
+        }
+      };
+
+    socketRef.current.onclose = () => {
+      console.log('WebSocket connection closed');
+      setIsConnected(false);
+    };
+
+    socketRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  };
+
+  const sendMessage = () => {
+    if (input && isConnected) {
+      const messageObject = { action: "sendmessage", message: input };
+      socketRef.current.send(JSON.stringify(messageObject));
+      console.log('Sent message:', input); // Log the sent message to the console
+      setInput(''); // Clear input after sending
+    } else if (!isConnected) {
+      console.error('WebSocket is not connected');
+    }
+  };
+
     const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
@@ -36,7 +103,6 @@ function UserLanding() {
         return localStorage.getItem('itStampVisible') === 'true';
     });
 
-    const [currentBooth, setCurrentBooth] = useState('Fintech');
     const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
     const [file, setFile] = useState(null);
@@ -86,6 +152,12 @@ function UserLanding() {
 
     // List of booths
     const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
+
+    //List of images:
+    const boothImages =[boothimage1, boothimage2, boothimage3, boothimage4]
+
+    const [currentBooth, setCurrentBooth] = useState('Fintech');
+    const [currentImage, setCurrentImage] = useState(boothImages[0]);
     
     // Function to cycle through the booth names
     const handleCycleBooth = () => {
@@ -94,13 +166,12 @@ function UserLanding() {
             const nextIndex = (currentIndex + 1) % booths.length;
             return booths[nextIndex];
         });
+        setCurrentImage((prevImage) => {
+            const currentIndex = boothImages.indexOf(prevImage);
+            const nextIndex = (currentIndex + 1) % boothImages.length;
+            return boothImages[nextIndex];
+        });
     };
-
-    // Function to set the new ID in localStorage and update the UI
-    const refreshId = () => {
-        const newId = fetchTicketId(); // Generate a new ID or fetch from an API
-        localStorage.setItem('ticket_id', newId); // Update the localStorage with the new ID
-};
 
     // Function to increment the queue number and format it as a 4-digit string
     const handleIncrementQueue = () => {
@@ -131,6 +202,8 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
+        connectWebSocket();
+        
         const updateDateTime = () => {
             const currentDate = new Date();
             
@@ -190,7 +263,13 @@ function UserLanding() {
 
 
         const intervalId = setInterval(updateDateTime, 60000); 
-        return () => clearInterval(intervalId); 
+        return () => 
+            {
+                if (socketRef.current) {
+                socketRef.current.close();
+                }
+            };
+            clearInterval(intervalId); 
     }, [ticket_id]);
 
     const toggleDropdownBooth = () => {
@@ -630,7 +709,7 @@ function UserLanding() {
                         </Box>
                     </Box>
                     <Box className="planeImage">
-                        <img src={plane_image} alt="Plane Image" width="70%" />
+                        <img src={currentImage} alt={plane_image} width="70%" />
                     </Box>
                     <Box class="detailsBox">
                         <Box>
@@ -678,9 +757,22 @@ function UserLanding() {
                     </Box>
                 </Box>
             </Paper>
-            <Button variant="contained" color="primary" onClick={refreshId} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                Refresh ID
-            </Button>
+
+            <div>
+                <h1>WebSocket Communication</h1>
+                <div class="messageDiv">
+                    {messages.map((msg, index) => (
+                    <div key={index}>{msg.message || 'Received non-JSON message'}</div>
+                    ))}
+                </div>
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Type a message"
+                    />
+                <button onClick={sendMessage} disabled={!isConnected}>Send Message</button>
+            </div>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
                     Change Booth
