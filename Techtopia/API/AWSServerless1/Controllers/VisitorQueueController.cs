@@ -31,7 +31,7 @@ namespace AWSServerless1.Controllers
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Queue Status include Engraving, Pending Collection and Collected. If in Queue, includes a Queue Number</response>
-        /// <response code="500">Bad Request</response>
+        /// <response code="400">Bad Request</response>
         /// <response code="404">User Not in any queue.</response>
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

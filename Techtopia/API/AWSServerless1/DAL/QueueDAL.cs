@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using ProjectEFEntities.OH25EntityModels;
 using System.Collections.Generic;
 
@@ -108,7 +109,7 @@ namespace AWSServerless1.DAL
             return result;
         }
 
-        public static List<RedemptionQueue> GetTopQueue(QUEUE_STATUS queueStatus, int top = -1)
+        public static List<RedemptionQueue> GetTopQueue(QUEUE_STATUS queueStatus, int top = 0)
         {
             List<RedemptionQueue> result = new List<RedemptionQueue>();
 
@@ -126,7 +127,7 @@ namespace AWSServerless1.DAL
                                      select q);
                     if (qTopQueue != null)
                     {
-                        if (top == -1)
+                        if (top <= 0)
                         {
                             result.AddRange(qTopQueue.Include(q => q.Visitor).ToList());
                         }
@@ -139,9 +140,112 @@ namespace AWSServerless1.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An Exception have occurred while GetTopQueue(top: {top}) - {ex.Message}");
+                Console.WriteLine($"An Exception have occurred in GetTopQueue(top: {top}) - {ex.Message}");
             }
 
+            return result;
+        }
+
+        internal static RedemptionQueue AddToQueue(int visitorId, DTO.AddToQueueDTO addToQueueInfo)
+        {
+            RedemptionQueue queue = null;
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var isAlreadyInQueue = from q in context.RedemptionQueues
+                                           where q.VisitorId == visitorId
+                                           select q;
+                    if (isAlreadyInQueue != null)
+                    {
+                        var isExist = isAlreadyInQueue.Count() > 0;
+                        if (isExist)
+                        {
+                            Console.WriteLine($"Queue already exist. No insertion required.");
+                            // Already in the queue, no need to add.
+                            queue = isAlreadyInQueue.First();
+                        }
+                        else
+                        {
+                            var queueToInsert = new RedemptionQueue()
+                            {
+                                VisitorId = visitorId,
+                                DateJoined = DateTime.Now,
+                                EngravingText = addToQueueInfo.EngravingText,
+                                LuggageTagColor = addToQueueInfo.LuggageTagColor,
+                            };
+                            context.RedemptionQueues.Add(queueToInsert);
+                            context.SaveChanges();
+                            queue = queueToInsert;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in AddToQueue(visitorId: {visitorId}) - {ex.Message}");
+            }
+            return queue;
+        }
+
+        internal static RedemptionQueue UpdateQueue(int visitorId, QUEUE_STATUS queueStatus)
+        {
+            RedemptionQueue result = null;
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var qCurrentQueue = from q in context.RedemptionQueues
+                                        where q.VisitorId == visitorId
+                                        select q;
+                    if (qCurrentQueue != null)
+                    {
+                        var queueToUpdate = qCurrentQueue.First();
+                        switch (queueStatus)
+                        {
+                            case QUEUE_STATUS.NOT_IN_QUEUE:
+                                context.RedemptionQueues.Remove(queueToUpdate);
+                                break;
+                            case QUEUE_STATUS.IN_QUEUE:
+                                queueToUpdate.DateEngravingStart = null;
+                                queueToUpdate.DatePendingCollection = null;
+                                queueToUpdate.DateCollected = null;
+                                break;
+                            case QUEUE_STATUS.ENGRAVING:
+                                if (queueToUpdate.DateEngravingStart == null)
+                                {
+                                    queueToUpdate.DateEngravingStart = DateTime.Now;
+                                }
+                                queueToUpdate.DatePendingCollection = null;
+                                queueToUpdate.DateCollected = null;
+                                break;
+                            case QUEUE_STATUS.PENDING_COLLECTION:
+                                if (queueToUpdate.DatePendingCollection == null)
+                                {
+                                    queueToUpdate.DatePendingCollection = DateTime.Now;
+                                }
+                                queueToUpdate.DateCollected = null;
+                                break;
+                            case QUEUE_STATUS.COLLECTED:
+                                if (queueToUpdate.DateCollected == null)
+                                {
+                                    queueToUpdate.DateCollected = DateTime.Now;
+                                }
+                                break;
+                            default:
+                                Console.WriteLine($"Unsupported status - {queueStatus} for visitorId {visitorId}!");
+                                break;
+                        }
+                        context.SaveChanges();
+                        result = queueToUpdate;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in UpdateQueue(visitorId: {visitorId}, QUEUE_STATUS: {queueStatus}) - {ex.Message}");
+            }
             return result;
         }
     }

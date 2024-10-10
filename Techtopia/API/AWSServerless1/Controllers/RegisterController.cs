@@ -38,7 +38,7 @@ namespace AWSServerless1.Controllers
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             if (identity != null && identity.IsAuthenticated) // If user already have a valid jwt token, no need to do anything
             {
-                return Ok("User is already signed in.");
+                return Ok($"User ({identity.Name}) is already signed in.");
             }
             else // if user does not have a valid jwt token, register a new one and return the jwt token
             {
