@@ -33,13 +33,13 @@ function ManageCompany() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3>Manage company</h3>
       <h5 mb={2}>Add new company</h5>
       <Stack mb={4}>
         <Typography mr={2}>*New company name:</Typography>
-        <TextField size='small' placeholder='Company name (required)' sx={{ minWidth: '240px', maxWidth:'240px' }} value={coName} onChange={(e) => setCoName(e.target.value)}></TextField>
+        <TextField size='small' placeholder='Company name (required)' sx={{ minWidth: '240px', maxWidth: '240px' }} value={coName} onChange={(e) => setCoName(e.target.value)}></TextField>
       </Stack>
       <Stack direction='row' mb={2}>
         <Stack mr={4}>

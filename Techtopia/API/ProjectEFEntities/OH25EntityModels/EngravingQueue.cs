@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ProjectEFEntities.OH25EntityModels;
 
-public partial class RedemptionQueue
+public partial class EngravingQueue
 {
     public int Queueid { get; set; }
 

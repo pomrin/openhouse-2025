@@ -30,7 +30,7 @@ function ManageModels() {
     setModelField('');
     setDescField('');
   }
-  
+
   const handleAdd = () => {
     console.log(brand + modelField + descField)
     handleReset();
@@ -42,7 +42,7 @@ function ManageModels() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2}>Manage models</h3>
       <h5> Add new models</h5>
@@ -74,7 +74,7 @@ function ManageModels() {
         <Button sx={{ ...otherButtonStyles, fontSize: '12px' }} onClick={handleAdd}>Add</Button>
       </Stack>
       <h5 mb={2}> Existing models</h5>
-      <Stack direction='row' style={{ marginRight: '30px', marginBottom:'50px'}}>
+      <Stack direction='row' style={{ marginRight: '30px', marginBottom: '50px' }}>
         <Input fontSize='1' placeholder='Search' style={{ width: '300px' }} value={inputField} onChange={(e) => setInputField(e.target.value)}></Input>
         <IconButton color="primary"> <Search /> </IconButton>
       </Stack>

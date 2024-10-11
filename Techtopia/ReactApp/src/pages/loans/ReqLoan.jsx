@@ -107,7 +107,7 @@ function RenderButton(props) {
         submitRequest(values.itemCategoryId, values.itemModelId, values.quantity, values.comment);
       }
       else {
-        for (let i = 0; i < cart.length; i++) { // loop instead of foreach in order to stop the loop upon submitting the request 
+        for (let i = 0; i < cart.length; i++) { // loop instead of foreach in order to stop the loop upon submitting the request
           const cartItem = cart[i];
           console.log('Cart Item:', cartItem)
           if (cartItem.categoryId == values.itemCategoryId && cartItem.modelId == values.itemModelId) {
@@ -427,7 +427,7 @@ function ReqLoan() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       {/* Stepper */}
       <Stepper activeStep={0} alternativeLabel style={{ display: 'flex', flexDirection: 'row', marginBottom: "50px" }} >

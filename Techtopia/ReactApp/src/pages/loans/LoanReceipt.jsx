@@ -223,7 +223,7 @@ function LoanReceipt() {
         setOpen(false);
     };
 
-    // get cart, model, and category 
+    // get cart, model, and category
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -353,7 +353,7 @@ function LoanReceipt() {
 
     return (
         <>
-            <h2>SIT Asset Management System</h2>
+            <h2>NYP-SIT OH2025</h2>
             <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
             {/* Stepper */}
             <Stepper activeStep={1} alternativeLabel style={{ display: 'flex', flexDirection: 'row', marginBottom: "50px" }} >

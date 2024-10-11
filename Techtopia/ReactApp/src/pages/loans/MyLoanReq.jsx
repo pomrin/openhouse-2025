@@ -17,9 +17,9 @@ import { useLoader } from '../../contexts/LoaderContext'
 
 function MyLoanReq() {
   const { setLoading } = useLoader();
-  const [loanReqList, setLoanReqList] = useState([]); // list of loan requests 
-  const [modelList, setModelList] = useState([]); // list of model 
-  const [catList, setCatList] = useState([]); // list of categories  
+  const [loanReqList, setLoanReqList] = useState([]); // list of loan requests
+  const [modelList, setModelList] = useState([]); // list of model
+  const [catList, setCatList] = useState([]); // list of categories
   const [brandList, setBrandList] = useState([]); // list of brands
 
   // pagination
@@ -62,13 +62,13 @@ function MyLoanReq() {
   const findCat = (Id) => { if (!catList) return '-'; const cat = catList.find((c) => c.catId === Id); return cat ? cat.catName : '-'; }
   const findBrand = (Id) => { if (!brandList) return '-'; const brand = brandList.find((b) => b.brandId === Id); return brand ? brand.brandName : '-'; }
 
-  //filtering 
+  //filtering
   const pendingReq = loanReqList.filter((data) => data.status === 0)
   const otherReq = loanReqList.filter((data) => data.status !== 0)
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2}>My loan requests</h3>
       <Typography mb={1}>Below are your pending loan request(s), Total : {pendingReq.length}</Typography>

@@ -94,7 +94,7 @@ namespace AWSServerless1.Controllers
                 {
                     case QueueDAL.QUEUE_STATUS.NOT_IN_QUEUE:
                         // TODO: Add the user to the Queue
-                        RedemptionQueue queueEntity = QueueDAL.AddToQueue(visitorEntity.VisitorId, addToQueueInfo);
+                        EngravingQueue queueEntity = QueueDAL.AddToQueue(visitorEntity.VisitorId, addToQueueInfo);
                         return Created(new Uri(Request.GetEncodedUrl()), queueEntity);
                     case QueueDAL.QUEUE_STATUS.IN_QUEUE:
                     case QueueDAL.QUEUE_STATUS.ENGRAVING:
@@ -139,7 +139,7 @@ namespace AWSServerless1.Controllers
             if (visitorEntity != null)
             {
                 var currentQueueStatus = QueueDAL.GetQueueStatusVisitor(visitorEntity.VisitorId);
-                RedemptionQueue queue = null;
+                EngravingQueue queue = null;
                 switch (updateQueueInfo.QUEUE_STATUS_TO_UPDATE)
                 {
                     case QueueDAL.QUEUE_STATUS.NOT_IN_QUEUE:

@@ -42,7 +42,7 @@ function ItemsPendingCollection() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3>Items Pending Collection</h3>
       <h5 style={{ opacity: '70%', color: 'grey' }}>The following are item(s) pending collection</h5>

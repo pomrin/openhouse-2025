@@ -9,8 +9,6 @@ public partial class Visitor
 
     public DateTime Datecreated { get; set; }
 
-    public ulong? LuggageRedeemed { get; set; }
-
     /// <summary>
     /// ARGB
     /// </summary>
@@ -21,9 +19,11 @@ public partial class Visitor
     /// </summary>
     public string? TicketId { get; set; }
 
-    public virtual LuggageTagColor? LuggageTagColorNameNavigation { get; set; }
+    public DateTime? LuggageRedeemedDate { get; set; }
 
-    public virtual ICollection<RedemptionQueue> RedemptionQueues { get; set; } = new List<RedemptionQueue>();
+    public virtual ICollection<EngravingQueue> EngravingQueues { get; set; } = new List<EngravingQueue>();
+
+    public virtual LuggageTagColor? LuggageTagColorNameNavigation { get; set; }
 
     public virtual ICollection<VisitorBooth> VisitorBooths { get; set; } = new List<VisitorBooth>();
 

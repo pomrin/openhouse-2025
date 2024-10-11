@@ -42,7 +42,7 @@ function CreateLoanApprovalStaff() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3>Create approval loan request for a selected staff</h3>
       <p style={{ color: 'red' }}>

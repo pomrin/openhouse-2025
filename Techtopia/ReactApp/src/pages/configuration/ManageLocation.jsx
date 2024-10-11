@@ -113,7 +113,7 @@ function ManageLocation() {
 
   const sortedLocationList = locationList.sort((a, b) => a.locationName.localeCompare(b.locationName));
 
-  // fetchdata 
+  // fetchdata
   const fetchData = () => {
     http.get(`/Location`).then((res) => { setLocationList(res.data); });
   }
@@ -131,7 +131,7 @@ function ManageLocation() {
       <SnackbarComponent type="success" message="Success" showSnackbar={showSnackbarSuccess} setShowSnackbar={setShowSnackbarSuccess} />
       <SnackbarComponent type="success" message="Success" showSnackbar={showChangeSuccess} setShowSnackbar={setShowChangeSuccess} />
 
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2}>Manage location</h3>
       <h5> Add new location</h5>

@@ -54,7 +54,7 @@ function ProcessedLoanExtReq() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2}>Manage processed loan extension requests</h3>
 

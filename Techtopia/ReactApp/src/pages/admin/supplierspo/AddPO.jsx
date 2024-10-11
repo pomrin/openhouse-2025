@@ -83,7 +83,7 @@ function AddPO() {
 
   return (
     <div >
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2}>Add new PO</h3>
       <Stack mb={6} direction={'row'}>
@@ -163,11 +163,11 @@ function AddPO() {
                   <Stack mt={2} direction={'row'}>
                     <Stack mb={2} mr={3} display='flex'>
                       <Typography mb={0.5}>Company address : </Typography>
-                      <TextField size='small' placeholder='Company address'disabled sx={{ minWidth: '240px' }} value={coAdd} onChange={(e) => setCoAdd(e.target.value)}></TextField>
+                      <TextField size='small' placeholder='Company address' disabled sx={{ minWidth: '240px' }} value={coAdd} onChange={(e) => setCoAdd(e.target.value)}></TextField>
                     </Stack>
                     <Stack mb={2} mr={3} display='flex'>
                       <Typography mb={0.5}>Company postal code : </Typography>
-                      <TextField size='small' placeholder='Company postal code'disabled sx={{ minWidth: '240px' }} value={coPostal} onChange={(e) => setCoPostal(e.target.value)}></TextField>
+                      <TextField size='small' placeholder='Company postal code' disabled sx={{ minWidth: '240px' }} value={coPostal} onChange={(e) => setCoPostal(e.target.value)}></TextField>
                     </Stack>
                   </Stack>
                   <Stack direction={'row'}>
@@ -268,7 +268,7 @@ function AddPO() {
                       <h3>Confirm before proceeding</h3>
                       <Typography fontWeight={'bold'} mb={1}>PO Details</Typography>
                       <Stack mb={2} direction='row' alignItems="flex-start">
-                        <Stack mr={4} sx={{minWidth:'180px'}}>
+                        <Stack mr={4} sx={{ minWidth: '180px' }}>
                           <Typography >PO number</Typography>
                           <Typography >PO date</Typography>
                           <Typography >PO description</Typography>
@@ -283,7 +283,7 @@ function AddPO() {
                       </Stack>
                       <Typography fontWeight={'bold'} mb={1}>Supplier Details</Typography>
                       <Stack mb={2} direction='row' alignItems="flex-start">
-                        <Stack mr={4} sx={{minWidth:'180px'}}>
+                        <Stack mr={4} sx={{ minWidth: '180px' }}>
                           <Typography >New/existing supplier</Typography>
                           <Typography >Supplier company</Typography>
                           <Typography >Company Address</Typography>

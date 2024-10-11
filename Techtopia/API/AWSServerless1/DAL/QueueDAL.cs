@@ -17,8 +17,8 @@ namespace AWSServerless1.DAL
 
                 using (var context = new Openhouse25Context())
                 {
-                    RedemptionQueue queue = null;
-                    var qVisitor = from q in context.RedemptionQueues
+                    EngravingQueue queue = null;
+                    var qVisitor = from q in context.EngravingQueues
                                    where q.VisitorId == visitorId
                                    orderby q.DateJoined descending
                                    select q;
@@ -73,7 +73,7 @@ namespace AWSServerless1.DAL
             {
                 using (var context = new Openhouse25Context())
                 {
-                    var qVisitorQueue = from q in context.RedemptionQueues
+                    var qVisitorQueue = from q in context.EngravingQueues
                                         where q.VisitorId == visitorId
                                         && q.DateEngravingStart == null
                                         && q.DatePendingCollection == null
@@ -83,7 +83,7 @@ namespace AWSServerless1.DAL
                     if (qVisitorQueue != null && qVisitorQueue.Count() > 0)
                     {
                         var visitorQ = qVisitorQueue.First();
-                        var qVisitorsInQueue = from q in context.RedemptionQueues
+                        var qVisitorsInQueue = from q in context.EngravingQueues
                                                where q.DateEngravingStart == null
                                                && q.DatePendingCollection == null
                                                && q.DateCollected == null
@@ -109,15 +109,15 @@ namespace AWSServerless1.DAL
             return result;
         }
 
-        public static List<RedemptionQueue> GetTopQueue(QUEUE_STATUS queueStatus, int top = 0)
+        public static List<EngravingQueue> GetTopQueue(QUEUE_STATUS queueStatus, int top = 0)
         {
-            List<RedemptionQueue> result = new List<RedemptionQueue>();
+            List<EngravingQueue> result = new List<EngravingQueue>();
 
             try
             {
                 using (var context = new Openhouse25Context())
                 {
-                    var qTopQueue = (from q in context.RedemptionQueues
+                    var qTopQueue = (from q in context.EngravingQueues
                                      where
                                      (queueStatus == QUEUE_STATUS.IN_QUEUE && q.DateEngravingStart == null && q.DatePendingCollection == null && q.DateCollected == null)
                                      || (queueStatus == QUEUE_STATUS.ENGRAVING && q.DateEngravingStart != null && q.DatePendingCollection == null && q.DateCollected == null)
@@ -146,14 +146,14 @@ namespace AWSServerless1.DAL
             return result;
         }
 
-        internal static RedemptionQueue AddToQueue(int visitorId, DTO.AddToQueueDTO addToQueueInfo)
+        internal static EngravingQueue AddToQueue(int visitorId, DTO.AddToQueueDTO addToQueueInfo)
         {
-            RedemptionQueue queue = null;
+            EngravingQueue queue = null;
             try
             {
                 using (var context = new Openhouse25Context())
                 {
-                    var isAlreadyInQueue = from q in context.RedemptionQueues
+                    var isAlreadyInQueue = from q in context.EngravingQueues
                                            where q.VisitorId == visitorId
                                            select q;
                     if (isAlreadyInQueue != null)
@@ -167,14 +167,14 @@ namespace AWSServerless1.DAL
                         }
                         else
                         {
-                            var queueToInsert = new RedemptionQueue()
+                            var queueToInsert = new EngravingQueue()
                             {
                                 VisitorId = visitorId,
                                 DateJoined = DateTime.Now,
                                 EngravingText = addToQueueInfo.EngravingText,
                                 LuggageTagColor = addToQueueInfo.LuggageTagColor,
                             };
-                            context.RedemptionQueues.Add(queueToInsert);
+                            context.EngravingQueues.Add(queueToInsert);
                             context.SaveChanges();
                             queue = queueToInsert;
                         }
@@ -188,15 +188,15 @@ namespace AWSServerless1.DAL
             return queue;
         }
 
-        internal static RedemptionQueue UpdateQueue(int visitorId, QUEUE_STATUS queueStatus)
+        internal static EngravingQueue UpdateQueue(int visitorId, QUEUE_STATUS queueStatus)
         {
-            RedemptionQueue result = null;
+            EngravingQueue result = null;
 
             try
             {
                 using (var context = new Openhouse25Context())
                 {
-                    var qCurrentQueue = from q in context.RedemptionQueues
+                    var qCurrentQueue = from q in context.EngravingQueues
                                         where q.VisitorId == visitorId
                                         select q;
                     if (qCurrentQueue != null)
@@ -205,7 +205,7 @@ namespace AWSServerless1.DAL
                         switch (queueStatus)
                         {
                             case QUEUE_STATUS.NOT_IN_QUEUE:
-                                context.RedemptionQueues.Remove(queueToUpdate);
+                                context.EngravingQueues.Remove(queueToUpdate);
                                 break;
                             case QUEUE_STATUS.IN_QUEUE:
                                 queueToUpdate.DateEngravingStart = null;

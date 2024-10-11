@@ -167,7 +167,7 @@ namespace AWSServerless1.DTO
         }
 
 
-        public static QueueDTO FromQueueEntity(RedemptionQueue redemptionQueueEntity)
+        public static QueueDTO FromQueueEntity(EngravingQueue redemptionQueueEntity)
         {
             QueueDTO result = new QueueDTO()
             {

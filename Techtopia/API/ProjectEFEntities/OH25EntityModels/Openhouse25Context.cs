@@ -18,9 +18,9 @@ public partial class Openhouse25Context : DbContext
 
     public virtual DbSet<Booth> Booths { get; set; }
 
-    public virtual DbSet<LuggageTagColor> LuggageTagColors { get; set; }
+    public virtual DbSet<EngravingQueue> EngravingQueues { get; set; }
 
-    public virtual DbSet<RedemptionQueue> RedemptionQueues { get; set; }
+    public virtual DbSet<LuggageTagColor> LuggageTagColors { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -59,28 +59,11 @@ public partial class Openhouse25Context : DbContext
                 .HasColumnName("booth_name");
         });
 
-        modelBuilder.Entity<LuggageTagColor>(entity =>
-        {
-            entity.HasKey(e => e.LuggageTagColorName).HasName("PRIMARY");
-
-            entity.ToTable("luggage_tag_colors");
-
-            entity.HasIndex(e => e.LuggageTagColorCode, "luggage_tag_color_code_UNIQUE").IsUnique();
-
-            entity.Property(e => e.LuggageTagColorName)
-                .HasMaxLength(64)
-                .HasColumnName("luggage_tag_color_name");
-            entity.Property(e => e.LuggageTagColorCode)
-                .HasMaxLength(9)
-                .IsFixedLength()
-                .HasColumnName("luggage_tag_color_code");
-        });
-
-        modelBuilder.Entity<RedemptionQueue>(entity =>
+        modelBuilder.Entity<EngravingQueue>(entity =>
         {
             entity.HasKey(e => e.Queueid).HasName("PRIMARY");
 
-            entity.ToTable("redemption_queue");
+            entity.ToTable("engraving_queue");
 
             entity.HasIndex(e => e.LuggageTagColor, "FK_luggage_tag_colors_idx");
 
@@ -110,15 +93,32 @@ public partial class Openhouse25Context : DbContext
                 .HasColumnName("luggage_tag_color");
             entity.Property(e => e.VisitorId).HasColumnName("visitor_id");
 
-            entity.HasOne(d => d.LuggageTagColorNavigation).WithMany(p => p.RedemptionQueues)
+            entity.HasOne(d => d.LuggageTagColorNavigation).WithMany(p => p.EngravingQueues)
                 .HasForeignKey(d => d.LuggageTagColor)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_luggage_tag_colors");
 
-            entity.HasOne(d => d.Visitor).WithMany(p => p.RedemptionQueues)
+            entity.HasOne(d => d.Visitor).WithMany(p => p.EngravingQueues)
                 .HasForeignKey(d => d.VisitorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_queue_visitor_id");
+        });
+
+        modelBuilder.Entity<LuggageTagColor>(entity =>
+        {
+            entity.HasKey(e => e.LuggageTagColorName).HasName("PRIMARY");
+
+            entity.ToTable("luggage_tag_colors");
+
+            entity.HasIndex(e => e.LuggageTagColorCode, "luggage_tag_color_code_UNIQUE").IsUnique();
+
+            entity.Property(e => e.LuggageTagColorName)
+                .HasMaxLength(64)
+                .HasColumnName("luggage_tag_color_name");
+            entity.Property(e => e.LuggageTagColorCode)
+                .HasMaxLength(9)
+                .IsFixedLength()
+                .HasColumnName("luggage_tag_color_code");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -157,10 +157,9 @@ public partial class Openhouse25Context : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
                 .HasColumnName("datecreated");
-            entity.Property(e => e.LuggageRedeemed)
-                .HasDefaultValueSql("b'0'")
-                .HasColumnType("bit(1)")
-                .HasColumnName("luggage_redeemed");
+            entity.Property(e => e.LuggageRedeemedDate)
+                .HasColumnType("datetime")
+                .HasColumnName("luggage_redeemed_date");
             entity.Property(e => e.LuggageTagColorName)
                 .HasMaxLength(64)
                 .HasComment("ARGB")

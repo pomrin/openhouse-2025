@@ -38,7 +38,7 @@ function MyAssets() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3>My Assets</h3>
       <p style={{ color: 'grey' }}>Below are items that have been tagged under you</p>
