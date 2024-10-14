@@ -22,25 +22,30 @@ import boothimage4 from './../assets/images/step4.png';
 
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
-function UserLanding() {
 
+
+function UserLanding() {
+    
+    
     //websocket stuff
     const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [recipientId, setRecipientId] = useState(''); // New state for recipient ID
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionId, setConnectionId] = useState(''); // New state for connection ID
   const socketRef = useRef(null);
 
-  const websocketUrl = 'wss://mnrm12z7q2.execute-api.ap-southeast-1.amazonaws.com/production/';
+  const websocketUrl = 'wss://9be5u1to5h.execute-api.ap-southeast-1.amazonaws.com/production/';
 
   const connectWebSocket = () => {
     socketRef.current = new WebSocket(websocketUrl);
 
     socketRef.current.onopen = () => {
-      console.log('Connected to WebSocket');
-      setIsConnected(true);
-    };
+        console.log('Connected to WebSocket');
+        setIsConnected(true);
+      };
 
-    socketRef.current.onmessage = (event) => {
+      socketRef.current.onmessage = (event) => {
         console.log('Received message:', event.data);
     
         // Try to parse the message as JSON
@@ -76,13 +81,16 @@ function UserLanding() {
   };
 
   const sendMessage = () => {
-    if (input && isConnected) {
-      const messageObject = { action: "sendmessage", message: input };
+    if (input && recipientId && isConnected) {
+      const messageObject = { action: "sendmessage", recipientId, message: input }; // Include recipientId
       socketRef.current.send(JSON.stringify(messageObject));
-      console.log('Sent message:', input); // Log the sent message to the console
+      console.log('Sent message:', messageObject); // Log the sent message to the console
       setInput(''); // Clear input after sending
+      setRecipientId(''); // Clear recipient ID after sending
     } else if (!isConnected) {
       console.error('WebSocket is not connected');
+    } else {
+      console.error('Message and recipient ID must not be empty');
     }
   };
 
@@ -564,6 +572,7 @@ function UserLanding() {
         localStorage.clear();
       }
     return (
+        <Box className="bodyBox">
         <Box>
             <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
 
@@ -732,26 +741,10 @@ function UserLanding() {
                     <Box class="detailsBox">
                         <Box>
                                 <Typography class="bold">
-                                    Queue
+                                    Queue Status
                                 </Typography>
                                 <Typography>
                                     {queueNumber} {/* Queue number state */}
-                                </Typography>
-                        </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
-                                </Typography>
-                                <Typography>
-                                    2B
-                                </Typography>
-                        </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
-                                </Typography>
-                                <Typography>
-                                    1A
                                 </Typography>
                         </Box>
                     </Box>
@@ -765,13 +758,21 @@ function UserLanding() {
                     <div key={index}>{msg.message || 'Received non-JSON message'}</div>
                     ))}
                 </div>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type a message"
-                    />
-                <button onClick={sendMessage} disabled={!isConnected}>Send Message</button>
+                <div>
+        <input
+          type="text"
+          placeholder="Recipient ID"
+          value={recipientId}
+          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
+        />
+        <input
+          type="text"
+          placeholder="Type a message"
+          value={input}
+          onChange={(e) => setInput(e.target.value)} // Handle message input
+        />
+        <button onClick={sendMessage}>Send Message</button>
+      </div>
             </div>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
@@ -797,6 +798,7 @@ function UserLanding() {
         <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Clear Local Storage
         </Button>
+        </Box>
         </Box>
     );
 }
