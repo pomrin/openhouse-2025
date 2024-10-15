@@ -34,9 +34,20 @@ const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
 const wsUrl = 'wss://9be5u1to5h.execute-api.ap-southeast-1.amazonaws.com/production/';
 const ws = new WebSocket(wsUrl);
 
+// Message queue for messages before the connection opens
+let messageQueue = [];
+let isWebSocketOpen = false;
+
 // Handle WebSocket connection open event
 ws.on('open', () => {
     console.log('WebSocket connection established.');
+    isWebSocketOpen = true;
+
+    // Process the queued messages
+    while (messageQueue.length > 0) {
+        const message = messageQueue.shift();
+        broadcastMessage(message);
+    }
 });
 
 // Handle WebSocket errors
@@ -46,6 +57,7 @@ ws.on('error', (error) => {
 
 ws.on('close', (code, reason) => {
     console.log(`WebSocket connection closed. Code: ${code}, Reason: ${reason}`);
+    isWebSocketOpen = false;
 });
 
 function broadcastMessage(message) {
@@ -54,7 +66,7 @@ function broadcastMessage(message) {
         message: message
     });
     // Check if WebSocket is open before sending
-    if (ws.readyState === WebSocket.OPEN) {
+    if (isWebSocketOpen) {
         ws.send(broadcastPayload, (err) => {
             if (err) {
                 console.error('Error sending broadcast message:', err);
@@ -63,7 +75,8 @@ function broadcastMessage(message) {
             }
         });
     } else {
-        console.error('WebSocket is not open. Unable to send broadcast message.');
+        console.error('WebSocket is not open. Queueing the message.');
+        messageQueue.push(message);
     }
 }
 
@@ -140,7 +153,7 @@ module.exports.postRequest = async (event, context) => {
             console.log(`responseCode - ${responseCode}`);
             if (responseCode == 4001) {
                 console.log("Insufficient Credit!");
-                broadcastMessage("Insufficient Credit!");
+                broadcastMessage("InsufficientCredits");
             } else {
 
                 // var responseBody = JSON.parse(response.data.code);
@@ -152,7 +165,7 @@ module.exports.postRequest = async (event, context) => {
                 if (base64String) {
                     var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
                     console.log(`response: ${response2}`);
-                    broadcastMessage("Image successfully uploaded for visitor.");
+                    broadcastMessage("ImageUploaded");
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }

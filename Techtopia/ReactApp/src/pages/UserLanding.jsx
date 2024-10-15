@@ -56,6 +56,10 @@ function UserLanding() {
           if (messageData.message === 'cycleBooth') {
             handleCycleBooth();
           }
+
+          if (messageData.message === 'InsufficientCredits') {
+            refreshPage();
+          }
     
           setMessages((prevMessages) => [...prevMessages, messageData]);
         } catch (error) {
@@ -179,6 +183,11 @@ function UserLanding() {
             const nextIndex = (currentIndex + 1) % boothImages.length;
             return boothImages[nextIndex];
         });
+    };
+
+    const refreshPage = () => {
+        location.reload();
+        console.log("page refreshed");
     };
 
     // Function to increment the queue number and format it as a 4-digit string
