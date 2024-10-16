@@ -14,6 +14,11 @@ import '../css/BoothRedemption.css';
 import nyp_logo from "./../assets/nyp_logo.png";
 import placeholderTag from './../assets/images/luggage-tag.webp';
 
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+// Auth token for test (TBD)
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQU1JTFlOIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQk9PVEhfSEVMUEVSIiwibmJmIjoxNzI5MDUxOTU3LCJleHAiOjE3MjkxMzgzNTcsImlzcyI6InNpdC5ueXAuZWR1LnNnIiwiYXVkIjoic2l0Lm55cC5lZHUuc2cifQ.v49hKAVN5jndF_tUvyYfty_8LsG9qVRCTtiJqz0vOxw';
+
 // RedemptionPage Component
 // This component handles the redemption process for visitors' luggage tags.
 // Mockup codes to be changed/deleted once backend done
@@ -21,50 +26,6 @@ import placeholderTag from './../assets/images/luggage-tag.webp';
 function RedemptionPage() {
     const navigate = useNavigate();
     
-     // Fake API for testing
-     const [ticketId, setTicketId] = useState('');
-     // Function to generate a random user ID
-     const generateRandomUserId = () => {
-         const randomString = Math.random().toString(36).substring(2, 9).toUpperCase(); // Generates 8-character string
-         return `U${randomString}`;
-     };
-     // Function to convert user_id to ticket_id
-     const generateTicketId = (userId) => {
-         return userId.replace('U', 'T'); // Replace the starting U with T
-     };
-     // Call function to generate new UID on page load/refresh
-     useEffect(() => {
-         const userId = generateRandomUserId();
-         const ticketId = generateTicketId(userId);
-         setTicketId(ticketId); // Set the ticket_id to state
-     }, []);
-     // Mock API call to redeem the tag
-     const redeemTag = async () => {
-        try {
-            // Simulate an API call with a delay
-            const mockResponse = await new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve({
-                        success: true,  // Simulate successful API response
-                        message: 'Tag redeemed successfully!',
-                        ticket_id: ticketId,
-                        color: selectedColor,
-                    });
-                }, 2000);
-            });
-    
-            console.log(mockResponse.message);
-            console.log('Ticket ID:', mockResponse.ticket_id);
-            console.log('Selected Color:', mockResponse.color);
-    
-            return mockResponse; // Return the response
-        } catch (error) {
-            console.error('Error redeeming tag:', error);
-            return { success: false }; // Return failure in case of error
-        }
-    };
-    // End of fake API (TBD)
-
     //Styles
     const overlayStyle = {
         background: 'rgba(0, 0, 0, 0.7)' // Transparent black background
@@ -78,7 +39,7 @@ function RedemptionPage() {
         justifyContent: 'center',
         flexDirection: 'column',
         margin: '8% 0'
-      };
+    };
 
     const popupContentStyle = {
         width: '100%', // Full width
@@ -99,7 +60,7 @@ function RedemptionPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
-    }
+    };
 
     const eligibilityContentContainerStyle = {
         width: '95%',
@@ -109,14 +70,14 @@ function RedemptionPage() {
         borderRadius: '10px',
         background: '#dedede',
         padding: '10px 0'
-    }
+    };
 
     const returnBtnStyle = {
         border: '1px solid grey', 
         borderRadius: '5px', 
         marginTop: '5%', 
         color: 'black'
-    }
+    };
 
     const submitFormBtnStyle = {
         width: '90%', 
@@ -124,7 +85,7 @@ function RedemptionPage() {
         backgroundColor: '#008080',
         color: 'white',
         border: '1px solid black'
-    }
+    };
 
     const startQRscannerBtn = {
     position: 'relative', 
@@ -136,73 +97,115 @@ function RedemptionPage() {
     backgroundColor: 'rgba(211,211,211,0.6)', 
     color: 'grey',
     Transition: 'z-index 0.55'
-    }
+    };
     
-    // Placeholder colors (TBC)
+    // Placeholder colors (According to colors in SQL database)
     const tagColors = [
-        { name: 'Salmon', hex: '#FA8072' },
-        { name: 'Beige', hex: '#F5F5DC' },
-        { name: 'Mint', hex: '#98FF98' },
-        { name: 'Blue', hex: '#87CEEB' },
-        { name: 'Purple', hex: '#9370DB' }
-    ]
+        { name: 'BLACK', hex: '#000000' },
+        { name: 'BLUE', hex: '#0000FF' },
+        { name: 'GREEN', hex: '#00FF00' },
+        { name: 'RED', hex: '#FF0000' },
+        { name: 'YELLOW', hex: '#FFFF00' },
+        { name: 'WHITE', hex: '#FFFFFF' }
+    ];
 
     // Tag Color buttons for redemption form
-    const [selectedColor, setSelectedColor] = useState('');
-    
     const TagColorsRadioBtns = ({ selectedColor, setSelectedColor }) => {
+        // Split colors into two rows: max 5 per row
+        const firstRowColors = tagColors.slice(0, 5);
+        const secondRowColors = tagColors.slice(5);
+    
         return (
+            <><RadioGroup
+                aria-label="tagColor"
+                name="tagColorOptions"
+                value={selectedColor}
+                onChange={(event) => setSelectedColor(event.target.value)}
+                sx={{ display: 'flex', flexDirection: 'row', marginY: '3%', flexWrap: 'nowrap' }}
+            >
+                {firstRowColors.map((color) => (
+                    <FormControlLabel
+                        key={color.name}
+                        value={color.name}
+                        control={
+                            <Radio
+                                sx={{
+                                    color: color.hex,
+                                    '&.Mui-checked': {
+                                        color: color.hex,
+                                    },
+                                    '& .MuiSvgIcon-root': {
+                                        borderRadius: '50%',
+                                        width: 30,
+                                        height: 30,
+                                        backgroundColor: color.hex,
+                                        border: '2px solid transparent',
+                                    },
+                                    '&.Mui-checked .MuiSvgIcon-root': {
+                                        borderColor: 'black',
+                                    },
+                                }}
+                            />
+                        }
+                        label=""
+                    />
+                ))}
+            </RadioGroup>
+
+            {/* Second row of colors */}
             <RadioGroup
-            aria-label="tagColor"
-            name="tagColorOptions"
-            value={selectedColor}
-            onChange={(event) => setSelectedColor(event.target.value)}
-            sx={{ display: 'flex', flexDirection: 'row', marginY: '3%' }}
-          >
-            {tagColors.map((color) => (
-              <FormControlLabel
-                key={color.name}
-                value={color.name}
-                control={
-                  <Radio
-                    sx={{
-                      color: color.hex,
-                      '&.Mui-checked': {
-                        color: color.hex,
-                      },
-                      '& .MuiSvgIcon-root': {
-                        borderRadius: '50%',
-                        width: 30,
-                        height: 30,
-                        backgroundColor: color.hex,
-                        border: '2px solid transparent',
-                      },
-                      '&.Mui-checked .MuiSvgIcon-root': {
-                        borderColor: 'black',
-                      },
-                    }}
-                  />
-                }
-                label="" // No label, only circles
-              />
-            ))}
-          </RadioGroup>
+                aria-label="tagColor"
+                name="tagColorOptions"
+                value={selectedColor}
+                onChange={(event) => setSelectedColor(event.target.value)}
+                sx={{ display: 'flex', flexDirection: 'row', marginY: '3%', flexWrap: 'nowrap' }}
+            >
+                {secondRowColors.map((color) => (
+                    <FormControlLabel
+                        key={color.name}
+                        value={color.name}
+                        control={
+                            <Radio
+                                sx={{
+                                    color: color.hex,
+                                    '&.Mui-checked': {
+                                        color: color.hex,
+                                    },
+                                    '& .MuiSvgIcon-root': {
+                                        borderRadius: '50%',
+                                        width: 30,
+                                        height: 30,
+                                        backgroundColor: color.hex,
+                                        border: '2px solid transparent',
+                                    },
+                                    '&.Mui-checked .MuiSvgIcon-root': {
+                                        borderColor: 'black',
+                                    },
+                                }}
+                            />
+                        }
+                        label=""
+                    />
+                ))}
+            </RadioGroup></>
         );
     };
 
     // Handle tag color form submission
+    const [ticketId, setTicketId] = useState(null);
+
     const submitUserRedemption = async () => {
         try {
-            const result = await redeemTag();   // Mock API for testing
+            const result = await sendToRedemptionApi(ticketId, selectedColor); 
             
             if (result.success) {
                 showToast('Tag redeemed successfully!', 'success');
                 setIsPopupOpen(false); 
             } else {
-                showToast('Failed to redeem tag, please try again.', 'error');
+                showToast(result.message || 'Failed to redeem tag, please try again.', 'error');
             }
         } catch (error) {
-            console.error('Error redeeming tag:', error); 
+            console.log('Error submitting redemption:', error);
             showToast('An error occurred while redeeming the tag. Please try again.', 'error');
         } finally {
             setSelectedColor(null);
@@ -212,45 +215,53 @@ function RedemptionPage() {
     // Eligibility modal content
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [eligibilityStatus, setEligibilityStatus] = useState(null); // Track visitor's elgibility status
-   
+    const [selectedColor, setSelectedColor] = useState(null);
+
     const closePopup = () => {
         setIsPopupOpen(false);
+        setHasValidated(false);
+        setScannerActive(true);
+        
+        setTimeout(() => {
+            startScanner(); // Restart QR scanner after 1 sec delay
+        }, 1000);
     };
     
-    const EligibilityContent = ({ eligibility }) => {
+    const EligibilityContent = ({ eligibility, selectedColor, setSelectedColor }) => {
         let content;
-        
-        // Cases (waiting on backend bfr change)
+
         switch (eligibility) {
             case 'missing_stamps':
                 content = (
-                    <Typography variant="body2" sx={{ textAlign: 'center', marginBottom: '20px' }}>
-                        User has yet to collect all stamps.
+                    <Typography variant="body2" sx={{ textAlign: 'center', marginY: '10px', width: '80%' }}>
+                        Visitor has yet to collect all stamps.
                     </Typography>
                 );
                 break;
             case 'already_redeemed':
                 content = (
-                    <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', marginY: '10px' }}>
                         Visitor has already redeemed their luggage tag.
                     </Typography>
                 );
                 break;
             case 'eligible':
                 content = (
-                  <><Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center', marginBottom: '20px' }}>
-                        Visitor Eligible
-                    </Typography>
-                    <img src={placeholderTag} width='85%' alt="Luggage Tag"/>
-                    <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5%', marginLeft: '5%' }}>
-                        <Typography variant="body1">Preferred Color</Typography>
-                        <TagColorsRadioBtns selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-                        {selectedColor && ( 
-                            <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
-                                Proceed with Redemption
-                            </Button>
-                        )}
-                    </FormControl></>
+                    <>
+                        <Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center', marginBottom: '20px' }}>
+                            Visitor Eligible
+                        </Typography>
+                        <img src={placeholderTag} width='85%' alt="Luggage Tag" />
+                        <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5%', marginLeft: '5%' }}>
+                            <Typography variant="body1">Preferred Color</Typography>
+                            <TagColorsRadioBtns selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                            {selectedColor && (
+                                <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
+                                    Proceed with Redemption
+                                </Button>
+                            )}
+                        </FormControl>
+                    </>
                 );
                 break;
             default:
@@ -262,7 +273,7 @@ function RedemptionPage() {
                 );
                 break;
         }
-    
+
         return content;
     };
     
@@ -271,14 +282,18 @@ function RedemptionPage() {
             <Box style={modalContentStyle}>
                 <Box style={overlayContentStyle}>
                     <Box id="eligibilityStatusContainer" style={eligibilityContentContainerStyle}>
-                        <EligibilityContent eligibility={eligibility} />
+                        <EligibilityContent 
+                            eligibility={eligibility} 
+                            selectedColor={selectedColor} 
+                            setSelectedColor={setSelectedColor} 
+                        />
                     </Box>
                     <Button onClick={closePopup} style={returnBtnStyle}>Return</Button>
                 </Box>
             </Box>
         );
     };
-
+    
     // Toast States
     const [openToast, setOpenToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -298,10 +313,13 @@ function RedemptionPage() {
       };
 
     // QR States
+
     const scanner = useRef(null);
     const videoEl = useRef(null);
     const qrBoxEl = useRef(null);
+    const scannerTimeout = useRef(null);
     const [scannerActive, setScannerActive] = useState(false); // Tracks if the scanner is active
+    const [hasValidated, setHasValidated] = useState(false); // Tracks whether qr code has been validated
     
     // Track whether scanner is active
     const isScannerInitialized = useRef(false);
@@ -309,7 +327,7 @@ function RedemptionPage() {
     // Initialize or restart the scanner
     const startScanner = () => {
         if (isScannerInitialized.current) {
-            console.log("Scanner already initialized"); // Debug
+            console.log("Scanner already initialized");  // Debugging
             return;
         }
 
@@ -325,59 +343,145 @@ function RedemptionPage() {
         if (scanner.current) {
             scanner.current.start().then(() => {
                 setScannerActive(true);
-                isScannerInitialized.current = true; // Set scanner as active ( for tracking )
+                isScannerInitialized.current = true;
 
+                // Set a timeout to stop the scanner if inactive for too long
+                scannerTimeout.current = setTimeout(() => {
+                    handleScannerTimeout();
+                }, 60000);  // 1 minute timeout
             }).catch((err) => {
-                console.log("Failed to start scanner:", err); // Debug
+                console.log("Failed to start scanner:", err);
                 isScannerInitialized.current = false;
                 showToast("Camera is blocked or not accessible.", 'warning');
             });
         }
     };
 
+    // Stop scanner when needed
+    const stopScanner = () => {
+        if (scanner.current) {
+            scanner.current.stop();
+            isScannerInitialized.current = false;
+            setScannerActive(false);
+        }
+
+        if (scannerTimeout.current) {
+            clearTimeout(scannerTimeout.current);
+            scannerTimeout.current = null;
+        }
+    };
+
+    // Auto-start scanner on component load
+    useEffect(() => {
+        startScanner();
+    }, []);
+
+    // Handle scanner timeout
+    const handleScannerTimeout = () => {
+        if (scanner.current) {
+            scanner.current.stop();
+            isScannerInitialized.current = false;
+            setScannerActive(false);
+            showToast("Scanner stopped due to inactivity.", 'info');
+        }
+    };
+
     // Handle successful QR scan
     const onScanSuccess = async (result) => {
+        if (hasValidated) return; // Prevent multiple validations
+
         try {
-            // Actual API call to be inserted here
+            stopScanner(); // Stop QR scanner upon successful scan
+            const ticketId = result.data;
+            setTicketId(ticketId);
 
-            // Mockup of API call
-            console.log('QR code scanned: ', result.data);
-    
-            // Simulate async operation (e.g., validating scanned QR code)
-            const isValid = await simulateAsyncValidation(result.data);
-    
-            // Set eligibility status based on scanned data
-            if (isValid.includes('eligible')) {
+            // Check if ticketId is valid
+            const apiResponse = await eligibilityValidation(ticketId);
+
+            // Handle the response from the API
+            if (apiResponse.status === 200) {
+                // Response 200: User is eligible
                 setEligibilityStatus('eligible');
-            } else if (isValid.includes('missing_stamps')) {
+                setIsPopupOpen(true);
+            } else if (apiResponse.status === 400) {
+                // Response 400: Visitor has not visited all required booths
                 setEligibilityStatus('missing_stamps');
-            } else if (isValid.includes('already_redeemed')) {
+                setIsPopupOpen(true);
+            } else if (apiResponse.status === 404) {
+                // Invalid ticket ID
+                showToast('Ticket ID not found!', 'error');
+            } else if (apiResponse.status === 409) {
+                // Visitor has already redeemed tag
                 setEligibilityStatus('already_redeemed');
-            } else {
-                setEligibilityStatus('unknown'); // Fallback if QR code doesn't match known values
+                setIsPopupOpen(true);
             }
-            // End of mockup
 
-            setIsPopupOpen(true); // Open modal popup
-    
-            if (scanner.current) {
-                await scanner.current.stop();
-                isScannerInitialized.current = false;
-                setScannerActive(false); // Stop scanner
-            }
+            setHasValidated(true); // Mark as validated
         } catch (error) {
-            console.error("Error in onScanSuccess:", error); // Debug
+            console.log("Error in onScanSuccess:", error);
+            showToast('An error occurred while validating the ticket.', 'error');
         }
     };
     
-    // Simulate async QR code validation
-    const simulateAsyncValidation = async (data) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(data); // Simulate async response, resolve the scanned data
-            }, 1000);
-        });
+    // Validate visitor's eligibility status
+    const eligibilityValidation = async (ticketId) => {
+        try {
+            const response = await fetch(`${apiUrl}/VisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`, 
+                }
+            });
+            return response;
+        } catch (error) {
+            console.log("Error calling CheckRedemption API:", error);
+            throw error;
+        }
     };
+
+    // Redeem visitor's luggage tag
+    const sendToRedemptionApi = async (ticketId, selectedColor) => {
+        const requestBody = {
+            ticketId: ticketId,
+            luggageTagColor: selectedColor
+        };
+
+    try {
+        const response = await fetch(`${apiUrl}/Redemption`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {  
+            // Response 200: Successful redemption
+            console.log('Success:', result);
+            showToast('Tag redeemed successfully!', 'success');
+            setIsPopupOpen(false);  
+        } else if (response.status === 400) {
+            // Response 400: Missing parameter or invalid luggage color
+            showToast('Invalid color or missing parameter. Please try again.', 'error');
+        } else if (response.status === 404) {
+            // Response 404: Ticket ID not found
+            showToast('Ticket ID not found. Please check the ticket.', 'error');
+        } else if (response.status === 409){
+            // Response 409: Visitor already redeemed
+            showToast('Visitor has already redeemed a tag');
+        } else {
+            // Other errors
+            console.log('Unknown error:', result);
+            showToast('An unexpected error occurred. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.log('Error redeeming tag:', error);
+    }
+};
 
     return (
         <><img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
@@ -430,8 +534,7 @@ function RedemptionPage() {
                     <Grid item xs={12} className="botContainer" sx={{ flexDirection: 'column' }}>
                         <Grid item xs={11} sx={{ textAlign: 'center', background: '#f0f0f0', borderRadius: '15px', marginY: '1%' }}>
                             <Typography variant='body1' sx={{ padding: '10px', marginY: '5%' }}>
-                                1. Press button above to start QR scanner. <br />
-                                2. Align the visitor's code within the frame.
+                                Align visitor's QR code within frame to begin redemption process.
                             </Typography>
                         </Grid>
                         <Grid item xs={11}>
@@ -439,6 +542,21 @@ function RedemptionPage() {
                                 Return
                             </Button>
                         </Grid>
+
+                        {/* Testing (TBD) */}
+                        <Grid item xs={11}>
+                            <Button
+                                variant="contained"
+                                onClick={() => {
+                                    setEligibilityStatus('eligible');
+                                    setIsPopupOpen(true); // Open the eligibility popup
+                                }}
+                                sx={{ borderRadius: '20px', boxShadow: '1em', padding: '13px 25px', border: '1px solid gray', marginY: '12%' }}
+                            >
+                                Test Eligibility
+                            </Button>
+                        </Grid>
+
                     </Grid>
                 </Grid>
             </Box>
