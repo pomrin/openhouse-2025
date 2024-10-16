@@ -43,6 +43,12 @@ function UserLanding() {
     socketRef.current.onopen = () => {
         console.log('Connected to WebSocket');
         setIsConnected(true);
+
+        if (ticket_id) {
+            const broadcastMessage = { action: "broadcast", message: ticket_id }; // Define the message structure
+            socketRef.current.send(JSON.stringify(broadcastMessage)); // Send the ticket_id
+            console.log('Broadcasted ticket_id:', broadcastMessage); // Log the sent ticket_id to the console
+          }
       };
 
       socketRef.current.onmessage = (event) => {
