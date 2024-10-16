@@ -24,8 +24,6 @@ public partial class Openhouse25Context : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<ViewBoothsVisited> ViewBoothsVisiteds { get; set; }
-
     public virtual DbSet<Visitor> Visitors { get; set; }
 
     public virtual DbSet<VisitorBooth> VisitorBooths { get; set; }
@@ -36,7 +34,7 @@ public partial class Openhouse25Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=docfiledb-t2.cxljlbpdqrxq.ap-southeast-1.rds.amazonaws.com,3306;user id=dotnetdev01;password=Dotnetdev@123;persist security info=True;database=openhouse25", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.35-mysql"));
+        => optionsBuilder.UseMySql("server=database-openhouse-2025.c12m84ymikqh.ap-southeast-1.rds.amazonaws.com,3306;user id=dotnetdev01;password=Dotnetdev@123;persist security info=True;database=openhouse25", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -133,13 +131,6 @@ public partial class Openhouse25Context : DbContext
             entity.Property(e => e.Password)
                 .HasColumnType("text")
                 .HasColumnName("password");
-        });
-
-        modelBuilder.Entity<ViewBoothsVisited>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToView("view_booths_visited");
         });
 
         modelBuilder.Entity<Visitor>(entity =>
