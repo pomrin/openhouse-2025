@@ -294,7 +294,7 @@ function LoanReqPendingTSOMGR() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid' }}></hr>
       <h3 style={{ marginTop: '30px' }}>Manage new loan requests (pending approval by <span style={{ color: 'green' }}>TSO MGR</span>)</h3>
       <h5 style={{ margin: '0px 0px 10px 0px' }} >Total new loan requests: {loanReqs.length}</h5>

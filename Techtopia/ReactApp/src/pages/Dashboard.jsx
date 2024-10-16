@@ -70,7 +70,7 @@ function Dashboard() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3>Asset Management Dashboard</h3>
       <Grid container spacing={2}>

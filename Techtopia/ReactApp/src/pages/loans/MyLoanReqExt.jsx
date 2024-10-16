@@ -14,9 +14,9 @@ import dayjs from 'dayjs';
 
 function MyLoanReqExt() {
   const token = tokenValue;
-  const [loanReqList, setLoanReqList] = useState([]); // list of loan requests 
-  const [modelList, setModelList] = useState([]); // list of model 
-  const [catList, setCatList] = useState([]); // list of categories  
+  const [loanReqList, setLoanReqList] = useState([]); // list of loan requests
+  const [modelList, setModelList] = useState([]); // list of model
+  const [catList, setCatList] = useState([]); // list of categories
   const [brandList, setBrandList] = useState([]); // list of brands
 
   // pagination
@@ -56,13 +56,13 @@ function MyLoanReqExt() {
     fetchData();
   }, []);
 
-  //filtering 
+  //filtering
   const loanReqExt = loanReqList.filter((data) => [1, 2, 3].includes(data.status) && !data.loanRequestExtensions);
   const expiringLoanReq = loanReqList.filter((data) => !data.loanRequestExtensions);
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2} >My loan request extensions</h3>
       <Typography sx={{ color: 'red', fontWeight: 'bold' }} mb={1} >Loan requests expiring : {expiringLoanReq.length}</Typography>

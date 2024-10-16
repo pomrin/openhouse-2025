@@ -11,13 +11,99 @@ import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
+import noImageUploaded from './../assets/images/noImageUploaded.png';
+import boothimage1 from './../assets/images/step1.png';
+import boothimage2 from './../assets/images/step2.png';
+import boothimage3 from './../assets/images/step3.png';
+import boothimage4 from './../assets/images/step4.png';
 
 
 
 
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
+
+
 function UserLanding() {
+    
+    
+    //websocket stuff
+    const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [recipientId, setRecipientId] = useState(''); // New state for recipient ID
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionId, setConnectionId] = useState(''); // New state for connection ID
+  const socketRef = useRef(null);
+
+  const websocketUrl = 'wss://9be5u1to5h.execute-api.ap-southeast-1.amazonaws.com/production/';
+
+  const connectWebSocket = () => {
+    socketRef.current = new WebSocket(websocketUrl);
+
+    socketRef.current.onopen = () => {
+        console.log('Connected to WebSocket');
+        setIsConnected(true);
+
+        if (ticket_id) {
+            const broadcastMessage = { action: "broadcast", message: ticket_id }; // Define the message structure
+            socketRef.current.send(JSON.stringify(broadcastMessage)); // Send the ticket_id
+            console.log('Broadcasted ticket_id:', broadcastMessage); // Log the sent ticket_id to the console
+          }
+      };
+
+      socketRef.current.onmessage = (event) => {
+        console.log('Received message:', event.data);
+    
+        // Try to parse the message as JSON
+        try {
+          const messageData = JSON.parse(event.data);
+    
+          // Check if the message is "cycleBooth" in the JSON object
+          if (messageData.message === 'cycleBooth') {
+            handleCycleBooth();
+          }
+
+          if (messageData.message === 'InsufficientCredits') {
+            refreshPage();
+          }
+    
+          setMessages((prevMessages) => [...prevMessages, messageData]);
+        } catch (error) {
+          console.log('Message is not JSON:', event.data);
+    
+          // Handle plain string messages
+          if (event.data === 'cycleBooth') {
+            handleCycleBooth();
+          }
+    
+          setMessages((prevMessages) => [...prevMessages, { message: event.data }]);
+        }
+      };
+
+    socketRef.current.onclose = () => {
+      console.log('WebSocket connection closed');
+      setIsConnected(false);
+    };
+
+    socketRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  };
+
+  const sendMessage = () => {
+    if (input && recipientId && isConnected) {
+      const messageObject = { action: "sendmessage", recipientId, message: input }; // Include recipientId
+      socketRef.current.send(JSON.stringify(messageObject));
+      console.log('Sent message:', messageObject); // Log the sent message to the console
+      setInput(''); // Clear input after sending
+      setRecipientId(''); // Clear recipient ID after sending
+    } else if (!isConnected) {
+      console.error('WebSocket is not connected');
+    } else {
+      console.error('Message and recipient ID must not be empty');
+    }
+  };
+
     const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
@@ -35,7 +121,6 @@ function UserLanding() {
         return localStorage.getItem('itStampVisible') === 'true';
     });
 
-    const [currentBooth, setCurrentBooth] = useState('Fintech');
     const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
     const [file, setFile] = useState(null);
@@ -85,6 +170,12 @@ function UserLanding() {
 
     // List of booths
     const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
+
+    //List of images:
+    const boothImages =[boothimage1, boothimage2, boothimage3, boothimage4]
+
+    const [currentBooth, setCurrentBooth] = useState('Fintech');
+    const [currentImage, setCurrentImage] = useState(boothImages[0]);
     
     // Function to cycle through the booth names
     const handleCycleBooth = () => {
@@ -93,13 +184,17 @@ function UserLanding() {
             const nextIndex = (currentIndex + 1) % booths.length;
             return booths[nextIndex];
         });
+        setCurrentImage((prevImage) => {
+            const currentIndex = boothImages.indexOf(prevImage);
+            const nextIndex = (currentIndex + 1) % boothImages.length;
+            return boothImages[nextIndex];
+        });
     };
 
-    // Function to set the new ID in localStorage and update the UI
-    const refreshId = () => {
-        const newId = fetchTicketId(); // Generate a new ID or fetch from an API
-        localStorage.setItem('ticket_id', newId); // Update the localStorage with the new ID
-};
+    const refreshPage = () => {
+        location.reload();
+        console.log("page refreshed");
+    };
 
     // Function to increment the queue number and format it as a 4-digit string
     const handleIncrementQueue = () => {
@@ -130,6 +225,8 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
+        connectWebSocket();
+        
         const updateDateTime = () => {
             const currentDate = new Date();
             
@@ -189,7 +286,13 @@ function UserLanding() {
 
 
         const intervalId = setInterval(updateDateTime, 60000); 
-        return () => clearInterval(intervalId); 
+        return () => 
+            {
+                if (socketRef.current) {
+                socketRef.current.close();
+                }
+            };
+            clearInterval(intervalId); 
     }, [ticket_id]);
 
     const toggleDropdownBooth = () => {
@@ -474,10 +577,17 @@ function UserLanding() {
     setSelectedValue(event.target.value);
     };
 
-    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/profile.png`
+    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpg`
+   // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
+    //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
+
+   // const imageSrc = photo_link || fallback_link || fallback2_link;
     const form_sg = `https://form.gov.sg/66e14a264cccbc8d098f46d1?66e14a409253225fefacaf1a=${ticket_id}`
-    
+    function clearLocalStorage() {
+        localStorage.clear();
+      }
     return (
+        <Box className="bodyBox">
         <Box>
             <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
 
@@ -526,11 +636,20 @@ function UserLanding() {
                     {/* <img src={GET_base64} alt="Output" class="profileImage"/> */}
                     
                 <Box className="profilePicture">
-                {output ? (
+                {/* {output ? (
                         <img src={output} alt="Output" className="profileImage" />
                     ) : (
                         <p className='profileImage'>No image uploaded yet</p>
-                    )}
+                    )} */}
+                            <img 
+                                src={photo_link} 
+                                alt="Profile" 
+                                className="profileImage" 
+                                onError={(e) => {
+                                    e.target.onerror = null; 
+                                    e.target.src = noImageUploaded; // Clear the src if there's an error
+                                }} 
+                            />
                 </Box>
             </Box>
 
@@ -614,7 +733,7 @@ function UserLanding() {
                         </Box>
                     </Box>
                     <Box className="planeImage">
-                        <img src={plane_image} alt="Plane Image" width="70%" />
+                        <img src={currentImage} alt={plane_image} width="70%" />
                     </Box>
                     <Box class="detailsBox">
                         <Box>
@@ -637,34 +756,39 @@ function UserLanding() {
                     <Box class="detailsBox">
                         <Box>
                                 <Typography class="bold">
-                                    Queue
+                                    Queue Status
                                 </Typography>
                                 <Typography>
                                     {queueNumber} {/* Queue number state */}
                                 </Typography>
                         </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
-                                </Typography>
-                                <Typography>
-                                    2B
-                                </Typography>
-                        </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
-                                </Typography>
-                                <Typography>
-                                    1A
-                                </Typography>
-                        </Box>
                     </Box>
                 </Box>
             </Paper>
-            <Button variant="contained" color="primary" onClick={refreshId} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                Refresh ID
-            </Button>
+
+            <div>
+                <h1>WebSocket Communication</h1>
+                <div class="messageDiv">
+                    {messages.map((msg, index) => (
+                    <div key={index}>{msg.message || 'Received non-JSON message'}</div>
+                    ))}
+                </div>
+                <div>
+        <input
+          type="text"
+          placeholder="Recipient ID"
+          value={recipientId}
+          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
+        />
+        <input
+          type="text"
+          placeholder="Type a message"
+          value={input}
+          onChange={(e) => setInput(e.target.value)} // Handle message input
+        />
+        <button onClick={sendMessage}>Send Message</button>
+      </div>
+            </div>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
                     Change Booth
@@ -686,6 +810,10 @@ function UserLanding() {
         <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Completed Booth 4
         </Button>
+        <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Clear Local Storage
+        </Button>
+        </Box>
         </Box>
     );
 }

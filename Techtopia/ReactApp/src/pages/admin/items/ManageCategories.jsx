@@ -55,7 +55,7 @@ function ManageCategories() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3 mb={2}>Manage categories</h3>
       <h5> Add new category</h5>
@@ -73,8 +73,8 @@ function ManageCategories() {
         </Stack>
       </Stack>
       <Stack direction='row' alignItems='center' mb={6}>
-          <Typography mr={2} display='flex'>Consumable</Typography> 
-          <Checkbox checked={consumable} onChange={(e) => setConsumable(e.target.checked)}></Checkbox>
+        <Typography mr={2} display='flex'>Consumable</Typography>
+        <Checkbox checked={consumable} onChange={(e) => setConsumable(e.target.checked)}></Checkbox>
       </Stack>
       <Stack direction={'row'} mb={4} maxWidth={400} float='right'>
         <Button sx={{ ...otherButtonStyles, fontSize: '12px', marginRight: '10px' }} onClick={handleReset}>Reset</Button>

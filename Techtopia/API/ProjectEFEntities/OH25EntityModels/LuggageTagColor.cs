@@ -9,5 +9,7 @@ public partial class LuggageTagColor
 
     public string? LuggageTagColorCode { get; set; }
 
+    public virtual ICollection<EngravingQueue> EngravingQueues { get; set; } = new List<EngravingQueue>();
+
     public virtual ICollection<Visitor> Visitors { get; set; } = new List<Visitor>();
 }

@@ -43,7 +43,7 @@ function ManageSuppliers() {
 
   return (
     <div>
-      <h2>SIT Asset Management System</h2>
+      <h2>NYP-SIT OH2025</h2>
       <hr style={{ border: '1px solid', marginBottom: '30px' }}></hr>
       <h3>Manage suppliers</h3>
       <h5>Add new supplier</h5>

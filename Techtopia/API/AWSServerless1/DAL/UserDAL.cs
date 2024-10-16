@@ -41,27 +41,34 @@ namespace AWSServerless1.DAL
         public static User CreateUser(String userName, String password)
         {
             User result = null;
-            using (var context = new Openhouse25Context())
+            try
             {
-                var qUserbyUserName = from q in context.Users
-                                      where userName.Trim().ToUpper().CompareTo(q.UserName.Trim().ToUpper()) == 0
-                                      select q;
-                if (qUserbyUserName != null && qUserbyUserName.Count() > 0)
+                using (var context = new Openhouse25Context())
                 {
-                    Console.WriteLine($"Username: {userName} already exists.");
-                }
-                else
-                {
-                    User user = new User()
+                    var qUserbyUserName = from q in context.Users
+                                          where userName.Trim().ToUpper().CompareTo(q.UserName.Trim().ToUpper()) == 0
+                                          select q;
+                    if (qUserbyUserName != null && qUserbyUserName.Count() > 0)
                     {
-                        UserName = userName.Trim().ToUpper(),
-                        Password = BCrypt.Net.BCrypt.EnhancedHashPassword(password),
-                    };
-                    context.Users.Add(user);
-                    context.SaveChanges();
-                    result = user;
-                }
+                        Console.WriteLine($"Username: {userName} already exists.");
+                    }
+                    else
+                    {
+                        User user = new User()
+                        {
+                            UserName = userName.Trim().ToUpper(),
+                            Password = BCrypt.Net.BCrypt.EnhancedHashPassword(password),
+                        };
+                        context.Users.Add(user);
+                        context.SaveChanges();
+                        result = user;
+                    }
 
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in CreateUser(userName: {userName}, password: xxx) - {ex.Message}.");
             }
 
             return result;
