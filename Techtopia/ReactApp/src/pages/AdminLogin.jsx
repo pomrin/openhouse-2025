@@ -13,7 +13,7 @@ function AdminLogin() {
   const navigate = useNavigate();
 
   // This code is to minimize risk of confusion - when the admin already logged in
-  // If the admin accidentally returns to login page (e.g. removing the /selectBooth on the url link)
+  // If the admin accidentally returns to login page (e.g. removing the /selectBooth on the url link) during testing
   useEffect(() => {
     // Check if the token exists in localStorage
     const token = localStorage.getItem('accessToken');
