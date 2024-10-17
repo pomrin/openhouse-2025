@@ -85,7 +85,7 @@ function App() {
               <Route path={"/MyLoanReq"} element={<MyLoanReq />} />
               <Route path={"/MyLoanReceipt"} element={<LoanReceipt />} />
               <Route path={"/MyLoanReqExt"} element={<MyLoanReqExt />} />
-              <Route path={"/BHRedemption"} element={<BoothRedemptionPage />} />
+              <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
 
               {/* TSO, TSO Manager, AD/DD */}
               <Route path={"/Dashboard"} element={<StaffElement><Dashboard /></StaffElement>} />
