@@ -48,7 +48,7 @@
     "eslint": "^8.27.0",
     "nodemon": "^2.0.16",
     "serverless": "^3.19.0",
-    "serverless-esbuild": "^1.33.0",
+    "serverless-esbuild": "^1.54.3",
     "serverless-prune-plugin": "^2.0.2"
   }
 }

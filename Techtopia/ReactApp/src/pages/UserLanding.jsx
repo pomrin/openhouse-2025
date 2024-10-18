@@ -16,6 +16,7 @@ import boothimage1 from './../assets/images/step1.png';
 import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
+import http from './http';
 
 
 
@@ -138,6 +139,8 @@ function UserLanding() {
             }
 
             const token = await response.text(); // Get the raw token string
+            localStorage.setItem("accessToken", token);
+            console.log('token',token);
             const decodedToken = parseJwt(token); // Decode the token
             const staffData = JSON.parse(decodedToken.Staff); // Parse the Staff JSON
             const newTicketId = staffData.TicketId; // Set the unique ID to the TicketId
@@ -196,9 +199,13 @@ function UserLanding() {
     };
 
     const hasFetchedDataRef = useRef(false);
+    const hasFetchedDataRefTicket = useRef(false);
+    const hasFetchedDataRefQueue = useRef(false);
+
 
     useEffect(() => {
-        if (!ticket_id) {
+        if (!ticket_id && !hasFetchedDataRefTicket.current) {
+            hasFetchedDataRefTicket.current = true; // Mark as fetched
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
@@ -258,7 +265,20 @@ function UserLanding() {
                     }
                 }
         };
-        
+        const responseVisitor = async () => {
+            if (!hasFetchedDataRefQueue.current) {
+                hasFetchedDataRefQueue.current = true;
+                try {
+                    const res = await http.get('https://6117kul8qd.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorQueue');
+                    const queue = res.data
+                    console.log('queue',queue);
+                } catch (error) {
+                    console.error("There is error accessing the API")
+                }
+            }
+        }
+        responseVisitor();    
+            
         fetchData(); // Call the fetch function
 
 
@@ -565,7 +585,7 @@ function UserLanding() {
       }
     return (
         <Box>
-            <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
+            {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
 
 
             {/* Show All Stamp Button */}
@@ -667,7 +687,7 @@ function UserLanding() {
 
             <Box class="boxForm">
                 <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                    <button class="formSg">Go to Form Page</button>
+                    <button class="formSg">Upload Image</button>
                 </a>
             </Box>
             <h1>NYP BOARDING PASS</h1>
