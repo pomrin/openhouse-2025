@@ -18,89 +18,24 @@ import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
 import axios from 'axios';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
+//redux
+import { useDispatch, useSelector } from 'react-redux';
+import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
 
 
 
 function UserLanding() {
     
-    
-    //websocket stuff
-    const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [recipientId, setRecipientId] = useState(''); // New state for recipient ID
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectionId, setConnectionId] = useState(''); // New state for connection ID
-  const socketRef = useRef(null);
+    // websocket in redux
+    const dispatch = useDispatch();
+    const [input, setInput] = useState('');
+    const [recipientId, setRecipientId] = useState('');
+    const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
+  
+    const isConnected = useSelector((state) => state.websocket.isConnected);
+    const messages = useSelector((state) => state.websocket.messages);
 
-  const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
-
-  const connectWebSocket = () => {
-    socketRef.current = new WebSocket(websocketUrl);
-
-    socketRef.current.onopen = () => {
-        console.log('Connected to WebSocket');
-        setIsConnected(true);
-
-        if (ticket_id) {
-            const broadcastMessage = { action: "broadcast", message: ticket_id }; // Define the message structure
-            socketRef.current.send(JSON.stringify(broadcastMessage)); // Send the ticket_id
-            console.log('Broadcasted ticket_id:', broadcastMessage); // Log the sent ticket_id to the console
-          }
-      };
-
-      socketRef.current.onmessage = (event) => {
-        console.log('Received message:', event.data);
-    
-        // Try to parse the message as JSON
-        try {
-          const messageData = JSON.parse(event.data);
-    
-          // Check if the message is "cycleBooth" in the JSON object
-          if (messageData.message === 'cycleBooth') {
-            handleCycleBooth();
-          }
-
-          if (messageData.message === 'InsufficientCredits') {
-            refreshPage();
-          }
-    
-          setMessages((prevMessages) => [...prevMessages, messageData]);
-        } catch (error) {
-          console.log('Message is not JSON:', event.data);
-    
-          // Handle plain string messages
-          if (event.data === 'cycleBooth') {
-            handleCycleBooth();
-          }
-    
-          setMessages((prevMessages) => [...prevMessages, { message: event.data }]);
-        }
-      };
-
-    socketRef.current.onclose = () => {
-      console.log('WebSocket connection closed');
-      setIsConnected(false);
-    };
-
-    socketRef.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-  };
-
-  const sendMessage = () => {
-    if (input && recipientId && isConnected) {
-      const messageObject = { action: "sendmessage", recipientId, message: input }; // Include recipientId
-      socketRef.current.send(JSON.stringify(messageObject));
-      console.log('Sent message:', messageObject); // Log the sent message to the console
-      setInput(''); // Clear input after sending
-      setRecipientId(''); // Clear recipient ID after sending
-    } else if (!isConnected) {
-      console.error('WebSocket is not connected');
-    } else {
-      console.error('Message and recipient ID must not be empty');
-    }
-  };
-
+    //set const
     const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
@@ -226,7 +161,7 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
-        connectWebSocket();
+        dispatch(connectWebSocket({ websocketUrl, ticketId: ticket_id, handleCycleBooth, refreshPage }));
         
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -250,51 +185,18 @@ function UserLanding() {
         const savedImage = localStorage.getItem('uploadedImage');
         if (savedImage) {
             setOutput(savedImage);
-            
         }
+    }, [ticket_id, dispatch]);
 
-        const fetchData = async () => {
-            // Check if uploadedImage exists in localStorage
-            if (ticket_id && !hasFetchedDataRef.current) {
-                hasFetchedDataRef.current = true; // Mark as fetched
-                const uploadedImage = localStorage.getItem('uploadedImage');
-                if (uploadedImage) {
-                    console.log('Uploaded image already exists. Skipping fetch.');
-                }
-                else {
-                    // Only fetch cartoonify data if ticket_id is available and not fetched before
-                    try {
-                        const response = await fetch(`http://localhost:3001/cartoonify/${ticket_id}`);
-                        if (!response.ok) {
-                            throw new Error('ID not found');
-                        }
-                        const data = await response.json();
-                        console.log('File data:', data);
-                        const newBlob = base64ToBlob(data.file, "image/jpeg");
-                        console.log('File blob:', newBlob);
-
-                        const imageUrl = URL.createObjectURL(newBlob);
-                        setOutput(imageUrl);
-                        localStorage.setItem('uploadedImage', imageUrl);
-                    } catch (error) {
-                        console.error('Error:', error);
-                    }
-                    }
-                }
-        };
-        
-        fetchData(); // Call the fetch function
-
-
-        const intervalId = setInterval(updateDateTime, 60000); 
-        return () => 
-            {
-                if (socketRef.current) {
-                socketRef.current.close();
-                }
-            };
-            clearInterval(intervalId); 
-    }, [ticket_id]);
+    const handleSendMessage = () => {
+        if (input && recipientId && isConnected) {
+          dispatch(sendMessage({ recipientId, input }));
+          setInput('');
+          setRecipientId('');
+        } else {
+          console.error('Message and recipient ID must not be empty');
+        }
+      };
 
     const toggleDropdownBooth = () => {
         setDropdownBoothOpen(prev => {
@@ -792,7 +694,7 @@ function UserLanding() {
           value={input}
           onChange={(e) => setInput(e.target.value)} // Handle message input
         />
-        <button onClick={sendMessage}>Send Message</button>
+        <button onClick={handleSendMessage}>Send Message</button>
       </div>
             </div>
                 {/* Button to cycle through booth names */}
