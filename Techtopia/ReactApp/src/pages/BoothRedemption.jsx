@@ -20,10 +20,12 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 // RedemptionPage Component
 // This component handles the redemption process for visitors' luggage tags.
 
+// Ticket IDs for testing in order ( Eligible, Already redeemed, Missing stamps ): NYP0001THU | NYP0275TUE | NYP0002FRI
+
 function RedemptionPage() {
     const navigate = useNavigate();
-    const [accessToken, setAccessToken] = useState(null);  // Correctly manage accessToken state
-    const [loading, setLoading] = useState(true);
+    const [accessToken, setAccessToken] = useState(null); 
+    const [loading, setLoading] = useState(true); // Manage page load if auth token hasn't been stored
 
     // Ensure user is an admin/booth helper
     useEffect(() => {
@@ -765,21 +767,6 @@ function RedemptionPage() {
                                     Align visitor's QR code within frame to begin redemption process.
                                 </Typography>
                             </Grid>
-
-                            {/* Testing (TBD) */}
-                            <Grid item xs={11}>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => {
-                                        setEligibilityStatus('already_redeemed');
-                                        setIsPopupOpen(true); // Open the eligibility popup
-                                    }}
-                                    sx={{ borderRadius: '10px', boxShadow: '1em', padding: '13px 25px', border: '1px solid gray', marginY: '12%' }}
-                                >
-                                    Test Eligibility
-                                </Button>
-                            </Grid>
-
                         </Grid>
                     </Grid>
                 </Box>
