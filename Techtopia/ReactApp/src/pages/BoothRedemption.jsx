@@ -22,17 +22,22 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 function RedemptionPage() {
     const navigate = useNavigate();
-    const [accessToken, setAccessToken] = useState(null); // Admin auth token
-  
+    const [accessToken, setAccessToken] = useState(null);  // Correctly manage accessToken state
+    const [loading, setLoading] = useState(true);
+
     // Ensure user is an admin/booth helper
     useEffect(() => {
-        // Check if accessToken exists in localStorage
+        // Retrieve accessToken from localStorage
         const token = localStorage.getItem('accessToken');
-        setAccessToken(token); // Set the accessToken in state
-        
-        // If no token, redirect to login
+
+        // Check if token is available
         if (!token) {
+            // If no token, redirect to login page
             navigate('/adminlogin');
+        } else {
+            // Set the accessToken and stop loading
+            setAccessToken(token);
+            setLoading(false);
         }
     }, [navigate]);
 
@@ -312,15 +317,14 @@ function RedemptionPage() {
                             {/* Display Current Color */}
                             <Box sx={{ marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
                                 <Typography variant="body2">Current tag color:</Typography>
-                                <Box
-                                    sx={{
-                                        width: '30px',
-                                        height: '30px',
-                                        backgroundColor: currentColor ? currentColor.hex : 'transparent',  // Dynamically set the background color
-                                        borderRadius: '50%',
-                                        border: '1px solid black',
-                                        marginLeft: '3%'
-                                    }}
+                                <Box sx={{
+                                    width: '30px',
+                                    height: '30px',
+                                    backgroundColor: currentColor?.hex || 'transparent',
+                                    borderRadius: '50%',
+                                    border: '1px solid black',
+                                    marginLeft: '3%',
+                                }}
                                 />
                                 <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
                                     {currentColor ? currentColor.name : 'Unknown'}  {/* Display color name */}
@@ -519,7 +523,7 @@ function RedemptionPage() {
     // API connections and response handling ( 3 API functions )
 
     // (1a) API (GET) call to validate visitor's redemption eligibility 
-    const eligibilityValidation = async (ticketId) => {
+    const eligibilityValidation = async (ticketId) => {   
         try {
             const response = await fetch(`${apiUrl}/VisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
                 method: 'GET',
@@ -669,6 +673,11 @@ function RedemptionPage() {
         }
     };
 
+    // Render a loading spinner or message while waiting for token
+    if (loading) {
+        return <div>Loading...</div>;  // Display a loader until the token is ready
+    }
+
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {/* Fixed AppBar */}
@@ -756,6 +765,21 @@ function RedemptionPage() {
                                     Align visitor's QR code within frame to begin redemption process.
                                 </Typography>
                             </Grid>
+
+                            {/* Testing (TBD) */}
+                            <Grid item xs={11}>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                        setEligibilityStatus('already_redeemed');
+                                        setIsPopupOpen(true); // Open the eligibility popup
+                                    }}
+                                    sx={{ borderRadius: '10px', boxShadow: '1em', padding: '13px 25px', border: '1px solid gray', marginY: '12%' }}
+                                >
+                                    Test Eligibility
+                                </Button>
+                            </Grid>
+
                         </Grid>
                     </Grid>
                 </Box>
