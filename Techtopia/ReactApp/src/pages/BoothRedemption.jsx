@@ -488,7 +488,9 @@ function RedemptionPage() {
 
     // Auto-start scanner on component load
     useEffect(() => {
-        startScanner();
+        if (!loading && accessToken) {
+            startScanner();
+        }
     }, []);
 
     // Handle scanner timeout
