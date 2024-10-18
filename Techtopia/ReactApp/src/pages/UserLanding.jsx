@@ -16,77 +16,31 @@ import boothimage1 from './../assets/images/step1.png';
 import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
+import axios from 'axios';
 import http from './http';
 
 
 
 
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
+//redux
+import { useDispatch, useSelector } from 'react-redux';
+import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
+
+
 
 function UserLanding() {
-
-    //websocket stuff
-    const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef(null);
-
-  const websocketUrl = 'wss://mnrm12z7q2.execute-api.ap-southeast-1.amazonaws.com/production/';
-
-  const connectWebSocket = () => {
-    socketRef.current = new WebSocket(websocketUrl);
-
-    socketRef.current.onopen = () => {
-      console.log('Connected to WebSocket');
-      setIsConnected(true);
-    };
-
-    socketRef.current.onmessage = (event) => {
-        console.log('Received message:', event.data);
     
-        // Try to parse the message as JSON
-        try {
-          const messageData = JSON.parse(event.data);
-    
-          // Check if the message is "cycleBooth" in the JSON object
-          if (messageData.message === 'cycleBooth') {
-            handleCycleBooth();
-          }
-    
-          setMessages((prevMessages) => [...prevMessages, messageData]);
-        } catch (error) {
-          console.log('Message is not JSON:', event.data);
-    
-          // Handle plain string messages
-          if (event.data === 'cycleBooth') {
-            handleCycleBooth();
-          }
-    
-          setMessages((prevMessages) => [...prevMessages, { message: event.data }]);
-        }
-      };
+    // websocket in redux
+    const dispatch = useDispatch();
+    const [input, setInput] = useState('');
+    const [recipientId, setRecipientId] = useState('');
+    const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
+  
+    const isConnected = useSelector((state) => state.websocket.isConnected);
+    const messages = useSelector((state) => state.websocket.messages);
 
-    socketRef.current.onclose = () => {
-      console.log('WebSocket connection closed');
-      setIsConnected(false);
-    };
-
-    socketRef.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-  };
-
-  const sendMessage = () => {
-    if (input && isConnected) {
-      const messageObject = { action: "sendmessage", message: input };
-      socketRef.current.send(JSON.stringify(messageObject));
-      console.log('Sent message:', input); // Log the sent message to the console
-      setInput(''); // Clear input after sending
-    } else if (!isConnected) {
-      console.error('WebSocket is not connected');
-    }
-  };
-
+    //set const
     const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
@@ -124,32 +78,33 @@ function UserLanding() {
     };
 
     // Fetch the ticket ID
+    const apiUrl = import.meta.env.VITE_REGISTER_API;
+
     const fetchTicketId = async () => {
         try {
-            const response = await fetch("https://6117kul8qd.execute-api.ap-southeast-1.amazonaws.com/Prod/api/Register", {
-                method: 'POST',
+            const response = await axios.post(apiUrl, {}, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
+                }
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const token = await response.text(); // Get the raw token string
-            localStorage.setItem("accessToken", token);
-            console.log('token',token);
-            const decodedToken = parseJwt(token); // Decode the token
-            const staffData = JSON.parse(decodedToken.Staff); // Parse the Staff JSON
-            const newTicketId = staffData.TicketId; // Set the unique ID to the TicketId
+            const token = response.data; 
+            const decodedToken = parseJwt(token); 
+            const staffData = JSON.parse(decodedToken.Staff);
+            const newTicketId = staffData.TicketId;
             
             setUniqueId(newTicketId);
-            localStorage.setItem('ticket_id', newTicketId); // Store in local storage
-
+            localStorage.setItem('ticket_id', newTicketId);
+    
         } catch (error) {
-            console.error("Error fetching ticket ID:", error);
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
         }
     };
 
@@ -176,6 +131,11 @@ function UserLanding() {
         });
     };
 
+    const refreshPage = () => {
+        location.reload();
+        console.log("page refreshed");
+    };
+
     // Function to increment the queue number and format it as a 4-digit string
     const handleIncrementQueue = () => {
         setQueueNumber((prevQueueNumber) => {
@@ -188,8 +148,9 @@ function UserLanding() {
     const [qrImage, setQrImage] = useState('');
 
     const generateQR = () => {
-        const url = "https://www.google.com"; // URL to encode
-        const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(url);
+        const url = `${ticket_id}`; // URL to encode
+        const qrApi = import.meta.env.VITE_QR_CODE_API
+        const qrSrc = qrApi + encodeURIComponent(url);
         setQrImage(qrSrc);
     };
 
@@ -209,7 +170,7 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
-        connectWebSocket();
+        dispatch(connectWebSocket({ websocketUrl, ticketId: ticket_id, handleCycleBooth, refreshPage }));
         
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -233,64 +194,18 @@ function UserLanding() {
         const savedImage = localStorage.getItem('uploadedImage');
         if (savedImage) {
             setOutput(savedImage);
-            
         }
+    }, [ticket_id, dispatch]);
 
-        const fetchData = async () => {
-            // Check if uploadedImage exists in localStorage
-            if (ticket_id && !hasFetchedDataRef.current) {
-                hasFetchedDataRef.current = true; // Mark as fetched
-                const uploadedImage = localStorage.getItem('uploadedImage');
-                if (uploadedImage) {
-                    console.log('Uploaded image already exists. Skipping fetch.');
-                }
-                else {
-                    // Only fetch cartoonify data if ticket_id is available and not fetched before
-                    try {
-                        const response = await fetch(`http://localhost:3001/cartoonify/${ticket_id}`);
-                        if (!response.ok) {
-                            throw new Error('ID not found');
-                        }
-                        const data = await response.json();
-                        console.log('File data:', data);
-                        const newBlob = base64ToBlob(data.file, "image/jpeg");
-                        console.log('File blob:', newBlob);
-
-                        const imageUrl = URL.createObjectURL(newBlob);
-                        setOutput(imageUrl);
-                        localStorage.setItem('uploadedImage', imageUrl);
-                    } catch (error) {
-                        console.error('Error:', error);
-                    }
-                    }
-                }
-        };
-        const responseVisitor = async () => {
-            if (!hasFetchedDataRefQueue.current) {
-                hasFetchedDataRefQueue.current = true;
-                try {
-                    const res = await http.get('https://6117kul8qd.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorQueue');
-                    const queue = res.data
-                    console.log('queue',queue);
-                } catch (error) {
-                    console.error("There is error accessing the API")
-                }
-            }
+    const handleSendMessage = () => {
+        if (input && recipientId && isConnected) {
+          dispatch(sendMessage({ recipientId, input }));
+          setInput('');
+          setRecipientId('');
+        } else {
+          console.error('Message and recipient ID must not be empty');
         }
-        responseVisitor();    
-            
-        fetchData(); // Call the fetch function
-
-
-        const intervalId = setInterval(updateDateTime, 60000); 
-        return () => 
-            {
-                if (socketRef.current) {
-                socketRef.current.close();
-                }
-            };
-            clearInterval(intervalId); 
-    }, [ticket_id]);
+      };
 
     const toggleDropdownBooth = () => {
         setDropdownBoothOpen(prev => {
@@ -335,7 +250,6 @@ function UserLanding() {
             return newWorkshopState;
         });
     };
-
 
     const ModalContent = ({ close }) => (
         <div style={modalContentStyle}>
@@ -526,10 +440,14 @@ function UserLanding() {
             formData.append('file', blob); // Use 'file' as the key
     
             try {
-                const response = await fetch('https://www.cutout.pro/api/v1/cartoonSelfie?cartoonType=1', {
+                const cutoutproApi = import.meta.env.VITE_CUTOUTPRO_API
+                const cutoutproApiKey = import.meta.env.VITE_CUTOUTPRO_API_KEY
+                console.log(cutoutproApi);
+                console.log(cutoutproApiKey);
+                const response = await fetch(cutoutproApi, {
                     method: 'POST',
                     headers: {
-                        'APIKEY': '06a1432f9bae48819435d328baea99b4', // Replace with your API key
+                        'APIKEY': cutoutproApiKey, // Replace with your API key
                     },
                     body: formData,
                 });
@@ -574,16 +492,19 @@ function UserLanding() {
     setSelectedValue(event.target.value);
     };
 
-    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpg`
+    const imageRepo = import.meta.env.VITE_IMAGE_REPO
+    const photo_link = imageRepo + `${ticket_id}/cartoonprofile.jpg`
    // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
    // const imageSrc = photo_link || fallback_link || fallback2_link;
-    const form_sg = `https://form.gov.sg/66e14a264cccbc8d098f46d1?66e14a409253225fefacaf1a=${ticket_id}`
+    const formSGApi = import.meta.env.VITE_FORMSG_LINK
+    const form_sg = formSGApi + ticket_id
     function clearLocalStorage() {
         localStorage.clear();
       }
     return (
+        <Box className="bodyBox">
         <Box>
             {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
 
@@ -752,26 +673,10 @@ function UserLanding() {
                     <Box class="detailsBox">
                         <Box>
                                 <Typography class="bold">
-                                    Queue
+                                    Queue Status
                                 </Typography>
                                 <Typography>
                                     {queueNumber} {/* Queue number state */}
-                                </Typography>
-                        </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
-                                </Typography>
-                                <Typography>
-                                    2B
-                                </Typography>
-                        </Box>
-                        <Box>
-                                <Typography class="bold">
-                                    Placeholder
-                                </Typography>
-                                <Typography>
-                                    1A
                                 </Typography>
                         </Box>
                     </Box>
@@ -785,13 +690,21 @@ function UserLanding() {
                     <div key={index}>{msg.message || 'Received non-JSON message'}</div>
                     ))}
                 </div>
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type a message"
-                    />
-                <button onClick={sendMessage} disabled={!isConnected}>Send Message</button>
+                <div>
+        <input
+          type="text"
+          placeholder="Recipient ID"
+          value={recipientId}
+          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
+        />
+        <input
+          type="text"
+          placeholder="Type a message"
+          value={input}
+          onChange={(e) => setInput(e.target.value)} // Handle message input
+        />
+        <button onClick={handleSendMessage}>Send Message</button>
+      </div>
             </div>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
@@ -817,6 +730,7 @@ function UserLanding() {
         <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Clear Local Storage
         </Button>
+        </Box>
         </Box>
     );
 }

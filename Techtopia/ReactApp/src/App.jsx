@@ -55,16 +55,30 @@ import LoanReceipt from './pages/loans/LoanReceipt';
 import UserLanding from './pages/UserLanding'
 import BoothRedemptionPage from './pages/BoothRedemption'
 
+import AdminLogin from './pages/AdminLogin';
+import Selectbooth from './pages/Selectbooth';
+import Qrcodescanner from './pages/Qrcodescanner';
+
 function App() {
   return (
     <Router>
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
           {/* NAV BAR */}
-          {CURRENT_USER_TYPE && <CustomSidebar />}
+          {/* {CURRENT_USER_TYPE && <CustomSidebar />} */}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
               <Route path={"/Home"} element={<UserLanding />} />
+
+
+              {/* Testing of Admin login - commented out by default */}
+              {/* <Route path={"/"} element={<AdminLogin />} /> */}
+              
+              {/* Admin Login for the 3 rows below this comment */}
+              <Route path="/adminlogin" element={<AdminLogin />} />
+              <Route path="/selectbooth" element={<Selectbooth />} />
+              <Route path="/qrcodescanner" element={<Qrcodescanner />} />
+
               <Route path={"/SignInPage"} element={<SignInPage />} />
               <Route path={"/Error"} element={<Error />} />
               <Route path={"/MyAssets"} element={<MyAssets />} />
@@ -72,7 +86,7 @@ function App() {
               <Route path={"/MyLoanReq"} element={<MyLoanReq />} />
               <Route path={"/MyLoanReceipt"} element={<LoanReceipt />} />
               <Route path={"/MyLoanReqExt"} element={<MyLoanReqExt />} />
-              <Route path={"/BHRedemption"} element={<BoothRedemptionPage />} />
+              <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
 
               {/* TSO, TSO Manager, AD/DD */}
               <Route path={"/Dashboard"} element={<StaffElement><Dashboard /></StaffElement>} />

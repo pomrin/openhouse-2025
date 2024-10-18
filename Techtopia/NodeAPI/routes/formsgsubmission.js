@@ -1,3 +1,4 @@
+const WebSocket = require('ws');
 const {
     createLambdaResponse,
 } = require("../helpers/common");
@@ -29,6 +30,55 @@ const formSecretKey = process.env.FORM_SECRET_KEY;
 
 // #### Cut Out Pro
 const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
+
+const wsUrl = process.env.WEBSOCKET_API;
+const ws = new WebSocket(wsUrl);
+
+// Message queue for messages before the connection opens
+let messageQueue = [];
+let isWebSocketOpen = false;
+
+// Handle WebSocket connection open event
+ws.on('open', () => {
+    console.log('WebSocket connection established.');
+    isWebSocketOpen = true;
+
+    // Process the queued messages
+    while (messageQueue.length > 0) {
+        const message = messageQueue.shift();
+        broadcastMessage(message);
+    }
+});
+
+// Handle WebSocket errors
+ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+});
+
+ws.on('close', (code, reason) => {
+    console.log(`WebSocket connection closed. Code: ${code}, Reason: ${reason}`);
+    isWebSocketOpen = false;
+});
+
+function broadcastMessage(message) {
+    const broadcastPayload = JSON.stringify({
+        action: "broadcast",
+        message: message
+    });
+    // Check if WebSocket is open before sending
+    if (isWebSocketOpen) {
+        ws.send(broadcastPayload, (err) => {
+            if (err) {
+                console.error('Error sending broadcast message:', err);
+            } else {
+                console.log('Broadcast message sent:', message);
+            }
+        });
+    } else {
+        console.error('WebSocket is not open. Queueing the message.');
+        messageQueue.push(message);
+    }
+}
 
 module.exports.getRequest = async (event, context) => {
     console.log(`event: ${JSON.stringify(event)}`);
@@ -63,6 +113,7 @@ module.exports.postRequest = async (event, context) => {
     const visitorName = submissionWithAttachments.content.responses[2].answer;
     console.log(`visitorName: ${visitorName}`);
     console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
+    broadcastMessage("Calling From PostRequest!");
     const photoInfo = submissionWithAttachments.content.responses[3].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
@@ -90,7 +141,7 @@ module.exports.postRequest = async (event, context) => {
         try {
             console.log(`Calling Cutout Pro API!`);
             // TODO 2: Pass the image to cutout pro
-            const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
+            const response = await axios.post(process.env.CUT_OUT_PRO_LINK, formData, {
                 headers: {
                     'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                     'Content-Type': 'multipart/form-data' // Important for file uploads
@@ -102,6 +153,7 @@ module.exports.postRequest = async (event, context) => {
             console.log(`responseCode - ${responseCode}`);
             if (responseCode == 4001) {
                 console.log("Insufficient Credit!");
+                broadcastMessage("InsufficientCredits");
             } else {
 
                 // var responseBody = JSON.parse(response.data.code);
@@ -113,6 +165,7 @@ module.exports.postRequest = async (event, context) => {
                 if (base64String) {
                     var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
                     console.log(`response: ${response2}`);
+                    broadcastMessage("ImageUploaded");
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }
@@ -157,7 +210,7 @@ module.exports.testLocal = async (event, context) => {
     var go = true;
     if (go == true) {
         await request.post({
-            url: 'https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1',
+            url: process.env.CUT_OUT_PRO_LINK,
             formData: {
                 file: readStream
             },
@@ -211,7 +264,7 @@ module.exports.testLocalAxios = async (event, context) => {
 
     var go = true;
     if (go == true) {
-        const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
+        const response = await axios.post(process.env.CUT_OUT_PRO_LINK, formData, {
             headers: {
                 'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                 'Content-Type': 'multipart/form-data' // Important for file uploads
