@@ -30,7 +30,7 @@ namespace AWSServerless1.Controllers
         /// <param name="redemptionInfo"></param>
         /// <returns></returns>
         /// <response code="200">Successfully redeemed</response>
-        /// <response code="400">Missing parameter or invalid Luggage color.</response>
+        /// <response code="400">Missing parameter or invalid Luggage color or cisitor not yet visited all required booths.</response>
         /// <response code="404">Ticket ID not found!</response>
         /// <response code="409">Visitor already redeemed before</response>
         [HttpPost]
@@ -43,23 +43,33 @@ namespace AWSServerless1.Controllers
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(redemptionInfo.TicketId);
             if (visitorEntity != null)
             {
-                if (visitorEntity.LuggageRedeemedDate != null)
+                var boothVisited = VisitorBoothDAL.GetVisitorBoothVisited(visitorEntity.VisitorId);
+                var totalBooth = BoothDAL.GetAllBooths();
+
+                if (boothVisited.Count() == totalBooth.Count())
                 {
-                    Console.WriteLine($"Visitor have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
-                    return Conflict($"Visitor have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
-                }
-                else
-                {
-                    var luggageTagColor = LuggageTagColorDAL.GetLuggageTagColorByName(redemptionInfo.LuggageTagColor);
-                    if (luggageTagColor != null)
+                    if (visitorEntity.LuggageRedeemedDate != null)
                     {
-                        Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
-                        return Ok(visitor);
+                        Console.WriteLine($"Visitor have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
+                        return Conflict($"Visitor have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
                     }
                     else
                     {
-                        return BadRequest($"Invalid Luggage Tag Name - {redemptionInfo.LuggageTagColor}");
+                        var luggageTagColor = LuggageTagColorDAL.GetLuggageTagColorByName(redemptionInfo.LuggageTagColor);
+                        if (luggageTagColor != null)
+                        {
+                            Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
+                            return Ok(visitor);
+                        }
+                        else
+                        {
+                            return BadRequest($"Invalid Luggage Tag Name - {redemptionInfo.LuggageTagColor}");
+                        }
                     }
+                }
+                else
+                {
+                    return BadRequest($"Visitor have visited {boothVisited.Count()} booths but is required to visit {totalBooth.Count()} booths.");
                 }
             }
             else
@@ -98,8 +108,18 @@ namespace AWSServerless1.Controllers
                     }
                     else
                     {
-                        Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
-                        return Ok(visitor);
+                        var boothVisited = VisitorBoothDAL.GetVisitorBoothVisited(visitorEntity.VisitorId);
+                        var totalBooth = BoothDAL.GetAllBooths();
+
+                        if (boothVisited.Count() == totalBooth.Count())
+                        {
+                            Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
+                            return Ok(visitor);
+                        }
+                        else
+                        {
+                            return BadRequest($"Visitor have visited {boothVisited.Count()} booths but is required to visit {totalBooth.Count()} booths.");
+                        }
                     }
                 }
                 else
