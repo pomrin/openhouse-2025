@@ -16,10 +16,7 @@ import boothimage1 from './../assets/images/step1.png';
 import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
-
-
-
-
+import axios from 'axios';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 
 
@@ -35,7 +32,7 @@ function UserLanding() {
   const [connectionId, setConnectionId] = useState(''); // New state for connection ID
   const socketRef = useRef(null);
 
-  const websocketUrl = 'wss://9be5u1to5h.execute-api.ap-southeast-1.amazonaws.com/production/';
+  const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
 
   const connectWebSocket = () => {
     socketRef.current = new WebSocket(websocketUrl);
@@ -141,30 +138,33 @@ function UserLanding() {
     };
 
     // Fetch the ticket ID
+    const apiUrl = import.meta.env.VITE_REGISTER_API;
+
     const fetchTicketId = async () => {
         try {
-            const response = await fetch("https://6117kul8qd.execute-api.ap-southeast-1.amazonaws.com/Prod/api/Register", {
-                method: 'POST',
+            const response = await axios.post(apiUrl, {}, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
+                }
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const token = await response.text(); // Get the raw token string
-            const decodedToken = parseJwt(token); // Decode the token
-            const staffData = JSON.parse(decodedToken.Staff); // Parse the Staff JSON
-            const newTicketId = staffData.TicketId; // Set the unique ID to the TicketId
+            const token = response.data; 
+            const decodedToken = parseJwt(token); 
+            const staffData = JSON.parse(decodedToken.Staff);
+            const newTicketId = staffData.TicketId;
             
             setUniqueId(newTicketId);
-            localStorage.setItem('ticket_id', newTicketId); // Store in local storage
-
+            localStorage.setItem('ticket_id', newTicketId);
+    
         } catch (error) {
-            console.error("Error fetching ticket ID:", error);
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
         }
     };
 
@@ -208,8 +208,9 @@ function UserLanding() {
     const [qrImage, setQrImage] = useState('');
 
     const generateQR = () => {
-        const url = "https://www.google.com"; // URL to encode
-        const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(url);
+        const url = `${ticket_id}`; // URL to encode
+        const qrApi = import.meta.env.VITE_QR_CODE_API
+        const qrSrc = qrApi + encodeURIComponent(url);
         setQrImage(qrSrc);
     };
 
@@ -338,7 +339,6 @@ function UserLanding() {
             return newWorkshopState;
         });
     };
-
 
     const ModalContent = ({ close }) => (
         <div style={modalContentStyle}>
@@ -529,10 +529,14 @@ function UserLanding() {
             formData.append('file', blob); // Use 'file' as the key
     
             try {
-                const response = await fetch('https://www.cutout.pro/api/v1/cartoonSelfie?cartoonType=1', {
+                const cutoutproApi = import.meta.env.VITE_CUTOUTPRO_API
+                const cutoutproApiKey = import.meta.env.VITE_CUTOUTPRO_API_KEY
+                console.log(cutoutproApi);
+                console.log(cutoutproApiKey);
+                const response = await fetch(cutoutproApi, {
                     method: 'POST',
                     headers: {
-                        'APIKEY': '06a1432f9bae48819435d328baea99b4', // Replace with your API key
+                        'APIKEY': cutoutproApiKey, // Replace with your API key
                     },
                     body: formData,
                 });
@@ -577,12 +581,14 @@ function UserLanding() {
     setSelectedValue(event.target.value);
     };
 
-    const photo_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpg`
+    const imageRepo = import.meta.env.VITE_IMAGE_REPO
+    const photo_link = imageRepo + `${ticket_id}/cartoonprofile.jpg`
    // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
    // const imageSrc = photo_link || fallback_link || fallback2_link;
-    const form_sg = `https://form.gov.sg/66e14a264cccbc8d098f46d1?66e14a409253225fefacaf1a=${ticket_id}`
+    const formSGApi = import.meta.env.VITE_FORMSG_LINK
+    const form_sg = formSGApi + ticket_id
     function clearLocalStorage() {
         localStorage.clear();
       }

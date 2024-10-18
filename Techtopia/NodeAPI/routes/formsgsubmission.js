@@ -31,7 +31,7 @@ const formSecretKey = process.env.FORM_SECRET_KEY;
 // #### Cut Out Pro
 const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
 
-const wsUrl = 'wss://9be5u1to5h.execute-api.ap-southeast-1.amazonaws.com/production/';
+const wsUrl = process.env.WEBSOCKET_API;
 const ws = new WebSocket(wsUrl);
 
 // Message queue for messages before the connection opens
@@ -141,7 +141,7 @@ module.exports.postRequest = async (event, context) => {
         try {
             console.log(`Calling Cutout Pro API!`);
             // TODO 2: Pass the image to cutout pro
-            const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
+            const response = await axios.post(process.env.CUT_OUT_PRO_LINK, formData, {
                 headers: {
                     'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                     'Content-Type': 'multipart/form-data' // Important for file uploads
@@ -210,7 +210,7 @@ module.exports.testLocal = async (event, context) => {
     var go = true;
     if (go == true) {
         await request.post({
-            url: 'https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1',
+            url: process.env.CUT_OUT_PRO_LINK,
             formData: {
                 file: readStream
             },
@@ -264,7 +264,7 @@ module.exports.testLocalAxios = async (event, context) => {
 
     var go = true;
     if (go == true) {
-        const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
+        const response = await axios.post(process.env.CUT_OUT_PRO_LINK, formData, {
             headers: {
                 'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                 'Content-Type': 'multipart/form-data' // Important for file uploads
