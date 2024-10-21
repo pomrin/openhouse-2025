@@ -17,6 +17,11 @@ import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
 import axios from 'axios';
+import http from './http';
+
+
+
+
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 //redux
 import { useDispatch, useSelector } from 'react-redux';
@@ -155,9 +160,13 @@ function UserLanding() {
     };
 
     const hasFetchedDataRef = useRef(false);
+    const hasFetchedDataRefTicket = useRef(false);
+    const hasFetchedDataRefQueue = useRef(false);
+
 
     useEffect(() => {
-        if (!ticket_id) {
+        if (!ticket_id && !hasFetchedDataRefTicket.current) {
+            hasFetchedDataRefTicket.current = true; // Mark as fetched
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
@@ -497,7 +506,7 @@ function UserLanding() {
     return (
         <Box className="bodyBox">
         <Box>
-            <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
+            {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
 
 
             {/* Show All Stamp Button */}
@@ -599,7 +608,7 @@ function UserLanding() {
 
             <Box class="boxForm">
                 <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                    <button class="formSg">Go to Form Page</button>
+                    <button class="formSg">Upload Image</button>
                 </a>
             </Box>
             <h1>NYP BOARDING PASS</h1>
@@ -674,53 +683,23 @@ function UserLanding() {
                 </Box>
             </Paper>
 
-            <div>
-                <h1>WebSocket Communication</h1>
-                <div class="messageDiv">
-                    {messages.map((msg, index) => (
-                    <div key={index}>{msg.message || 'Received non-JSON message'}</div>
-                    ))}
-                </div>
-                <div>
-        <input
-          type="text"
-          placeholder="Recipient ID"
-          value={recipientId}
-          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
-        />
-        <input
-          type="text"
-          placeholder="Type a message"
-          value={input}
-          onChange={(e) => setInput(e.target.value)} // Handle message input
-        />
-        <button onClick={handleSendMessage}>Send Message</button>
-      </div>
-            </div>
-                {/* Button to cycle through booth names */}
-                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                    Change Booth
-                </Button>
-                {/* New button to increment queue number */}
-                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                    Add Queue Number
-                </Button>
-            {/* Gained a stamp upon each completion of booth */}
-        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 1
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 2   
-        </Button>
-        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 3
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 4
-        </Button>
-        <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Clear Local Storage
-        </Button>
+            
+
+
+        <div class='dropdown' style={{ ...dropdownStyle }}>
+                        <div style={gridStyle}>
+                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
+                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
+                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
+                        </div>
+                        {/* Display message if no stamps are visible */}
+                        {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
+                            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+                                You have not collected anything.
+                            </div>
+                        )}
+                    </div>
         </Box>
         </Box>
     );

@@ -13,10 +13,12 @@ import { Typography } from '@mui/material';
 import { CURRENT_USER_TYPE, USER_TYPES_NAV, decodedToken, removeToken, tokenValue } from '../constants';
 import { useToastify } from '../contexts/ToastifyContext';
 import { useLoader } from '../contexts/LoaderContext';
+import nyp_logo from "./../assets/nyp_logo.png";
 
 function CustomSidebar() {
   const { setLoading } = useLoader();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -44,8 +46,11 @@ function CustomSidebar() {
     if (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
       return 'Dashboard'
     }
-    else if (CURRENT_USER_TYPE === USER_TYPES_NAV.STORE_ADMIN) {
-      return 'StoreItemsHome'
+    else if (CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) {
+      return 'Dashboard'
+    }
+    else if (CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR) {
+      return '/'
     }
   }
 
@@ -53,8 +58,13 @@ function CustomSidebar() {
     <div className='sidebar-stick'>
       {(!(location.pathname === '/')) ?
         <>
-          <Sidebar style={{ height: "100vh" }} collapsed={!isExpanded} >
-            <Menu>
+        <Menu >
+          <div className='menuBar'><MenuItem style={{backgroundColor: 'white'}} icon={<MenuIcon style={{color: 'black'}}/>} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>
+          <img src={nyp_logo} style={{ margin: "0px 0px 0px 0px", maxWidth: '60%'}} alt="NYP Logo" />
+          </div>
+        </Menu>
+          <Sidebar style={{ height: "150vh"}} collapsed={!isExpanded} collapsedWidth= "0px" width= "300px" >
+            <Menu >
               <div style={{ padding: '10px 18px 10px 18px', color: 'white' }}>
                 <div style={{ padding: '0px 0px 0px 0px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                   <Link to={`/${locationPfp()}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -88,21 +98,55 @@ function CustomSidebar() {
                   </div>
                 </div>
               </div>
-              <MenuItem icon={<MenuIcon />} title="hide/un-hide" onClick={() => { handleToggle(); }}>
-                Hide sidebar
-              </MenuItem>
+              <MenuItem icon={<MenuIcon />} title="hide/un-hide" onClick={() => { handleToggle(); }}>Hide Navbar</MenuItem>
               <hr style={{ width: '80%' }} />
-              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) ?
+              {(CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR) ?
                 <>
-                  <MenuItem icon={<DashboardIcon />} active={location.pathname === "/Dashboard"} title="Dashboard" component={<Link to="/Dashboard" />}> Dashboard</MenuItem>
+                  <SubMenu icon={<ReceiptLongIcon />} label="Level 2">
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Cybersecurity </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> AI </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Software Engineering </MenuItem>
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> FinTech/BlockChain </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Redemption </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Museum </MenuItem>
+                  </SubMenu>
+                  <SubMenu icon={<ReceiptLongIcon />} label="Level 3">
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Laser Engraving </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Projects </MenuItem>
+                  </SubMenu>
+                  <SubMenu icon={<ReceiptLongIcon />} label="Level 5">
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Workshops </MenuItem>
+                  </SubMenu>
                 </> : null
               }
-              <MenuItem icon={<Inventory2Icon />} active={location.pathname === "/MyAssets"} title="My assets" component={<Link to="/MyAssets" />}> My Assets</MenuItem>
+
+
+              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
+                <>
+                <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Cybersecurity </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> AI </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Software Engineering </MenuItem>
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> FinTech/BlockChain </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Redemption </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Museum </MenuItem>
+                  </SubMenu>
+                  <SubMenu icon={<ReceiptLongIcon />} label="Scan Workshops">
+                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Workshop 1 </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Workshop 2 </MenuItem>
+                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Workshop 3 </MenuItem>
+                  </SubMenu>
+                  {/* <MenuItem icon={<DashboardIcon />} active={location.pathname === "/Dashboard"} title="Dashboard" component={<Link to="/Dashboard" />}> Dashboard</MenuItem> */}
+                </> : null
+              }
+              {/* <MenuItem icon={<Inventory2Icon />} active={location.pathname === "/MyAssets"} title="My assets" component={<Link to="/MyAssets" />}> My Assets</MenuItem>
               <SubMenu icon={<ReceiptLongIcon />} label="Loan">
                 <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Request loan </MenuItem>
                 <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> My loan requests </MenuItem>
                 <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> My loan request extensions </MenuItem>
-              </SubMenu>
+              </SubMenu> */}
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.TSO || CURRENT_USER_TYPE === USER_TYPES_NAV.TSO_MANAGER || CURRENT_USER_TYPE === USER_TYPES_NAV.ADDD) ?
                 <>
                   <SubMenu icon={<AdminPanelSettingsIcon />} label="Admin">
