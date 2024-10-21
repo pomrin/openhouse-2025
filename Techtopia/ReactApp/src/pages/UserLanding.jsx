@@ -683,53 +683,23 @@ function UserLanding() {
                 </Box>
             </Paper>
 
-            <div>
-                <h1>WebSocket Communication</h1>
-                <div class="messageDiv">
-                    {messages.map((msg, index) => (
-                    <div key={index}>{msg.message || 'Received non-JSON message'}</div>
-                    ))}
-                </div>
-                <div>
-        <input
-          type="text"
-          placeholder="Recipient ID"
-          value={recipientId}
-          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
-        />
-        <input
-          type="text"
-          placeholder="Type a message"
-          value={input}
-          onChange={(e) => setInput(e.target.value)} // Handle message input
-        />
-        <button onClick={handleSendMessage}>Send Message</button>
-      </div>
-            </div>
-                {/* Button to cycle through booth names */}
-                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                    Change Booth
-                </Button>
-                {/* New button to increment queue number */}
-                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
-                    Add Queue Number
-                </Button>
-            {/* Gained a stamp upon each completion of booth */}
-        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 1
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 2   
-        </Button>
-        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 3
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 4
-        </Button>
-        <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Clear Local Storage
-        </Button>
+            
+
+
+        <div class='dropdown' style={{ ...dropdownStyle }}>
+                        <div style={gridStyle}>
+                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
+                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
+                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
+                        </div>
+                        {/* Display message if no stamps are visible */}
+                        {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
+                            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+                                You have not collected anything.
+                            </div>
+                        )}
+                    </div>
         </Box>
         </Box>
     );

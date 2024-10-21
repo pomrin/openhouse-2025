@@ -65,10 +65,10 @@ function App() {
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
           {/* NAV BAR */}
-          {/* {CURRENT_USER_TYPE && <CustomSidebar />} */}
+          {CURRENT_USER_TYPE && <CustomSidebar />} 
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
-              <Route path={"/Home"} element={<UserLanding />} />
+              <Route path={"/"} element={<UserLanding />} />
 
 
               {/* Testing of Admin login - commented out by default */}
