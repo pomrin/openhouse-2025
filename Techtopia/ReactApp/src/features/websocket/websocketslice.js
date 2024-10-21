@@ -6,7 +6,8 @@ let socket = null; // WebSocket reference
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ websocketUrl, ticketId, handleCycleBooth, refreshPage }, { dispatch }) => {
+    async ({ticketId, handleCycleBooth, refreshPage }, { dispatch }) => {
+        const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
         socket = new WebSocket(websocketUrl);
 
         socket.onopen = () => {

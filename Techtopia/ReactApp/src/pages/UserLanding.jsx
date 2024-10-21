@@ -30,7 +30,7 @@ function UserLanding() {
     const dispatch = useDispatch();
     const [input, setInput] = useState('');
     const [recipientId, setRecipientId] = useState('');
-    const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
+    
   
     const isConnected = useSelector((state) => state.websocket.isConnected);
     const messages = useSelector((state) => state.websocket.messages);
@@ -161,7 +161,7 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
-        dispatch(connectWebSocket({ websocketUrl, ticketId: ticket_id, handleCycleBooth, refreshPage }));
+        dispatch(connectWebSocket({ticketId: ticket_id, handleCycleBooth, refreshPage }));
         
         const updateDateTime = () => {
             const currentDate = new Date();
