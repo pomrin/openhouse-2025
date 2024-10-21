@@ -28,6 +28,7 @@ function CustomSidebar() {
   if (decodedToken != null) {
     role = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
     name = decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
+    
   } else {
     <Navigate to='/Error' />;
   }
@@ -56,7 +57,7 @@ function CustomSidebar() {
 
   return (
     <div className='sidebar-stick'>
-      {(!(location.pathname === '/')) ?
+      {true ?
         <>
         <Menu >
           <div className='menuBar'><MenuItem style={{backgroundColor: 'white'}} icon={<MenuIcon style={{color: 'black'}}/>} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>

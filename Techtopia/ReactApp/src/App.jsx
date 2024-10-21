@@ -68,7 +68,8 @@ function App() {
           {CURRENT_USER_TYPE && <CustomSidebar />} 
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
-              <Route path={"/"} element={<UserLanding />} />
+            <Route path={"/"} element={<UserLanding />} />
+              <Route path={"/Home"} element={<UserLanding />} />
 
 
               {/* Testing of Admin login - commented out by default */}
