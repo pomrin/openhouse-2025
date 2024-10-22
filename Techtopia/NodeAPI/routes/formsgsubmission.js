@@ -31,7 +31,8 @@ const formSecretKey = process.env.FORM_SECRET_KEY;
 // #### Cut Out Pro
 const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
 
-const wsUrl = process.env.WEBSOCKET_API;
+//const wsUrl = process.env.WEBSOCKET_API;
+const wsUrl = 'wss://ygfo8jqflc.execute-api.ap-southeast-1.amazonaws.com/production/';
 const ws = new WebSocket(wsUrl);
 
 // Message queue for messages before the connection opens
@@ -113,7 +114,7 @@ module.exports.postRequest = async (event, context) => {
     const visitorName = submissionWithAttachments.content.responses[2].answer;
     console.log(`visitorName: ${visitorName}`);
     console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
-    broadcastMessage("Calling From PostRequest!");
+    broadcastMessage(ticketId);
     const photoInfo = submissionWithAttachments.content.responses[3].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
@@ -141,7 +142,7 @@ module.exports.postRequest = async (event, context) => {
         try {
             console.log(`Calling Cutout Pro API!`);
             // TODO 2: Pass the image to cutout pro
-            const response = await axios.post(process.env.CUT_OUT_PRO_LINK, formData, {
+            const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
                 headers: {
                     'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                     'Content-Type': 'multipart/form-data' // Important for file uploads
@@ -153,7 +154,6 @@ module.exports.postRequest = async (event, context) => {
             console.log(`responseCode - ${responseCode}`);
             if (responseCode == 4001) {
                 console.log("Insufficient Credit!");
-                broadcastMessage("InsufficientCredits");
             } else {
 
                 // var responseBody = JSON.parse(response.data.code);
@@ -165,7 +165,6 @@ module.exports.postRequest = async (event, context) => {
                 if (base64String) {
                     var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
                     console.log(`response: ${response2}`);
-                    broadcastMessage("ImageUploaded");
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }
@@ -210,7 +209,7 @@ module.exports.testLocal = async (event, context) => {
     var go = true;
     if (go == true) {
         await request.post({
-            url: process.env.CUT_OUT_PRO_LINK,
+            url: 'https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1',
             formData: {
                 file: readStream
             },
@@ -264,7 +263,7 @@ module.exports.testLocalAxios = async (event, context) => {
 
     var go = true;
     if (go == true) {
-        const response = await axios.post(process.env.CUT_OUT_PRO_LINK, formData, {
+        const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
             headers: {
                 'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
                 'Content-Type': 'multipart/form-data' // Important for file uploads

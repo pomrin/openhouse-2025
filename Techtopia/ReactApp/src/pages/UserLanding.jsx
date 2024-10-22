@@ -131,11 +131,6 @@ function UserLanding() {
         });
     };
 
-    const refreshPage = () => {
-        location.reload();
-        console.log("page refreshed");
-    };
-
     // Function to increment the queue number and format it as a 4-digit string
     const handleIncrementQueue = () => {
         setQueueNumber((prevQueueNumber) => {
@@ -170,7 +165,7 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
-        dispatch(connectWebSocket({ticketId: ticket_id, handleCycleBooth, refreshPage }));
+        dispatch(connectWebSocket({ticketId: ticket_id, handleCycleBooth, refreshProfilePicture}));
         
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -493,7 +488,17 @@ function UserLanding() {
     };
 
     const imageRepo = import.meta.env.VITE_IMAGE_REPO
-    const photo_link = imageRepo + `${ticket_id}/cartoonprofile.jpg`
+
+    const photoLink = `${imageRepo}${ticket_id}/cartoonprofile.jpg`;
+    const [imageSource, setImageSource] = useState(photoLink);
+
+    // Function to refresh the profile picture
+    const refreshProfilePicture = () => {
+        setTimeout(() => {
+            setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
+            console.log("photo updated");
+        }, 5000); // 5000 milliseconds = 5 seconds
+    };
    // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
@@ -559,9 +564,9 @@ function UserLanding() {
                         <p className='profileImage'>No image uploaded yet</p>
                     )} */}
                             <img 
-                                src={photo_link} 
+                                src={imageSource} 
                                 alt="Profile" 
-                                className="profileImage" 
+                                className="profileImage"
                                 onError={(e) => {
                                     e.target.onerror = null; 
                                     e.target.src = noImageUploaded; // Clear the src if there's an error
@@ -682,10 +687,54 @@ function UserLanding() {
                     </Box>
                 </Box>
             </Paper>
-
             
-
-
+            <div>
+                <h1>WebSocket Communication</h1>
+                <div class="messageDiv">
+                    {messages.map((msg, index) => (
+                    <div key={index}>{msg.message || 'Received non-JSON message'}</div>
+                    ))}
+                </div>
+                <div>
+        <input
+          type="text"
+          placeholder="Recipient ID"
+          value={recipientId}
+          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
+        />
+        <input
+          type="text"
+          placeholder="Type a message"
+          value={input}
+          onChange={(e) => setInput(e.target.value)} // Handle message input
+        />
+        <button onClick={handleSendMessage}>Send Message</button>
+      </div>
+            </div>
+                {/* Button to cycle through booth names */}
+                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                    Change Booth
+                </Button>
+                {/* New button to increment queue number */}
+                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                    Add Queue Number
+                </Button>
+            {/* Gained a stamp upon each completion of booth */}
+        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 1
+        </Button>
+        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 2   
+        </Button>
+        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 3
+        </Button>
+        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Completed Booth 4
+        </Button>
+        <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                    Clear Local Storage
+        </Button>
         <div class='dropdown' style={{ ...dropdownStyle }}>
                         <div style={gridStyle}>
                         <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
