@@ -6,9 +6,13 @@
              xmlns:local="clr-namespace:OHMontageApp.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Width="45px" Height="45px" Background="{Binding BackgroundColor}">
-        <Border BorderBrush="Black" BorderThickness="1,1,1,1">
-            <Image Grid.Row="0" Source="{Binding ImageUrl}" Opacity="1"/>
+    <Grid Width="100px" Height="100px" Background="{Binding BackgroundColor}" IsEnabled="False">
+        <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0">
+            <Image Source="{Binding ImageUrl}" Opacity="0.7"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0"  Visibility="{Binding IsJiggleVisibility}">
+            <Image  x:Name="imgAnimation"  Source="/Images/JiggleAnimationResources/floating_balloon.gif"
+                    />
         </Border>
     </Grid>
 </UserControl>
