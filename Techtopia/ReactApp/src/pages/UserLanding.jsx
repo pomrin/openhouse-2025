@@ -16,16 +16,15 @@ import boothimage1 from './../assets/images/step1.png';
 import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
-import axios from 'axios';
-import http from './http';
-
-
+// import http from './http';
+import axios from './http';
 
 
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 //redux
 import { useDispatch, useSelector } from 'react-redux';
 import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
+// import axios from 'axios';
 
 
 
@@ -95,6 +94,7 @@ function UserLanding() {
             
             setUniqueId(newTicketId);
             localStorage.setItem('ticket_id', newTicketId);
+            localStorage.setItem('accessToken', token);
     
         } catch (error) {
             if (error.response) {
