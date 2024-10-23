@@ -29,5 +29,29 @@ namespace AWSServerless1.DAL
             return result;
         }
 
+        public static Booth GetBoothByBoothId(int boothId)
+        {
+            Booth result = null;
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var qBooth = from q in context.Booths
+                                 where q.BoothId == boothId
+                                 select q;
+                    if (qBooth != null)
+                    {
+                        result = qBooth.First();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in GetBoothByBoothId(boothId: {boothId}) - {ex.Message}");
+            }
+
+            return result;
+        }
     }
 }

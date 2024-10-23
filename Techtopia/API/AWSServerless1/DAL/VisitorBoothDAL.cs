@@ -30,6 +30,68 @@ namespace AWSServerless1.DAL
             return result;
         }
 
+        public static VisitorBooth IssueOrUpdateVisitorBoothStamp(Visitor visitorEntity, Booth boothEntity)
+        {
+            VisitorBooth result = null;
 
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var qVisitorBoothVisited = from q in context.VisitorBooths
+                                               where q.VisitorId == visitorEntity.VisitorId
+                                               && q.BoothId == boothEntity.BoothId
+                                               select q;
+                    if (qVisitorBoothVisited != null && qVisitorBoothVisited.Count() > 0)
+                    {
+                        // Already exist, update the status
+                        result = qVisitorBoothVisited.First();
+                    }
+                    else
+                    {
+                        var newVisitorBoothRecord = new VisitorBooth()
+                        {
+                            BoothId = boothEntity.BoothId,
+                            VisitorId = visitorEntity.VisitorId,
+                        };
+                        // Create a new status
+                        context.VisitorBooths.Add(newVisitorBoothRecord);
+                        context.SaveChanges();
+                        result = newVisitorBoothRecord;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in UpdateVisitorBooth(visitorId: {visitorEntity.VisitorId}, boothId: {boothEntity.BoothId}) - {ex.Message}");
+            }
+            return result;
+        }
+
+        internal static VisitorBooth GetVisitorBoothByVisitorAndBooth(Visitor visitorEntity, Booth boothEntity)
+        {
+            VisitorBooth result = null;
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var qVisitorBoothVisited = from q in context.VisitorBooths
+                                               where q.VisitorId == visitorEntity.VisitorId
+                                               && q.BoothId == boothEntity.BoothId
+                                               select q;
+                    if (qVisitorBoothVisited != null && qVisitorBoothVisited.Count() > 0)
+                    {
+                        // Already exist, update the status
+                        result = qVisitorBoothVisited.First();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in GetVisitorBoothByVisitorAndBooth(visitorId: {visitorEntity.VisitorId}, boothId: {boothEntity.BoothId}) - {ex.Message}");
+            }
+            return result;
+        }
     }
 }

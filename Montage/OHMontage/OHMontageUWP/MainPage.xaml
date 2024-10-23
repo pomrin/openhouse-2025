@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:usercontrol="using:OHMontageUWP.UserControl" xmlns:mycustomusercontrols="using:OHMontageUWP.MyCustomUserControls"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Padding="3">
 
     <Grid >
         <Grid.Background>
@@ -14,15 +15,26 @@
         </Grid.Background>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="1*" />
+            <RowDefinition Height="0.8*" />
+            <RowDefinition Height="0.05*" />
+            <RowDefinition Height="0" />
         </Grid.RowDefinitions>
-        <Button Grid.Row="0"
-                Content="Simulate A Jiggle" Click="Button_Click" 
+        <mycustomusercontrols:Montage Grid.Row="0" DataContext="{Binding MontageViewModel}" 
+                                      HorizontalAlignment="Stretch" 
+                                      VerticalAlignment="Stretch"
+                                      Margin="10,10,10,10"/>
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="White" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,3,0,3">
+            <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <RelativePanel.Background>
+                    <ImageBrush ImageSource="/Images/RGB_SIT_1.png" Stretch="Uniform"/>
+                </RelativePanel.Background>
+
+            </RelativePanel>
+        </Grid>
+        <Button Grid.Row="2"
+                Content="Simulate A Jiggle" 
+                Click="Button_Click" 
                 HorizontalAlignment="Stretch"
                 />
-        <mycustomusercontrols:Montage Grid.Row="1" DataContext="{Binding MontageViewModel}" 
-                                      HorizontalAlignment="Stretch" 
-                                      VerticalAlignment="Stretch"></mycustomusercontrols:Montage>
     </Grid>
 </Page>
