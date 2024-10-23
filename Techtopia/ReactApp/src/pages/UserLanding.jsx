@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, Link } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import nyp_logo from "./../assets/nyp_logo.png";
+import nyp_logo from "./../assets/images/RGB_SIT_1.png";
 import '../css/UserLanding.css';
 import plane_image from './../assets/images/plane_image.png';
 import Popup from 'reactjs-popup';
@@ -16,10 +16,9 @@ import boothimage1 from './../assets/images/step1.png';
 import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
+import uploadProfile from './../assets/images/upload_profile.png';
 // import http from './http';
 import axios from './http';
-
-
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 //redux
 import { useDispatch, useSelector } from 'react-redux';
@@ -512,72 +511,6 @@ function UserLanding() {
         <Box className="bodyBox">
         <Box>
             {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
-
-
-            {/* Show All Stamp Button */}
-            <Box className="profile_box" style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '5%', right: '10%' }}>
-                    <Popup
-                        trigger={
-                            <button
-                                style={{
-                                    border: 'none',
-                                    background: 'transparent',
-                                    cursor: 'pointer',
-                                    borderRadius: '50%', // Circular shape
-                                    width: '100px', // Set width and height for hitbox
-                                    height: '100px',
-                                    padding: '0',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <img
-                                    src={clickHereStamp}
-                                    alt="Click Here"
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover', // Adjust size here
-                                    }}
-                                />
-                            </button>
-                        }
-                        position="right center"
-                        modal
-                        overlayStyle={overlayStyle}
-                        contentStyle={popupContentStyle}
-                    >
-                        {close => <ModalContent close={close} />}
-                    </Popup>
-                </div>
-
-
-                {/* <img src={profile_picture} class="profileImage"/> */}
-                    {/* {output && <img src={output} alt="Output" class="profileImage"/>}  */}
-                    {/* <img src={photo_link} alt="Output" class="profileImage"/> */}
-                    {/* <img src={GET_base64} alt="Output" class="profileImage"/> */}
-                    
-                <Box className="profilePicture">
-                {/* {output ? (
-                        <img src={output} alt="Output" className="profileImage" />
-                    ) : (
-                        <p className='profileImage'>No image uploaded yet</p>
-                    )} */}
-                            <img 
-                                src={imageSource} 
-                                alt="Profile" 
-                                className="profileImage"
-                                onError={(e) => {
-                                    e.target.onerror = null; 
-                                    e.target.src = noImageUploaded; // Clear the src if there's an error
-                                }} 
-                            />
-                </Box>
-            </Box>
-
-            
-
-            
             <div>
                 {/* 
                 <input 
@@ -609,80 +542,61 @@ function UserLanding() {
 
             {loading && <p>Loading...</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
-
-
-            <Box class="boxForm">
-                <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                    <button class="formSg">Upload Image</button>
-                </a>
-            </Box>
-            <h1>NYP BOARDING PASS</h1>
-            <Paper elevation={2} sx={{ borderRadius: "20px", paddingBottom: "10px"}}>
-                <Box class="QRBox">
-                    <a href="#"><img src={qrImage} alt="QR Code" /></a>
+            <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
+            <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px" ,paddingTop: "10px"}}>
+                <Box className="topdiv">
+                    <a href={form_sg} target="_blank" rel="noopener noreferrer">
+                        <Box className="profilePicture" sx={{ position: "relative" }}>
+                            <img 
+                                src={imageSource} 
+                                alt="Profile" 
+                                className="profileImage"
+                                onError={(e) => {
+                                    e.target.onerror = null; 
+                                    e.target.src = noImageUploaded; // Fallback image on error
+                                }} 
+                            />
+                            <div className="uploadCircle">
+                                <img src={uploadProfile} alt="Upload" className="uploadImage" />
+                            </div>
+                        </Box>
+                    </a>
+                    <Box className="QRBox">
+                        <img src={qrImage} alt="QR Code" className="qrImage"/>
+                    </Box>
                 </Box>
             </Paper>
-            <Paper className="BoardingPass" elevation={2} sx={{ borderRadius: "20px", borderTop: "1px dotted black"}}>
+            <Paper className="BoardingPass" elevation={12} sx={{ borderRadius: "20px", marginTop:"20px"}}>
                 <Box className="BoardingPassContent">
-                    <Box className="travelBox">
-                        <Box className="fromBox">
-                            <Typography variant="h3">
-                                SCH
-                            </Typography>
-                            <Typography class="bold">
-                                Previous School    
-                            </Typography>
-                            <Typography>
-                                {currentDate}
-                            </Typography>
-                            <Typography>
-                                {currentTime}
-                            </Typography>
-                        </Box>
-                        <Box className="toBox">
-                            <Typography variant="h3">
-                                NYP
-                            </Typography>
-                            <Typography class="bold">
-                                Nanyang Polytechnic
-                            </Typography>
-                            <Typography>
-                                21/04/2025 
-                            </Typography>
-                            <Typography>
-                                9:00 AM
-                            </Typography>
-                        </Box>
-                    </Box>
-                    <Box className="planeImage">
-                        <img src={currentImage} alt={plane_image} width="70%" />
-                    </Box>
                     <Box class="detailsBox">
                         <Box>
                             <Typography class="bold">
-                                Passenger ID
+                                Engraving Queue Status
                             </Typography>
                             <Typography>
-                                {ticket_id}
+                                {queueNumber} {/* Queue number state */}
                             </Typography>
                         </Box>
                         <Box>
                             <Typography class="bold">
-                                Next Booth
+                                Redemption Status
                             </Typography>
                             <Typography>
-                                {currentBooth} {/* Updated to show current booth */}
-                            </Typography>
+                                {queueNumber} {/* Queue number state */}
+                            </Typography> 
                         </Box>
                     </Box>
-                    <Box class="detailsBox">
-                        <Box>
-                                <Typography class="bold">
-                                    Queue Status
-                                </Typography>
-                                <Typography>
-                                    {queueNumber} {/* Queue number state */}
-                                </Typography>
+                    <h1>Stamps:</h1>
+                    <Box className="stampsBox">
+                        <Box className="stamps">
+                        </Box>
+                        <Box className="stamps">
+                        </Box>
+                    </Box>
+                    <Box className="stampsBox">
+                        <Box className="stamps">
+                        </Box>
+                        <Box className="stamps">
                         </Box>
                     </Box>
                 </Box>
@@ -711,6 +625,14 @@ function UserLanding() {
         <button onClick={handleSendMessage}>Send Message</button>
       </div>
             </div>
+            <Box>
+                <Typography class="bold">
+                    Passenger ID
+                </Typography>
+                <Typography>
+                    {ticket_id}
+                </Typography>
+            </Box>
                 {/* Button to cycle through booth names */}
                 <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
                     Change Booth
