@@ -22,6 +22,7 @@ namespace AWSServerless1.Controllers
 
         /// <summary>
         /// Returns the Eligibility of the Visitor for Luggage Tag redemption.
+        /// This method will REQUIRE Authentication and for role BOOTH HELPER OR ABOVE.
         /// </summary>
         /// <param name="ticketId"></param>
         /// <returns></returns>

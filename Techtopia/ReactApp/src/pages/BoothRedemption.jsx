@@ -9,6 +9,8 @@ import Alert from '@mui/material/Alert';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import Radio from '@mui/material/Radio';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -25,7 +27,6 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 function RedemptionPage() {
     const navigate = useNavigate();
     const [accessToken, setAccessToken] = useState(null); 
-    const [loading, setLoading] = useState(true); // Manage page load if auth token hasn't been stored
 
     // Ensure user is an admin/booth helper
     useEffect(() => {
@@ -55,6 +56,35 @@ function RedemptionPage() {
     // Return to booth selection pg
     const handleBack = () => {
         navigate('/selectbooth');
+    };
+
+    // Progress Loader
+    const [loading, setLoading] = useState(true); // State used to manage page load if auth token hasn't been stored
+    const [scannerLoading, setScannerLoading] = useState(false); // State used to manage loader display when awaiting API response
+
+    // Custom circular progress loader (To display when waiting for API response)
+    const CustomCircularProgress = () => {
+        return (
+            <Box sx={{
+                width: 'fit-content',
+                position: 'relative', 
+                bottom: '65%',
+                left: '32%',
+                borderRadius: '10px', 
+                padding: '10px', 
+                margin: '5px 15px'  
+            }}>
+            <svg width={0} height={0}>
+                <defs>
+                <linearGradient id="my_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#0462f9" />
+                    <stop offset="100%" stopColor="#ff0000" />
+                </linearGradient>
+                </defs>
+            </svg>
+            <CircularProgress size={50} sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} />
+            </Box>    
+        )
     };
 
     //Styles
@@ -130,7 +160,7 @@ function RedemptionPage() {
     Transition: 'z-index 0.55'
     };
     
-    // Placeholder colors (According to colors in SQL database)
+    // Placeholder colors (TBC)
     const tagColors = [
         { name: 'BLACK', hex: '#000000' },
         { name: 'BLUE', hex: '#0000FF' },
@@ -248,13 +278,13 @@ function RedemptionPage() {
 
     const submitUpdatedTagColor = async () => {
         try{
-            const result = await updateVisitorTag(ticketId, newColor);
+            const result = await updateVisitorTag(ticketId, selectedColor);
             handleVisitorTagUpdate(result);
         } catch (error) {
             console.log('Error submitting tag color update: ', error);
             showToast('An error occurred while updating the tag. Please try again.', 'error')
         } finally {
-            setNewColor(null); // Reset form selection color
+            setSelectedColor(null); // Reset form selection color
         }
     };
 
@@ -272,24 +302,6 @@ function RedemptionPage() {
             startScanner(); // Restart QR scanner after 1 sec delay
         }, 1000);
     };
-    
-    // Get visitor's existing tag color
-    useEffect(() => {
-        const fetchCurrentColor = async () => {
-            try {
-                const currentColor = await getTagCurrentColor(ticketId);
-                setCurrentColor(currentColor);  // Set the current color in state
-            } catch (error) {
-                console.log('Error fetching current tag color:', error);
-            }
-        };
-    
-        if (eligibilityStatus === 'already_redeemed') {
-            fetchCurrentColor();  // Fetch current color only for already redeemed cases
-        }
-    }, [eligibilityStatus, ticketId]);
-    
-    const [currentColor, setCurrentColor] = useState(null);  // State to store the current color
     
     // The 3 different popup contents -> eligible / already_redeemed / missing_stamps
     const EligibilityContent = ({ eligibility, selectedColor, setSelectedColor }) => {
@@ -322,22 +334,22 @@ function RedemptionPage() {
                                 <Box sx={{
                                     width: '30px',
                                     height: '30px',
-                                    backgroundColor: currentColor?.hex || 'transparent',
+                                    backgroundColor: currentColor ? currentColor.toLowerCase() : 'transparent',
                                     borderRadius: '50%',
                                     border: '1px solid black',
                                     marginLeft: '3%',
                                 }}
                                 />
                                 <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                    {currentColor ? currentColor.name : 'Unknown'}  {/* Display color name */}
+                                    {currentColor || '----'}  {/* Display color name */}
                                 </Typography>
                             </Box>
             
                             {/* Color selection form */}
-                            <FormControl component="fieldset" id="updateColorForm" sx={{ margin: '0 0 10px 5%'}}>
+                            <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5%', margin: '0 0 10px 5%' }}>
                                 <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
                                 <TagColorsRadioBtns selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-                                {selectedColor && selectedColor !== currentColor?.name && (
+                                {selectedColor && selectedColor.name !== currentColor && (
                                     <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
                                         Update Tag Color
                                     </Button>
@@ -491,7 +503,7 @@ function RedemptionPage() {
         if (!loading && accessToken) {
             startScanner();
         }
-    }, []);
+    }, [loading, accessToken]);
 
     // Handle scanner timeout
     const handleScannerTimeout = () => {
@@ -503,48 +515,53 @@ function RedemptionPage() {
         }
     };
 
+    const [currentColor, setCurrentColor] = useState(null);  // State to store the current color
+
     // Handle successful QR scan
     const onScanSuccess = async (result) => {
         if (hasValidated) return; // Prevent multiple validations
-
+    
         try {
             stopScanner(); // Stop QR scanner upon successful scan
             const ticketId = result.data;
             setTicketId(ticketId);
-
+    
             // (1) Check if ticket ID is valid
             const apiResponse = await eligibilityValidation(ticketId);
-
+    
             // (2) Display content according to visitor eligibility
-            handleEligibilityResponse(apiResponse);
-
+            await handleEligibilityResponse(apiResponse, ticketId);
+            
         } catch (error) {
             console.log("Error in onScanSuccess:", error);
             showToast('An error occurred while validating the ticket.', 'error');
         }
     };
-    
-    // API connections and response handling ( 3 API functions )
+
+    // API connections and response handling ( 4 API functions )
 
     // (1a) API (GET) call to validate visitor's redemption eligibility 
     const eligibilityValidation = async (ticketId) => {   
+        setScannerLoading(true);
         try {
             const response = await fetch(`${apiUrl}/VisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`, 
+                    'Authorization': `Bearer ${accessToken}` 
                 }
             });
             return response;
         } catch (error) {
             console.log("Error calling CheckRedemption API:", error);
             throw error;
+        } finally {
+            setScannerLoading(false);
         }
     };
 
     // (1b) Process API response to determine visitor's eligibility and content to display
-    const handleEligibilityResponse = (apiResponse) => {
+    const handleEligibilityResponse = async (apiResponse, ticketId) => {
         switch (apiResponse.status) {
             case 200:
                 // Response 200: User is eligible
@@ -559,23 +576,31 @@ function RedemptionPage() {
             case 404:
                 // Invalid ticket ID
                 showToast('Ticket ID not found!', 'error');
+                startScanner();
                 break;
             case 409:
                 // Visitor has already redeemed tag
                 setEligibilityStatus('already_redeemed');
-                setIsPopupOpen(true);
+                const currentColor = await setCurrentTagColor(ticketId);
+                if (currentColor) {
+                    setIsPopupOpen(true);
+                } else {
+                    console.log("Current color could not be fetched.");
+                }
                 break;
             default:
                 showToast('Unexpected response from the server.', 'error');
+                startScanner();
                 break;
         }
     };
 
     // (2a) API (POST) call to redeem visitor's luggage tag
     const redeemVisitorTag = async (ticketId, selectedColor) => {
+        setScannerLoading(true);
         const requestBody = {
             ticketId: ticketId,
-            luggageTagColor: selectedColor
+            luggageTagColor: selectedColor.name
         };
 
     try {
@@ -590,6 +615,8 @@ function RedemptionPage() {
         return response
     } catch (error) {
         console.log('Error redeeming tag:', error);
+    } finally {
+        setScannerLoading(false);
     }
     };
 
@@ -616,11 +643,12 @@ function RedemptionPage() {
 
     // (3a) API (PUT) call to update visitor's luggage tag color
     const updateVisitorTag = async (ticketId, selectedColor) => {
+        setScannerLoading(true);
         const requestBody = {
             ticketId: ticketId,
-            luggageTagColor: selectedColor
+            luggageTagColor: selectedColor.name
         };
-
+    
     try {
         const response = await fetch(`${apiUrl}/Redemption`, {
             method: 'PUT',
@@ -633,6 +661,8 @@ function RedemptionPage() {
         return response
     } catch (error) {
         console.log('Error updating tag:', error);
+    } finally {
+        setScannerLoading(false);
     }
     };
 
@@ -648,13 +678,13 @@ function RedemptionPage() {
             showToast('Invalid color or missing parameter. Please try again.', 'error');
         } else if (response.status === 404) {
             // Response 404: Ticket ID not found
-            showToast('Ticket ID not found.', 'error');
+            showToast('Ticket ID not found. Please try again.', 'error');
         } else {
             showToast(response.message || 'Failed to update tag, please try again.', 'error');
         }
     };
 
-    // (4) API (GET) to retrieve associated tag color for update content
+    // (4a) API (GET) to retrieve associated tag color for update content
     const getTagCurrentColor = async (ticketId) => {
         try {
             const response = await fetch(`${apiUrl}/AdminVisitor?ticketId=${encodeURIComponent(ticketId)}`, {
@@ -670,18 +700,40 @@ function RedemptionPage() {
             }
 
             const data = await response.json();
-            return data.luggagetagcolorname;  // Return only the luggage tag color name
+            return data.luggageTagColorName;  // Return the luggage tag color name
         } catch (error) {
             console.log("Error retrieving visitor's current tag color:", error);
             throw error;
         }
     };
 
-    // Render a loading spinner or message while waiting for token
-    if (loading) {
-        return <div>Loading...</div>;  // Display a loader until the token is ready
-    }
+    // (4b) Set current tag color in state
+    const setCurrentTagColor = async (ticketId) => {
+        if (ticketId) {
+            try {
+                const color = await getTagCurrentColor(ticketId);
+                if (color) {
+                    setCurrentColor(color);
+                    return color;
+                } else {
+                    console.error("Color not found in response.");               }
+            } catch (error) {
+                console.error("Error fetching current color:", error);
+            }
+        } else {
+            console.error("Ticket ID is null, cannot fetch color");
+        }
+    };
 
+    // Render a loading spinner if token not ready
+    if (loading) {
+        return (
+            <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
+        );
+    };
+    
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {/* Fixed AppBar */}
@@ -696,18 +748,15 @@ function RedemptionPage() {
             </Toolbar>
             </AppBar>
 
-            <Box display="flex" 
-                flexDirection="column" 
-                alignItems="center" 
-                justifyContent="center" 
-                height="95vh"
-                sx={{
-                    flexGrow: 1,
-                    display: 'flex',
-                    justifyContent: 'top',
-                    alignItems: 'center',
-                    paddingTop: '64px', 
-                    paddingBottom: '20px',
+            <Box sx={{
+                height: '95vh',
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'top',
+                alignItems: 'center',
+                paddingTop: '64px', 
+                paddingBottom: '20px',
                 }}>
             <Box display="flex" width="100%" justifyContent="flex-start">
                 <IconButton onClick={handleBack} aria-label="Go Back">
@@ -753,14 +802,17 @@ function RedemptionPage() {
                                 overflow: 'hidden'
                             }}>
                                 <video ref={videoEl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}></video>
-                                {/* Show "Start scanner" button if the scanner is not active */}
-                                {!scannerActive && (
-                                    <Button onClick={startScanner} style={{...startQRscannerBtn,  zIndex: scannerActive ? -99 : 99}}>
+                                {/* Show "Start scanner" button if the scanner is not active; else show loader if await API response */}
+                                {!scannerLoading ? (
+                                    !scannerActive && (
+                                        <Button onClick={startScanner} style={{...startQRscannerBtn,  zIndex: scannerActive ? -99 : 90}}>
                                         Start scanner
                                     </Button>
+                                    )
+                                ) : (
+                                    <CustomCircularProgress />
                                 )}
-                                <div ref={qrBoxEl} className="qr-box">
-                                </div> 
+                                <div ref={qrBoxEl} className="qr-box"></div> 
                             </Box>
                         </Grid>
                         <Grid item xs={12} className="botContainer" sx={{ flexDirection: 'column' }}>

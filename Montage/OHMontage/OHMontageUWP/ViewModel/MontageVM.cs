@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OHMontageApp.ViewModel
+namespace OHMontageUWP.ViewModel
 {
     internal class MontageVM
     {
-        public static readonly int DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY = 200;
+        public static readonly int DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY = 1000;
 
         public MontageVM()
         {

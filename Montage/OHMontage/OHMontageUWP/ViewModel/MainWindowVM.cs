@@ -5,14 +5,14 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Windows.Threading;
+using Windows.UI.Xaml;
 
-namespace OHMontageApp.ViewModel
+namespace OHMontageUWP.ViewModel
 {
     internal class MainWindowVM
     {
 
-        private DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render);
+        private DispatcherTimer timer = new DispatcherTimer();
         public MainWindowVM()
         {
             this.MontageViewModel = new MontageVM();
@@ -23,12 +23,12 @@ namespace OHMontageApp.ViewModel
                 this.MontageViewModel.AddNewPhoto();
             }
 
-            timer.Tick += this.Timer_Tick;
-            timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+            timer.Tick += Timer_Tick1;
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 10);
             timer.Start();
         }
 
-        private void Timer_Tick(object? sender, EventArgs e)
+        private void Timer_Tick1(object sender, object e)
         {
             var qCurrentAnimation = from q in this.MontageViewModel.Photos
                                     where q.IsJiggle == true

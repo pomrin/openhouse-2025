@@ -9,17 +9,17 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Media;
 
 
-namespace OHMontageApp.ViewModel
+namespace OHMontageUWP.ViewModel
 {
     internal class PhotoControlVM : INotifyPropertyChanged
     {
 
 
-        DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render)
+        DispatcherTimer timer = new DispatcherTimer()
         {
             Interval = new TimeSpan(0, 0, 3),
         };
@@ -42,11 +42,11 @@ namespace OHMontageApp.ViewModel
             //this.imageUrl = "https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/cyber-security.png";
             this.ImageUrl = ProjectHelper.GetDefaultUserPhotoImage();
             this.AnimationImageUrl = "";
-            timer.Tick += Dt_Tick;
+            timer.Tick += Timer_Tick;
             this.IsJiggle = false;
         }
 
-        private void Dt_Tick(object? sender, EventArgs e)
+        private void Timer_Tick(object sender, object e)
         {
 
             if (this.IsJiggle)
@@ -128,7 +128,7 @@ namespace OHMontageApp.ViewModel
                         if (!this.timer.IsEnabled)
                         {
                             this.timer.Start();
-                            switch (new Random().NextInt64(1, 4))
+                            switch (new Random().Next(1, 4))
                             {
                                 case 1:
                                     this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl();
@@ -176,7 +176,7 @@ namespace OHMontageApp.ViewModel
                 }
                 else
                 {
-                    return Visibility.Hidden;
+                    return Visibility.Collapsed;
                 }
             }
         }
