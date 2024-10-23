@@ -9,6 +9,8 @@ namespace OHMontageApp.ViewModel
 {
     internal class MontageVM
     {
+        public static readonly int DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY = 200;
+
         public MontageVM()
         {
             this.generateSamplePhotosVM();
@@ -20,12 +22,16 @@ namespace OHMontageApp.ViewModel
             {
                 this.Photos = new ObservableCollection<PhotoControlVM>();
             }
+            //while (this.Photos.Count < DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY)
+            //{
+            //    this.AddNewPhoto();
+            //}
         }
 
         internal bool AddNewPhoto()
         {
             bool result = false;
-            if (this.Photos.Count() < 20)
+            if (this.Photos.Count() < DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY)
             {
                 this.Photos.Add(new PhotoControlVM());
                 result = true;

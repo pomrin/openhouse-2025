@@ -9,11 +9,38 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="JiggleAnimationResources\man.png" />
+    <None Remove="Images\background.jpg" />
+    <None Remove="Images\background.png" />
+    <None Remove="Images\defaultuser.png" />
+    <None Remove="Images\JiggleAnimationResources\floating_balloon.gif" />
+    <None Remove="Images\JiggleAnimationResources\floating_balloon2.gif" />
+    <None Remove="Images\JiggleAnimationResources\floating_balloon3.gif" />
+    <None Remove="Images\JiggleAnimationResources\man.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="JiggleAnimationResources\man.png">
+    <Resource Include="Images\JiggleAnimationResources\floating_balloon3.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\background.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\JiggleAnimationResources\floating_balloon.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\JiggleAnimationResources\floating_balloon2.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\JiggleAnimationResources\man.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\defaultuser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

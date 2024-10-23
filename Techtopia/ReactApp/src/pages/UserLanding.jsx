@@ -16,16 +16,15 @@ import boothimage1 from './../assets/images/step1.png';
 import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
-import axios from 'axios';
-import http from './http';
-
-
+// import http from './http';
+import axios from './http';
 
 
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 //redux
 import { useDispatch, useSelector } from 'react-redux';
 import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
+// import axios from 'axios';
 
 
 
@@ -35,7 +34,7 @@ function UserLanding() {
     const dispatch = useDispatch();
     const [input, setInput] = useState('');
     const [recipientId, setRecipientId] = useState('');
-    const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
+    
   
     const isConnected = useSelector((state) => state.websocket.isConnected);
     const messages = useSelector((state) => state.websocket.messages);
@@ -95,6 +94,7 @@ function UserLanding() {
             
             setUniqueId(newTicketId);
             localStorage.setItem('ticket_id', newTicketId);
+            localStorage.setItem('accessToken', token);
     
         } catch (error) {
             if (error.response) {
@@ -131,11 +131,6 @@ function UserLanding() {
         });
     };
 
-    const refreshPage = () => {
-        location.reload();
-        console.log("page refreshed");
-    };
-
     // Function to increment the queue number and format it as a 4-digit string
     const handleIncrementQueue = () => {
         setQueueNumber((prevQueueNumber) => {
@@ -170,7 +165,7 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
-        dispatch(connectWebSocket({ websocketUrl, ticketId: ticket_id, handleCycleBooth, refreshPage }));
+        dispatch(connectWebSocket({ticketId: ticket_id, handleCycleBooth, refreshProfilePicture}));
         
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -493,7 +488,17 @@ function UserLanding() {
     };
 
     const imageRepo = import.meta.env.VITE_IMAGE_REPO
-    const photo_link = imageRepo + `${ticket_id}/cartoonprofile.jpg`
+
+    const photoLink = `${imageRepo}${ticket_id}/cartoonprofile.jpg`;
+    const [imageSource, setImageSource] = useState(photoLink);
+
+    // Function to refresh the profile picture
+    const refreshProfilePicture = () => {
+        setTimeout(() => {
+            setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
+            console.log("photo updated");
+        }, 5000); // 5000 milliseconds = 5 seconds
+    };
    // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
@@ -559,9 +564,9 @@ function UserLanding() {
                         <p className='profileImage'>No image uploaded yet</p>
                     )} */}
                             <img 
-                                src={photo_link} 
+                                src={imageSource} 
                                 alt="Profile" 
-                                className="profileImage" 
+                                className="profileImage"
                                 onError={(e) => {
                                     e.target.onerror = null; 
                                     e.target.src = noImageUploaded; // Clear the src if there's an error
@@ -682,7 +687,7 @@ function UserLanding() {
                     </Box>
                 </Box>
             </Paper>
-
+            
             <div>
                 <h1>WebSocket Communication</h1>
                 <div class="messageDiv">
@@ -730,6 +735,20 @@ function UserLanding() {
         <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Clear Local Storage
         </Button>
+        <div class='dropdown' style={{ ...dropdownStyle }}>
+                        <div style={gridStyle}>
+                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
+                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
+                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
+                        </div>
+                        {/* Display message if no stamps are visible */}
+                        {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
+                            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+                                You have not collected anything.
+                            </div>
+                        )}
+                    </div>
         </Box>
         </Box>
     );

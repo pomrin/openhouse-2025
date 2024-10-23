@@ -6,7 +6,8 @@ let socket = null; // WebSocket reference
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ websocketUrl, ticketId, handleCycleBooth, refreshPage }, { dispatch }) => {
+    async ({ticketId, handleCycleBooth, refreshProfilePicture }, { dispatch }) => {
+        const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
         socket = new WebSocket(websocketUrl);
 
         socket.onopen = () => {
@@ -29,8 +30,8 @@ export const connectWebSocket = createAsyncThunk(
                 // Call the functions if specific messages are received
                 if (messageData.message === 'cycleBooth') {
                     handleCycleBooth(); // Call the passed function
-                } else if (messageData.message === 'InsufficientCredits') {
-                    refreshPage(); // Call the passed function
+                } else if (messageData.message === 'updateImage') {
+                    refreshProfilePicture(); // Call the passed function
                 }
             } catch (error) {
                 console.log(error, event.data);

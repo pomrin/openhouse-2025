@@ -65,9 +65,10 @@ function App() {
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
           {/* NAV BAR */}
-          {/* {CURRENT_USER_TYPE && <CustomSidebar />} */}
+          {CURRENT_USER_TYPE && <CustomSidebar />} 
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
+            <Route path={"/"} element={<UserLanding />} />
               <Route path={"/Home"} element={<UserLanding />} />
 
 
