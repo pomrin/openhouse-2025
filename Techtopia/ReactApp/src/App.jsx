@@ -59,6 +59,17 @@ import AdminLogin from './pages/AdminLogin';
 import Selectbooth from './pages/Selectbooth';
 import Qrcodescanner from './pages/Qrcodescanner';
 
+import Cybersecurity from './pages/Cybersecurity';
+import Fintech from './pages/Fintech';
+import AI from './pages/AI';
+import SE from './pages/SE';
+import RD from './pages/RD';
+import Museum from './pages/Museum';
+
+
+
+
+
 function App() {
   return (
     <Router>
@@ -69,7 +80,15 @@ function App() {
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
             <Route path={"/"} element={<UserLanding />} />
-              <Route path={"/Home"} element={<UserLanding />} />
+            <Route path={"/Home"} element={<UserLanding />} />
+
+            <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
+            <Route path={"/FintechMap"} element={<Fintech />} />
+            <Route path={"/AIMap"} element={<AI />} />
+            <Route path={"/SEMap"} element={<SE />} />
+            <Route path={"/RedemptionMap"} element={<RD />} />
+            <Route path={"/MuseumMap"} element={<Museum />} />
+
 
 
               {/* Testing of Admin login - commented out by default */}

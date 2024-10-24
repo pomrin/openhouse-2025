@@ -64,10 +64,10 @@ function UserLanding() {
     const [error, setError] = useState(null);
     const [output, setOutput] = useState(null);
 
-    const [isDropdownBoothOpen, setDropdownBoothOpen] = useState(false);
+    const [isDropdownBoothOpen, setDropdownBoothOpen] = useState(true);
     const [isDropdownWorkshopOpen, setDropdownWorkshopOpen] = useState(false);
     const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
-    const [boothButtonColor, setBoothButtonColor] = useState('#4CAF50'); // Original color
+    const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
@@ -253,7 +253,7 @@ function UserLanding() {
                 <h2 style={titleStyle}>All Collected Stamps</h2>
                 <p>Here you can see all your collected stamps.</p>
     
-                <div className='button-container'>
+                {/* <div className='button-container'>
                     <button className="dropdown-button" onClick={toggleDropdownBooth} style={{ marginBottom: '10px', transition: 'background-color 0.3s', backgroundColor: boothButtonColor }}>
                         {isDropdownBoothOpen ? 'Hide Booth Stamps' : 'Show Booth Stamps'}
                     </button>
@@ -261,12 +261,16 @@ function UserLanding() {
                     <button className="dropdown-button" onClick={toggleDropdownWorkshop} style={{ marginBottom: '10px', transition: 'background-color 0.3s', backgroundColor: workshopButtonColor }}>
                         {isDropdownWorkshopOpen ? 'Hide Workshop Stamps' : 'Show Workshop Stamps'}
                     </button>
-                </div>
+                </div> */}
                 
     
-                {isDropdownBoothOpen && (
+                {/* {isDropdownBoothOpen && ( */}
                     <div class='dropdown' style={{ ...dropdownStyle }}>
                         <div style={gridStyle}>
+                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
+                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
+                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
                         <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
                         <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
                         <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
@@ -279,7 +283,7 @@ function UserLanding() {
                             </div>
                         )}
                     </div>
-                )}
+                {/* )} */}
     
                 {isDropdownWorkshopOpen && (
                     <div class='dropdown' style={{ ...dropdownStyle }}>

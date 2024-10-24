@@ -84,13 +84,13 @@
         opacity: 0;
     }
     to {
-        max-height: 258.59px; /* Adjust based on content */
+        max-height: 300vh; /* Adjust based on content */
         opacity: 1;
     }
 }
 
 .dropdown {
-    animation: slideDown 0.3s ease-in-out; /* 'forwards' retains the final state */
+    animation: slideDown 0.2s ease-in-out; /* 'forwards' retains the final state */
 }
 
 .formSg {

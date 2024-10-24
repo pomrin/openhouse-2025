@@ -1,0 +1,15 @@
+.container {
+    width: 100%; /* Full width of the viewport */
+    height: 100%; /* Full height of the viewport */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Prevents overflow of the image */
+}
+
+.map-image {
+    width: auto; /* Maintain aspect ratio */
+    height: 90vh; /* Sets the height to 90% of the viewport height */
+    max-width: 100%; /* Ensure it doesn’t overflow horizontally */
+    object-fit: contain; /* Ensures the image fits well within its container */
+}
