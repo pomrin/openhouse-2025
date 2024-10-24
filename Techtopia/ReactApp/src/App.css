@@ -97,7 +97,7 @@
   top: 0;
   left: 0;
   height: 150vh;
-  z-index: 1;
+  z-index: 3;
 }
 
 .menuBar {
@@ -115,7 +115,7 @@
   max-width: 1920px; /* Optional: Max width for larger screens */
   height: 6vh; /* Set height based on viewport height */
   background-color: white; /* Set background color */
-  z-index: 1; /* Ensure it stays on top of other elements */
+  z-index: 2; /* Ensure it stays on top of other elements */
 }
 
 .menuBar img {

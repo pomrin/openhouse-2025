@@ -31,11 +31,11 @@
 
 .button-container {
     position: absolute;
-    top: 170px;
-    right: 20px;
+    top: 30%; /* Use percentage for vertical positioning */
+    right: 2%; /* Use percentage for horizontal positioning */
     display: flex;
     gap: 15px; /* Space between buttons */
-    
+    z-index: 1;
 }
 
 .zoom-button {
@@ -43,8 +43,8 @@
     color: white;
     border: none;
     border-radius: 50px; /* Rounded button */
-    padding: 15px 20px;
-    font-size: 24px;
+    padding: 0.3em 0.9em; /* Use em for responsive padding */
+    font-size: 1.5em; /* Use em for responsive font size */
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
@@ -52,9 +52,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 45px; /* Fixed width for uniformity */
-    height: 45px; /* Fixed height for uniformity */
+    min-width: 45px; /* Use min-width for responsive sizing */
+    min-height: 45px; /* Use min-height for responsive sizing */
 }
+
+/* Media query for larger screens */
+@media (min-width: 580px) {
+    .zoom-button {
+        font-size: 2em; /* Increase font size for larger screens */
+        padding: 0.5em 0.8em; /* Increase padding for larger screens */
+        
+    }
+    .button-container {
+        top: 5%;
+    }
+}
+
+@media (min-width: 920px) {
+    .zoom-button {
+        font-size: 2em; /* Further increase font size for extra-large screens */
+        padding: 0.5em 1em; /* Further increase padding for extra-large screens */
+    }
+    .button-container{
+        z-index: 1;
+        top: 2%;
+        right: 10%;
+    }
+}
+
 
 .zoom-button:hover {
     background-color: #218838; /* Darker shade on hover */
