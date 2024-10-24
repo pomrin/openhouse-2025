@@ -13,7 +13,7 @@ import { Typography } from '@mui/material';
 import { CURRENT_USER_TYPE, USER_TYPES_NAV, decodedToken, removeToken, tokenValue } from '../constants';
 import { useToastify } from '../contexts/ToastifyContext';
 import { useLoader } from '../contexts/LoaderContext';
-import nyp_logo from "./../assets/nyp_logo.png";
+import nyp_logo from "./../assets/images/RGB_SIT_1.png";
 
 function CustomSidebar() {
   const { setLoading } = useLoader();

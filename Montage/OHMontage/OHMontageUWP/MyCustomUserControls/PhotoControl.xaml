@@ -1,0 +1,20 @@
+﻿<UserControl
+    x:Class="OHMontageUWP.MyCustomUserControls.PhotoControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OHMontageUWP.MyCustomUserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <Grid Width="30px" Height="30px" Background="{Binding BackgroundColor}" >
+        <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0">
+            <Image Source="{Binding ImageUrl}" Opacity="0.7" Stretch="Uniform"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0"  Visibility="{Binding IsJiggleVisibility}">
+            <Image  x:Name="imgAnimation"  Source="{Binding AnimationImageUrl}" Stretch="Uniform"
+                    />
+        </Border>
+    </Grid>
+</UserControl>

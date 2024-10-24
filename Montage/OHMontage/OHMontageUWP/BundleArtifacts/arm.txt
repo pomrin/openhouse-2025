@@ -1,0 +1,2 @@
+MainPackage=D:\Projects\OpenHouse\2025\Montage\OHMontage\OHMontageUWP\bin\ARM\Debug\OHMontageUWP_1.0.1.0_ARM_Debug.msix
+SymbolPackage=D:\Projects\OpenHouse\2025\Montage\OHMontage\OHMontageUWP\obj\ARM\Debug\Symbols\OHMontageUWP_1.0.1.0_ARM_Debug.appxsym

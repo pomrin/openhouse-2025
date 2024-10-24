@@ -29,10 +29,16 @@ namespace OHMontageApp
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             var vm = this.DataContext as MainWindowVM;
-            //if (vm != null)
-            //{
-            //    vm.Photos.Add(new PhotoControlVM());
-            //}
+
+            if (vm != null)
+            {
+                //for (int i = 0; i < 25; i++)
+                //{
+                var photosVM = vm.MontageViewModel.Photos;
+                int random = new Random().Next(0, photosVM.Count);
+                photosVM[random].IsJiggle = true;
+                //}
+            }
         }
     }
 }

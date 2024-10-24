@@ -6,12 +6,12 @@
         "dotnet lambda help",
         "All the command line options for the Lambda command can be specified in this file."
     ],
-    "profile"     : "ChanylOH2025",
+    "profile"     : "Chanyl-AWS-NYP-OH",
     "region"      : "ap-southeast-1",
     "configuration" : "Release",
     "s3-prefix"     : "AWSServerless1/",
     "template"      : "serverless.template",
     "template-parameters" : "",
-    "s3-bucket"           : "oh2025-api-staging-serverlessdeploymentbucket-pmno8c1o2ycn",
+    "s3-bucket"           : "cf-templates-q2vb0sl4jujz-ap-southeast-1",
     "stack-name"          : "oh2025-dotnet-assetapi"
 }
