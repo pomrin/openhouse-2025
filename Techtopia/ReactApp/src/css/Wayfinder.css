@@ -64,7 +64,7 @@
         
     }
     .button-container {
-        top: 5%;
+        top: 30%;
     }
 }
 
@@ -74,8 +74,7 @@
         padding: 0.5em 1em; /* Further increase padding for extra-large screens */
     }
     .button-container{
-        z-index: 1;
-        top: 2%;
+        top: 20%;
         right: 10%;
     }
 }
