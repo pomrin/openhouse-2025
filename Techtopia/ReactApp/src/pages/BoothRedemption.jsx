@@ -3,7 +3,7 @@ import Popup from 'reactjs-popup';
 import QrScanner from 'qr-scanner';
 
 import { useNavigate } from 'react-router-dom';
-import { Box, IconButton, Typography, Grid, Button, RadioGroup, AppBar, Toolbar } from '@mui/material';
+import { Box, IconButton, Typography, Grid, Button, RadioGroup } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -16,6 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import '../css/BoothRedemption.css';
 import placeholderTag from './../assets/images/luggage-tag.webp';
+import CustomCircularProgress from './../components/customLoader.jsx';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -28,64 +29,51 @@ function RedemptionPage() {
     const navigate = useNavigate();
     const [accessToken, setAccessToken] = useState(null); 
 
+    const [tagColors, setTagColors] = useState([]);
+    const [colorsFetched, setColorsFetched] = useState(false); // Track whether colors have been fetched
+
     // Ensure user is an admin/booth helper
     useEffect(() => {
         // Retrieve accessToken from localStorage
         const token = localStorage.getItem('accessToken');
 
-        // Check if token is available
         if (!token) {
             // If no token, redirect to login page
             navigate('/adminlogin');
         } else {
-            // Set the accessToken and stop loading
+            // Set the accessToken
             setAccessToken(token);
-            setLoading(false);
         }
     }, [navigate]);
 
-    // Handle Admin logout
-    const handleLogout = () => {
-        // Remove the accessToken from localStorage to log the user out
-        localStorage.removeItem('accessToken');
-    
-        // Navigate to adminlogin page
-        navigate('/adminlogin');
-    };
+    // Fetch tag colors once access token is available
+    useEffect(() => {
+        if (accessToken && !colorsFetched) {
+            fetchColors();
+        }
+    }, [accessToken, colorsFetched]);
 
     // Return to booth selection pg
     const handleBack = () => {
         navigate('/selectbooth');
     };
 
+    // Fetch luggage tag colors from database
+    const fetchColors = async () => {
+        try {
+            const colors = await getTagColors();  
+            setTagColors(colors);  
+            setColorsFetched(true); // Set to true after fetching colors
+        } catch (error) {
+            console.error('Error fetching colors:', error); 
+        } finally {
+            setLoading(false); // Set loading to false after fetching is complete
+        }
+    };
+
     // Progress Loader
     const [loading, setLoading] = useState(true); // State used to manage page load if auth token hasn't been stored
     const [scannerLoading, setScannerLoading] = useState(false); // State used to manage loader display when awaiting API response
-
-    // Custom circular progress loader (To display when waiting for API response)
-    const CustomCircularProgress = () => {
-        return (
-            <Box sx={{
-                width: 'fit-content',
-                position: 'relative', 
-                bottom: '65%',
-                left: '32%',
-                borderRadius: '10px', 
-                padding: '10px', 
-                margin: '5px 15px'  
-            }}>
-            <svg width={0} height={0}>
-                <defs>
-                <linearGradient id="my_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#0462f9" />
-                    <stop offset="100%" stopColor="#ff0000" />
-                </linearGradient>
-                </defs>
-            </svg>
-            <CircularProgress size={50} sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} />
-            </Box>    
-        )
-    };
 
     //Styles
     const overlayStyle = {
@@ -159,108 +147,76 @@ function RedemptionPage() {
     color: 'grey',
     Transition: 'z-index 0.55'
     };
-    
-    // Placeholder colors (TBC)
-    const tagColors = [
-        { name: 'BLACK', hex: '#000000' },
-        { name: 'BLUE', hex: '#0000FF' },
-        { name: 'GREEN', hex: '#00FF00' },
-        { name: 'RED', hex: '#FF0000' },
-        { name: 'YELLOW', hex: '#FFFF00' },
-        { name: 'WHITE', hex: '#FFFFFF' }
-    ];
 
     // Tag Color buttons for redemption/update form
-    const TagColorsRadioBtns = ({ selectedColor, setSelectedColor }) => {
-        // Limit max no. of color buttons to 5 per row
-        const firstRowColors = tagColors.slice(0, 5);
-        const secondRowColors = tagColors.slice(5);
+    const TagColorsRadioBtns = ({ tagColors, selectedColor, setSelectedColor }) => {
+        // Ensure tagColors is not empty
+        if (!Array.isArray(tagColors) || tagColors.length === 0) {
+            return <div>Error loading colors, please refresh the page and try again</div>;
+        }
     
-        // Handle selection change to update the full color object
+        // Handle selection change
         const handleColorChange = (event) => {
             const selectedColorName = event.target.value;
-            const selectedColorObj = tagColors.find(color => color.name === selectedColorName);
-            setSelectedColor(selectedColorObj);  // Update with full color object (name + hex)
+            const selectedColorObj = tagColors.find(color => color.luggageTagColorName === selectedColorName);
+            setSelectedColor(selectedColorObj); // Update with the entire color object
         };
+    
+        // Split tagColors array into smaller arrays (for each row)
+        const chunkArray = (array, chunkSize) => {
+            const result = [];
+            for (let i = 0; i < array.length; i += chunkSize) {
+                result.push(array.slice(i, i + chunkSize));
+            }
+            return result;
+        };
+    
+        const colorRows = chunkArray(tagColors, 3); // Each row to contain only 3 colors
     
         return (
             <>
-                <RadioGroup
-                    aria-label="tagColor"
-                    name="tagColorOptions"
-                    value={selectedColor ? selectedColor.name : ''}  // Use color name for the radio value
-                    onChange={handleColorChange}  // Handle color change
-                    sx={{ display: 'flex', flexDirection: 'row', marginY: '3%', flexWrap: 'nowrap' }}
-                >
-                    {firstRowColors.map((color) => (
-                        <FormControlLabel
-                            key={color.name}
-                            value={color.name}  // Radio value is the color name
-                            control={
-                                <Radio
-                                    sx={{
-                                        color: color.hex,
-                                        '&.Mui-checked': {
-                                            color: color.hex,
-                                        },
-                                        '& .MuiSvgIcon-root': {
-                                            borderRadius: '50%',
-                                            width: 30,
-                                            height: 30,
-                                            backgroundColor: color.hex,
-                                            border: '2px solid transparent',
-                                        },
-                                        '&.Mui-checked .MuiSvgIcon-root': {
-                                            borderColor: 'black',
-                                        },
-                                    }}
-                                />
-                            }
-                            label=""
-                        />
-                    ))}
-                </RadioGroup>
-    
-                {/* Second row of colors */}
-                <RadioGroup
-                    aria-label="tagColor"
-                    name="tagColorOptions"
-                    value={selectedColor ? selectedColor.name : ''}  // Use color name for the radio value
-                    onChange={handleColorChange}  // Handle color change
-                    sx={{ display: 'flex', flexDirection: 'row', marginY: '3%', flexWrap: 'nowrap' }}
-                >
-                    {secondRowColors.map((color) => (
-                        <FormControlLabel
-                            key={color.name}
-                            value={color.name}  // Radio value is the color name
-                            control={
-                                <Radio
-                                    sx={{
-                                        color: color.hex,
-                                        '&.Mui-checked': {
-                                            color: color.hex,
-                                        },
-                                        '& .MuiSvgIcon-root': {
-                                            borderRadius: '50%',
-                                            width: 30,
-                                            height: 30,
-                                            backgroundColor: color.hex,
-                                            border: '2px solid transparent',
-                                        },
-                                        '&.Mui-checked .MuiSvgIcon-root': {
-                                            borderColor: 'black',
-                                        },
-                                    }}
-                                />
-                            }
-                            label=""
-                        />
-                    ))}
-                </RadioGroup>
+                {colorRows.map((row, rowIndex) => (
+                    <RadioGroup
+                        key={rowIndex}
+                        aria-label="tagColor"
+                        name={`tagColorOptions-${rowIndex}`}
+                        value={selectedColor ? selectedColor.luggageTagColorName : ''}
+                        onChange={handleColorChange}
+                        sx={{ display: 'flex', flexDirection: 'row', marginY: '3%', flexWrap: 'nowrap' }}
+                    >
+                        {row.map((color) => (
+                            <FormControlLabel
+                                key={color.luggageTagColorName}
+                                value={color.luggageTagColorName}
+                                control={
+                                    <Radio
+                                        sx={{
+                                            color: color.luggageTagColorCode,
+                                            '&.Mui-checked': {
+                                                color: color.luggageTagColorCode,
+                                            },
+                                            '& .MuiSvgIcon-root': {
+                                                borderRadius: '50%',
+                                                width: 30,
+                                                height: 30,
+                                                backgroundColor: color.luggageTagColorCode,
+                                                border: '2px solid transparent',
+                                            },
+                                            '&.Mui-checked .MuiSvgIcon-root': {
+                                                borderColor: 'black',
+                                            },
+                                        }}
+                                    />
+                                }
+                                label={color.luggageTagColorName} // Display the color name as label
+                            />
+                        ))}
+                    </RadioGroup>
+                ))}
             </>
         );
     };
-
+      
     // Handle tag color form submission
     const [ticketId, setTicketId] = useState(null);
 
@@ -297,6 +253,9 @@ function RedemptionPage() {
         setIsPopupOpen(false);
         setHasValidated(false);
         setScannerActive(true);
+
+        // Reset scanner timeout when closing popup
+        resetScannerTimeout();
         
         setTimeout(() => {
             startScanner(); // Restart QR scanner after 1 sec delay
@@ -348,7 +307,7 @@ function RedemptionPage() {
                             {/* Color selection form */}
                             <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5%', margin: '0 0 10px 5%' }}>
                                 <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
-                                <TagColorsRadioBtns selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                                <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
                                 {selectedColor && selectedColor.name !== currentColor && (
                                     <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
                                         Update Tag Color
@@ -366,22 +325,22 @@ function RedemptionPage() {
                     </Typography>
                     <img src={placeholderTag} width='85%' alt="Luggage Tag" />
                     <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5%', marginLeft: '5%' }}>
-                        <Typography variant="body1">Preferred Color</Typography>
-                        <TagColorsRadioBtns selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                        <Typography variant="body1">Preferred Color: </Typography>
+                        <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
                         <Box sx={{ width: '100%', marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
                             <Typography variant="body1">Selected color:</Typography>
                             <Box
                                 sx={{
                                     width: '30px',
                                     height: '30px',
-                                    backgroundColor: selectedColor ? selectedColor.hex : 'transparent',  // Display selected color
+                                    backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent',  // Display selected color
                                     borderRadius: '50%',
                                     border: '1px solid black',
                                     marginLeft: '3%'
                                 }}
                             />
                             <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                {selectedColor ? selectedColor.name : '-'}  {/* Display selected color name */}
+                                {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
                             </Typography>
                         </Box>
                         {selectedColor && (
@@ -472,10 +431,9 @@ function RedemptionPage() {
                 setScannerActive(true);
                 isScannerInitialized.current = true;
 
-                // Set a timeout to stop the scanner if inactive for too long
-                scannerTimeout.current = setTimeout(() => {
-                    handleScannerTimeout();
-                }, 60000);  // 1 minute timeout
+                // Reset timeout when the scanner starts
+                resetScannerTimeout();
+
             }).catch((err) => {
                 console.log("Failed to start scanner:", err);
                 isScannerInitialized.current = false;
@@ -505,12 +463,22 @@ function RedemptionPage() {
         }
     }, [loading, accessToken]);
 
+    // Reset scanner timeout
+    const resetScannerTimeout = () => {
+        if (scannerTimeout.current) {
+            clearTimeout(scannerTimeout.current); // Clear existing timeout
+        }
+
+        // Set a new timeout to stop the scanner if inactive for too long
+        scannerTimeout.current = setTimeout(() => {
+            handleScannerTimeout();
+        }, 60000);  // 1 minute timeout
+    };
+
     // Handle scanner timeout
     const handleScannerTimeout = () => {
         if (scanner.current) {
-            scanner.current.stop();
-            isScannerInitialized.current = false;
-            setScannerActive(false);
+            stopScanner(); // Call the stopScanner function to stop the scanner
             showToast("Scanner stopped due to inactivity.", 'info');
         }
     };
@@ -532,6 +500,9 @@ function RedemptionPage() {
             // (2) Display content according to visitor eligibility
             await handleEligibilityResponse(apiResponse, ticketId);
             
+            // Reset scanner timeout after processing
+            resetScannerTimeout();
+
         } catch (error) {
             console.log("Error in onScanSuccess:", error);
             showToast('An error occurred while validating the ticket.', 'error');
@@ -600,7 +571,7 @@ function RedemptionPage() {
         setScannerLoading(true);
         const requestBody = {
             ticketId: ticketId,
-            luggageTagColor: selectedColor.name
+            luggageTagColor: selectedColor.luggageTagColorName
         };
 
     try {
@@ -622,22 +593,27 @@ function RedemptionPage() {
 
     // (2b) Process API response and display content accordingly
     const handleVisitorRedemption = (response) => {
-        if (response.status === 200) {
-            // Response 200: Successful redemption
-            console.log('Success:', response);
-            showToast('Tag redeemed successfully!', 'success');
-            setIsPopupOpen(false);  
-        } else if (response.status === 400) {
-            // Response 400: Missing parameter or invalid luggage color
-            showToast('Invalid color or missing parameter. Please try again.', 'error');
-        } else if (response.status === 404) {
-            // Response 404: Ticket ID not found
-            showToast('Ticket ID not found.', 'error');
-        } else if (response.status === 409) {
-            // Response 409: Visitor already redeemed tag
-            showToast('Visitor has already redeemed a tag');
-        } else {
-            showToast(response.message || 'Failed to redeem tag, please try again.', 'error');
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful redemption
+                showToast('Tag redeemed successfully!', 'success');
+                setIsPopupOpen(false); 
+            case 400:
+                // Response 400: Missing parameter or invalid luggage color
+                showToast('Invalid color or missing parameter. Please try again.', 'error');
+                break;
+            case 404:
+                // Invalid ticket ID
+                showToast('Ticket ID not found!', 'error');
+                startScanner();
+                break;
+            case 409:
+                // Response 409: Visitor already redeemed tag
+                showToast('Visitor has already redeemed a tag');
+                break;
+            default:
+                showToast(response.message || 'Failed to redeem tag, please try again.', 'error');
+                break;
         }
     };
 
@@ -646,7 +622,7 @@ function RedemptionPage() {
         setScannerLoading(true);
         const requestBody = {
             ticketId: ticketId,
-            luggageTagColor: selectedColor.name
+            luggageTagColor: selectedColor.luggageTagColorName
         };
     
     try {
@@ -668,19 +644,23 @@ function RedemptionPage() {
 
     // (3b) Process API response and display content accordingly
     const handleVisitorTagUpdate = (response) => {
-        if (response.status === 200) {
-            // Response 200: Successful update
-            console.log('Success:', response);
-            showToast('Tag updated successfully!', 'success');
-            setIsPopupOpen(false);  
-        } else if (response.status === 400) {
-            // Response 400: Missing parameter or invalid luggage color
-            showToast('Invalid color or missing parameter. Please try again.', 'error');
-        } else if (response.status === 404) {
-            // Response 404: Ticket ID not found
-            showToast('Ticket ID not found. Please try again.', 'error');
-        } else {
-            showToast(response.message || 'Failed to update tag, please try again.', 'error');
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful update
+                showToast('Tag updated successfully!', 'success');
+                setIsPopupOpen(false);  
+                break;
+            case 400:
+                // Response 400: Missing parameter or invalid luggage color
+                showToast('Invalid color or missing parameter. Please try again.', 'error');
+                break;
+            case 404:
+                // Response 404: Ticket ID not found
+                showToast('Ticket ID not found. Please try again.', 'error');
+                break;
+            default:
+                showToast(response.message || 'Failed to update tag, please try again.', 'error');
+                break;
         }
     };
 
@@ -696,7 +676,7 @@ function RedemptionPage() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch visitor data');
+                throw new Error('Failed to fetch visitor data from API');
             }
 
             const data = await response.json();
@@ -725,6 +705,29 @@ function RedemptionPage() {
         }
     };
 
+    // (5) Retrieve tag colors [ name & color hex ]
+    const getTagColors = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/LuggageTagColors`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to fetch tag colors from API');
+            }
+    
+            const data = await response.json();
+            return data; // Return the colors data
+        } catch (error) {
+            console.log('Error retrieving luggage tag colors:', error);
+            throw error; // Rethrow the error to be caught in fetchColors
+        }
+    };
+
     // Render a loading spinner if token not ready
     if (loading) {
         return (
@@ -736,17 +739,6 @@ function RedemptionPage() {
     
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            {/* Fixed AppBar */}
-            <AppBar position="fixed">
-            <Toolbar>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                NYP Open House Admin
-                </Typography>
-                <Button color="inherit" onClick={handleLogout}>
-                Logout
-                </Button>
-            </Toolbar>
-            </AppBar>
 
             <Box sx={{
                 height: '95vh',
@@ -823,6 +815,7 @@ function RedemptionPage() {
                             </Grid>
                         </Grid>
                     </Grid>
+
                 </Box>
                 <Box>
                     <Snackbar open={openToast} autoHideDuration={3000} onClose={closeToast}>
