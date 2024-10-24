@@ -48,6 +48,9 @@ provider:
     # Form SG config
     FORM_SG_POST_URL: ${env:FORM_SG_POST_URL}
     FORM_SECRET_KEY: ${env:FORM_SECRET_KEY}
+    # Form SG Demo config
+    FORM_SG_POST_URL_DEMO: ${env:FORM_SG_POST_URL_DEMO}
+    FORM_SECRET_KEY_DEMO: ${env:FORM_SECRET_KEY_DEMO}
     # CutOutPro
     CUT_OUT_PRO_API: ${env:CUT_OUT_PRO_API}
 
@@ -66,6 +69,14 @@ functions:
     events:
       - http:
           path: /formsg/imageuploaded
+          method: POST
+          cors: true
+
+  demoformsgpost:
+    handler: routes/formsgsubmission.postDemoRequest
+    events:
+      - http:
+          path: /formsg/demoimageuploaded
           method: POST
           cors: true
 

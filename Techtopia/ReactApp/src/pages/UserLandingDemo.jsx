@@ -17,6 +17,7 @@ import boothimage2 from './../assets/images/step2.png';
 import boothimage3 from './../assets/images/step3.png';
 import boothimage4 from './../assets/images/step4.png';
 import uploadProfile from './../assets/images/upload_profile.png';
+import circleAnimation from './../assets/images/circleanimation.gif';
 // import http from './http';
 import axios from './http';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
@@ -506,47 +507,43 @@ function UserLanding() {
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
     // const imageSrc = photo_link || fallback_link || fallback2_link;
-    const formSGApi = import.meta.env.VITE_FORMSG_LINK
+    const formSGApi = import.meta.env.VITE_FORMSG_LINK_DEMO
     const form_sg = formSGApi + ticket_id
+
+
+
     function clearLocalStorage() {
         localStorage.clear();
     }
+
+    const [showOverlay, setShowOverlay] = useState(false);
+    const onHover = () => {
+        setShowOverlay(true);
+    };
+
+    const onLeave = () => {
+        setShowOverlay(false);
+    };
+
     return (
         <Box className="bodyBox">
             <Box>
-                {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
-                <div>
-                    {/*
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    style={{ display: 'none' }}
-                    id="fileInput"
-                />
-                <label htmlFor="fileInput" style={{
-                    cursor: 'pointer',
-                    padding: '10px 20px',
-                    background: '#007BFF',
-                    color: '#fff',
-                    borderRadius: '5px',
-                    textAlign: 'center'
-                }}>
-                    Choose File
-                </label>
-
-                <button onClick={handleUpload} disabled={loading || !file} style={{ marginLeft: '10px' }}>
-                    Upload
-                </button>
-                <button onClick={handleRemoveImage} style={{ marginLeft: '10px' }}>
-                    Remove
-                </button>
-                */}
-                </div>
-
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
+                <h2 class="boardingpassSubHeader">*Early Access*</h2>
+                <h3 class="boardingpassSubHeader">
+                    Do you want to see what you would look like as a digital avatar?
+                </h3>
+                <br />
+                <div
+                    onMouseEnter={onHover}
+                    onMouseLeave={onLeave}>
+                    <h3>
+                        Upload your photo now and join us as we aim to set a Singapore Book of Records title for
+                        'Most People Contributing to a Digital Avatar Montage.'</h3>
+                </div>
+                <br />
                 <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
                     <Box className="topdiv">
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
@@ -563,14 +560,20 @@ function UserLanding() {
                                 <div className="uploadCircle">
                                     <img src={uploadProfile} alt="Upload" className="uploadImage" />
                                 </div>
+                                {showOverlay && <div className="CircleAnimationDiv">
+                                </div>}
                             </Box>
                         </a>
                         <Box className="QRBox">
                             <img src={qrImage} alt="QR Code" className="qrImage" />
                         </Box>
+                        <Box>
+                            <Typography class="bold">
+                                Ticket ID: {ticket_id}
+                            </Typography>
+                        </Box>
                     </Box>
                 </Paper>
-
             </Box>
         </Box>
     );

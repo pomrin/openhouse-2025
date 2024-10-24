@@ -28,13 +28,13 @@ import { connectWebSocket, sendMessage } from '../features/websocket/websocketsl
 
 
 function UserLanding() {
-    
+
     // websocket in redux
     const dispatch = useDispatch();
     const [input, setInput] = useState('');
     const [recipientId, setRecipientId] = useState('');
-    
-  
+
+
     const isConnected = useSelector((state) => state.websocket.isConnected);
     const messages = useSelector((state) => state.websocket.messages);
 
@@ -86,15 +86,15 @@ function UserLanding() {
                 }
             });
 
-            const token = response.data; 
-            const decodedToken = parseJwt(token); 
+            const token = response.data;
+            const decodedToken = parseJwt(token);
             const staffData = JSON.parse(decodedToken.Staff);
             const newTicketId = staffData.TicketId;
-            
+
             setUniqueId(newTicketId);
             localStorage.setItem('ticket_id', newTicketId);
             localStorage.setItem('accessToken', token);
-    
+
         } catch (error) {
             if (error.response) {
                 console.error("Error response:", error.response.data);
@@ -111,11 +111,11 @@ function UserLanding() {
     const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
 
     //List of images:
-    const boothImages =[boothimage1, boothimage2, boothimage3, boothimage4]
+    const boothImages = [boothimage1, boothimage2, boothimage3, boothimage4]
 
     const [currentBooth, setCurrentBooth] = useState('Fintech');
     const [currentImage, setCurrentImage] = useState(boothImages[0]);
-    
+
     // Function to cycle through the booth names
     const handleCycleBooth = () => {
         setCurrentBooth((prevBooth) => {
@@ -164,13 +164,13 @@ function UserLanding() {
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
         generateQR();
-        dispatch(connectWebSocket({ticketId: ticket_id, handleCycleBooth, refreshProfilePicture}));
-        
+        dispatch(connectWebSocket({ ticketId: ticket_id, handleCycleBooth, refreshProfilePicture }));
+
         const updateDateTime = () => {
             const currentDate = new Date();
-            
+
             const day = String(currentDate.getDate()).padStart(2, '0');
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0'); 
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
             const year = currentDate.getFullYear();
             const formattedDate = `${day}/${month}/${year}`;
             setCurrentDate(formattedDate);
@@ -178,13 +178,13 @@ function UserLanding() {
             const hours = currentDate.getHours();
             const minutes = String(currentDate.getMinutes()).padStart(2, '0');
             const isAm = hours < 12;
-            const formattedHours = hours % 12 || 12; 
+            const formattedHours = hours % 12 || 12;
             const amPm = isAm ? 'AM' : 'PM';
             const formattedTime = `${formattedHours}:${minutes} ${amPm}`;
             setCurrentTime(formattedTime);
         };
 
-        updateDateTime(); 
+        updateDateTime();
         const savedImage = localStorage.getItem('uploadedImage');
         if (savedImage) {
             setOutput(savedImage);
@@ -193,13 +193,13 @@ function UserLanding() {
 
     const handleSendMessage = () => {
         if (input && recipientId && isConnected) {
-          dispatch(sendMessage({ recipientId, input }));
-          setInput('');
-          setRecipientId('');
+            dispatch(sendMessage({ recipientId, input }));
+            setInput('');
+            setRecipientId('');
         } else {
-          console.error('Message and recipient ID must not be empty');
+            console.error('Message and recipient ID must not be empty');
         }
-      };
+    };
 
     const toggleDropdownBooth = () => {
         setDropdownBoothOpen(prev => {
@@ -208,9 +208,9 @@ function UserLanding() {
             if (newBoothState) {
                 // If booth is now open, set workshop button color to original
                 //setWorkshopButtonColor('red');
-               // setBoothButtonColor('#4CAF50'); // Set booth button color to red
-               setBoothButtonColor('red');
-               setWorkshopButtonColor('#4CAF50'); // Set booth button color to red
+                // setBoothButtonColor('#4CAF50'); // Set booth button color to red
+                setBoothButtonColor('red');
+                setWorkshopButtonColor('#4CAF50'); // Set booth button color to red
             } else {
                 // If booth is closing, reset booth button color
                 setBoothButtonColor('#4CAF50');
@@ -251,7 +251,7 @@ function UserLanding() {
                 <button onClick={() => close()} className='close-button'>&times;</button>
                 <h2 style={titleStyle}>All Collected Stamps</h2>
                 <p>Here you can see all your collected stamps.</p>
-    
+
                 {/* <div className='button-container'>
                     <button className="dropdown-button" onClick={toggleDropdownBooth} style={{ marginBottom: '10px', transition: 'background-color 0.3s', backgroundColor: boothButtonColor }}>
                         {isDropdownBoothOpen ? 'Hide Booth Stamps' : 'Show Booth Stamps'}
@@ -261,11 +261,11 @@ function UserLanding() {
                         {isDropdownWorkshopOpen ? 'Hide Workshop Stamps' : 'Show Workshop Stamps'}
                     </button>
                 </div> */}
-                
-    
+
+
                 {/* {isDropdownBoothOpen && ( */}
-                    <div class='dropdown' style={{ ...dropdownStyle }}>
-                        <div style={gridStyle}>
+                <div class='dropdown' style={{ ...dropdownStyle }}>
+                    <div style={gridStyle}>
                         <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
                         <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
                         <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
@@ -274,28 +274,28 @@ function UserLanding() {
                         <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
                         <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
                         <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} /> */}
-                        </div>
-                        {/* Display message if no stamps are visible */}
-                        {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
-                            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
-                                You have not collected anything.
-                            </div>
-                        )}
                     </div>
+                    {/* Display message if no stamps are visible */}
+                    {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
+                        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
+                            You have not collected anything.
+                        </div>
+                    )}
+                </div>
                 {/* )} */}
-    
+
                 {isDropdownWorkshopOpen && (
                     <div class='dropdown' style={{ ...dropdownStyle }}>
                         {/* Workshop stamps would go here */}
                         <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
-                                You have not collected anything.
-                            </div>
+                            You have not collected anything.
+                        </div>
                     </div>
                 )}
             </div>
         </div>
     );
-      
+
     // Function to toggle AI stamp visibility
     const toggleAiStamp = () => {
         const newValue = !isAiStampVisible;
@@ -326,15 +326,15 @@ function UserLanding() {
 
 
 
-      // Styles
+    // Styles
     const dropdownStyle = {
         overflow: 'hidden',
         transition: 'height 0.3s ease-in-out',
         border: '1px solid #ddd', // Optional: border to visually separate the dropdown
         backgroundColor: '#fafafa'
     };
-        
-    
+
+
     const displayStamp = {
         display: 'none'
     };
@@ -345,8 +345,8 @@ function UserLanding() {
     const contentStyle = {
         maxHeight: 'calc(100vh - 40px)', // Ensure modal content area is scrollable if it overflows
         overflowY: 'auto', // Enable vertical scrolling within the content area
-      };
-    
+    };
+
     const popupContentStyle = {
         width: '100vw', // Full width
         height: '100vh', // Full height
@@ -358,7 +358,7 @@ function UserLanding() {
         background: 'rgba(0, 0, 0, 0.7)' // Transparent black background
 
     };
-    
+
     const modalContentStyle = {
         width: '80%', // Adjust the width as needed
         height: '80%', // Adjust the height as needed
@@ -369,11 +369,11 @@ function UserLanding() {
         position: 'relative', // For absolute positioning of internal elements if needed
         alignItems: 'center'
     };
-    
+
     const titleStyle = {
         marginBottom: '20px'
     };
-    
+
 
     const gridStyle = {
         display: 'grid',
@@ -381,8 +381,8 @@ function UserLanding() {
         gap: '10px', // Space between stamps
         justifyItems: 'center', // Center items in their grid cells
         marginTop: '20px', // Space above the grid
-      };
-    
+    };
+
 
     // Handle File Upload Cartoonify
     const handleFileChange = (event) => {
@@ -413,19 +413,19 @@ function UserLanding() {
             alert("Please select a file first.");
             return;
         }
-    
+
         setLoading(true);
         setError(null);
 
         const formData = new FormData();
-        
-    
+
+
         // Check if the file is a valid File object
         if (file instanceof File) {
             console.log('File Name:', file.name);
             console.log('File Type:', file.type);
             console.log('File Size:', file.size); // Size in bytes
-    
+
             // Convert the file to a Uint8Array to access the binary data
             const byteArray = new Uint8Array(await file.arrayBuffer());
             const base64String = uint8ArrayToBase64(byteArray);
@@ -436,7 +436,7 @@ function UserLanding() {
             console.log('Blob created from Base64:', blob);
 
             formData.append('file', blob); // Use 'file' as the key
-    
+
             try {
                 const cutoutproApi = import.meta.env.VITE_CUTOUTPRO_API
                 const cutoutproApiKey = import.meta.env.VITE_CUTOUTPRO_API_KEY
@@ -449,12 +449,12 @@ function UserLanding() {
                     },
                     body: formData,
                 });
-    
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Network response was not ok: ${errorText}`);
                 }
-    
+
                 const blob = await response.blob();
                 const imageUrl = URL.createObjectURL(blob);
                 setOutput(imageUrl);
@@ -478,8 +478,8 @@ function UserLanding() {
         }
     };
 
-    
-    
+
+
 
     const handleRemoveImage = () => {
         setOutput(null);
@@ -487,7 +487,7 @@ function UserLanding() {
     };
 
     const handleDropChange = (event) => {
-    setSelectedValue(event.target.value);
+        setSelectedValue(event.target.value);
     };
 
     const imageRepo = import.meta.env.VITE_IMAGE_REPO
@@ -502,34 +502,34 @@ function UserLanding() {
             console.log("photo updated");
         }, 5000); // 5000 milliseconds = 5 seconds
     };
-   // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
+    // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
-   // const imageSrc = photo_link || fallback_link || fallback2_link;
+    // const imageSrc = photo_link || fallback_link || fallback2_link;
     const formSGApi = import.meta.env.VITE_FORMSG_LINK
     const form_sg = formSGApi + ticket_id
     function clearLocalStorage() {
         localStorage.clear();
-      }
+    }
     return (
         <Box className="bodyBox">
-        <Box>
-            {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
-            <div>
-                {/* 
-                <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                    style={{ display: 'none' }} 
+            <Box>
+                {/* <img src={nyp_logo} width="60%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" /> */}
+                <div>
+                    {/*
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
                     id="fileInput"
                 />
                 <label htmlFor="fileInput" style={{
-                    cursor: 'pointer', 
-                    padding: '10px 20px', 
-                    background: '#007BFF', 
-                    color: '#fff', 
-                    borderRadius: '5px', 
+                    cursor: 'pointer',
+                    padding: '10px 20px',
+                    background: '#007BFF',
+                    color: '#fff',
+                    borderRadius: '5px',
                     textAlign: 'center'
                 }}>
                     Choose File
@@ -540,136 +540,136 @@ function UserLanding() {
                 </button>
                 <button onClick={handleRemoveImage} style={{ marginLeft: '10px' }}>
                     Remove
-                </button> 
+                </button>
                 */}
-            </div>
-
-            {loading && <p>Loading...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-            <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px" ,paddingTop: "10px"}}>
-                <Box className="topdiv">
-                    <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                        <Box className="profilePicture" sx={{ position: "relative" }}>
-                            <img 
-                                src={imageSource} 
-                                alt="Profile" 
-                                className="profileImage"
-                                onError={(e) => {
-                                    e.target.onerror = null; 
-                                    e.target.src = noImageUploaded; // Fallback image on error
-                                }} 
-                            />
-                            <div className="uploadCircle">
-                                <img src={uploadProfile} alt="Upload" className="uploadImage" />
-                            </div>
-                        </Box>
-                    </a>
-                    <Box className="QRBox">
-                        <img src={qrImage} alt="QR Code" className="qrImage"/>
-                    </Box>
-                </Box>
-            </Paper>
-            <Paper className="BoardingPass" elevation={12} sx={{ borderRadius: "20px", marginTop:"20px"}}>
-                <Box className="BoardingPassContent">
-                    <Box class="detailsBox">
-                        <Box>
-                            <Typography class="bold">
-                                Engraving Queue Status
-                            </Typography>
-                            <Typography>
-                                {queueNumber} {/* Queue number state */}
-                            </Typography>
-                        </Box>
-                        <Box>
-                            <Typography class="bold">
-                                Redemption Status
-                            </Typography>
-                            <Typography>
-                                {queueNumber} {/* Queue number state */}
-                            </Typography> 
-                        </Box>
-                    </Box>
-                    <h1>Stamps:</h1>
-                    <Box className="stampsBox">
-                        <Box className="stamps">
-                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none', marginTop: '25px'  }} />
-           
-                        </Box>
-                        <Box className="stamps">
-                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none', marginTop: '25px'  }} />
-
-                        </Box>
-                    </Box>
-                    <Box className="stampsBox">
-                        <Box className="stamps">
-                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none', marginTop: '25px'  }} />
-
-                        </Box>
-                        <Box className="stamps">
-                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none', marginTop: '25px' }} />
-                        </Box>
-                    </Box>
-                </Box>
-            </Paper>
-            
-            <div>
-                <h1>WebSocket Communication</h1>
-                <div class="messageDiv">
-                    {messages.map((msg, index) => (
-                    <div key={index}>{msg.message || 'Received non-JSON message'}</div>
-                    ))}
                 </div>
+
+                {loading && <p>Loading...</p>}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
+                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
+                    <Box className="topdiv">
+                        <a href={form_sg} target="_blank" rel="noopener noreferrer">
+                            <Box className="profilePicture" sx={{ position: "relative" }}>
+                                <img
+                                    src={imageSource}
+                                    alt="Profile"
+                                    className="profileImage"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = noImageUploaded; // Fallback image on error
+                                    }}
+                                />
+                                <div className="uploadCircle">
+                                    <img src={uploadProfile} alt="Upload" className="uploadImage" />
+                                </div>
+                            </Box>
+                        </a>
+                        <Box className="QRBox">
+                            <img src={qrImage} alt="QR Code" className="qrImage" />
+                        </Box>
+                    </Box>
+                </Paper>
+                <Paper className="BoardingPass" elevation={12} sx={{ borderRadius: "20px", marginTop: "20px" }}>
+                    <Box className="BoardingPassContent">
+                        <Box class="detailsBox">
+                            <Box>
+                                <Typography class="bold">
+                                    Engraving Queue Status
+                                </Typography>
+                                <Typography>
+                                    {queueNumber} {/* Queue number state */}
+                                </Typography>
+                            </Box>
+                            <Box>
+                                <Typography class="bold">
+                                    Redemption Status
+                                </Typography>
+                                <Typography>
+                                    {queueNumber} {/* Queue number state */}
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <h1>Stamps:</h1>
+                        <Box className="stampsBox">
+                            <Box className="stamps">
+                                <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none', marginTop: '25px' }} />
+
+                            </Box>
+                            <Box className="stamps">
+                                <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none', marginTop: '25px' }} />
+
+                            </Box>
+                        </Box>
+                        <Box className="stampsBox">
+                            <Box className="stamps">
+                                <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none', marginTop: '25px' }} />
+
+                            </Box>
+                            <Box className="stamps">
+                                <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none', marginTop: '25px' }} />
+                            </Box>
+                        </Box>
+                    </Box>
+                </Paper>
+
                 <div>
-        <input
-          type="text"
-          placeholder="Recipient ID"
-          value={recipientId}
-          onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
-        />
-        <input
-          type="text"
-          placeholder="Type a message"
-          value={input}
-          onChange={(e) => setInput(e.target.value)} // Handle message input
-        />
-        <button onClick={handleSendMessage}>Send Message</button>
-      </div>
-            </div>
-            <Box>
-                <Typography class="bold">
-                    Passenger ID
-                </Typography>
-                <Typography>
-                    {ticket_id}
-                </Typography>
-            </Box>
+                    <h1>WebSocket Communication</h1>
+                    <div class="messageDiv">
+                        {messages.map((msg, index) => (
+                            <div key={index}>{msg.message || 'Received non-JSON message'}</div>
+                        ))}
+                    </div>
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Recipient ID"
+                            value={recipientId}
+                            onChange={(e) => setRecipientId(e.target.value)} // Handle recipient ID input
+                        />
+                        <input
+                            type="text"
+                            placeholder="Type a message"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)} // Handle message input
+                        />
+                        <button onClick={handleSendMessage}>Send Message</button>
+                    </div>
+                </div>
+                <Box>
+                    <Typography class="bold">
+                        Passenger ID
+                    </Typography>
+                    <Typography>
+                        {ticket_id}
+                    </Typography>
+                </Box>
                 {/* Button to cycle through booth names */}
-                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width: '60%' }}>
                     Change Booth
                 </Button>
                 {/* New button to increment queue number */}
-                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width:'60%' }}>
+                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width: '60%' }}>
                     Add Queue Number
                 </Button>
-            {/* Gained a stamp upon each completion of booth */}
-        <Button variant="contained" color="primary"  onClick={toggleAiStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                {/* Gained a stamp upon each completion of booth */}
+                <Button variant="contained" color="primary" onClick={toggleAiStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
                     Completed Booth 1
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleCsStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
-                    Completed Booth 2   
-        </Button>
-        <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                </Button>
+                <Button variant="contained" color="primary" onClick={toggleCsStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+                    Completed Booth 2
+                </Button>
+                <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
                     Completed Booth 3
-        </Button>
-        <Button variant="contained" color="primary"  onClick={toggleItStamp} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                </Button>
+                <Button variant="contained" color="primary" onClick={toggleItStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
                     Completed Booth 4
-        </Button>
-        <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
+                </Button>
+                <Button variant="contained" color="primary" onClick={clearLocalStorage} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
                     Clear Local Storage
-        </Button>
-        
-        </Box>
+                </Button>
+
+            </Box>
         </Box>
     );
 }

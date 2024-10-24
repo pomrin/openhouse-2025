@@ -1,19 +1,23 @@
-.bodyBox{
-    max-width:400px;
-    margin-left:auto;
-    margin-right:auto;
+.bodyBox {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.messageDiv{
-    width:80%;
-    border:1px solid black;
-    min-height:50px;
-    
+.messageDiv {
+    width: 80%;
+    border: 1px solid black;
+    min-height: 50px;
+
 }
 
-.boardingpassHeader{
-    text-align:center;
-    margin-top:100px;
+.boardingpassHeader {
+    text-align: center;
+    margin-top: 100px;
+}
+
+.boardingpassSubHeader {
+    text-align: center;
 }
 
 .topdiv {
@@ -25,7 +29,7 @@
     gap: 20px;
 }
 
-.profilePicture{
+.profilePicture {
     width: 40vw;
     height: 40vw;
     max-width: 120px;
@@ -35,7 +39,7 @@
     position: relative;
 }
 
-.QRBox{
+.QRBox {
     width: 40vw;
     height: 40vw;
     max-width: 120px;
@@ -46,8 +50,8 @@
 
 .uploadCircle {
     position: absolute;
-    bottom: -10px; 
-    right: -10px; 
+    bottom: -10px;
+    right: -10px;
     width: 30px;
     height: 30px;
     background-color: #02cc4c;
@@ -55,6 +59,19 @@
     overflow: hidden;
     padding: 3px;
     border: 2px solid black;
+}
+
+.CircleAnimationDiv {
+    position: absolute;
+    bottom: -40px;
+    right: -40px;
+    width: 100px;
+    height: 100px;
+    background-image: url("/images/circleanimation.gif");
+    background-repeat: no-repeat, no-repeat;
+    background-position: center;
+    background-size: cover;
+
 }
 
 .qrImage {
@@ -73,7 +90,8 @@
         flex-direction: row;
     }
 
-    .profilePicture, .QRBox {
+    .profilePicture,
+    .QRBox {
         width: 75vw;
         height: 75vw;
     }
@@ -95,43 +113,43 @@
     margin: 2px;
 }
 
-.profileImage{
-    height:100%;
-    width:100%;
-    object-fit:cover;
+.profileImage {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
 }
 
-.BoardingPass{
-    width:100%;
+.BoardingPass {
+    width: 100%;
 }
 
-.BoardingPassContent{
-    padding:14px;
+.BoardingPassContent {
+    padding: 14px;
 }
 
-.travelBox{
-    display:flex;
-    justify-content:space-between;
-    text-align:center;
+.travelBox {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
 }
 
-.fromBox{
-    text-align:left;
+.fromBox {
+    text-align: left;
 }
 
-.toBox{
-    text-align:right;
+.toBox {
+    text-align: right;
 }
 
-.bold{
-    font-weight:bold;
+.bold {
+    font-weight: bold;
 }
 
-.detailsBox{
-    display:flex;
-    text-align:center;
-    justify-content:space-around;
-    padding-bottom:10px;
+.detailsBox {
+    display: flex;
+    text-align: center;
+    justify-content: space-around;
+    padding-bottom: 10px;
 }
 
 
@@ -141,91 +159,137 @@
         max-height: 0;
         opacity: 0;
     }
+
     to {
-        max-height: 300vh; /* Adjust based on content */
+        max-height: 300vh;
+        /* Adjust based on content */
         opacity: 1;
     }
 }
 
 .dropdown {
-    animation: slideDown 0.2s ease-in-out; /* 'forwards' retains the final state */
+    animation: slideDown 0.2s ease-in-out;
+    /* 'forwards' retains the final state */
 }
 
 .formSg {
     display: inline-block;
     padding: 12px 24px;
-    background-color: #6200ea; /* Purple background */
-    color: white; /* White text */
-    font-size: 16px; /* Font size */
-    font-weight: bold; /* Bold text */
-    border: none; /* No border */
-    border-radius: 8px; /* Rounded corners */
-    text-decoration: none; /* Remove underline */
-    text-align: center; /* Center text */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
-    cursor: pointer; /* Pointer cursor */
+    background-color: #6200ea;
+    /* Purple background */
+    color: white;
+    /* White text */
+    font-size: 16px;
+    /* Font size */
+    font-weight: bold;
+    /* Bold text */
+    border: none;
+    /* No border */
+    border-radius: 8px;
+    /* Rounded corners */
+    text-decoration: none;
+    /* Remove underline */
+    text-align: center;
+    /* Center text */
+    transition: background-color 0.3s, transform 0.2s;
+    /* Smooth transitions */
+    cursor: pointer;
+    /* Pointer cursor */
     margin-left: auto;
     margin-right: auto;
-  }
-  
-  .formSg:hover {
-    background-color: #3700b3; /* Darker purple on hover */
-    transform: scale(1.05); /* Slightly enlarge the button */
-  }
-  
-  .formSg:active {
-    transform: scale(0.95); /* Slightly shrink when clicked */
-  }
+}
+
+.formSg:hover {
+    background-color: #3700b3;
+    /* Darker purple on hover */
+    transform: scale(1.05);
+    /* Slightly enlarge the button */
+}
+
+.formSg:active {
+    transform: scale(0.95);
+    /* Slightly shrink when clicked */
+}
 
 .boxForm {
-    
-        display: flex; /* Use flexbox */
-        justify-content: center; /* Center horizontally */
-        align-items: center; /* Center vertically */
-        margin-top: 1vh; /* Remove default margin */
-    
+
+    display: flex;
+    /* Use flexbox */
+    justify-content: center;
+    /* Center horizontally */
+    align-items: center;
+    /* Center vertically */
+    margin-top: 1vh;
+    /* Remove default margin */
+
 }
 
 .close-button {
-    background-color: transparent; /* No background */
-    border: none; /* No border */
-    color: #000; /* Change to your desired color */
-    font-size: 8vw; /* Adjust size */
-    cursor: pointer; /* Pointer on hover */
-    position: absolute; /* Position it inside the modal */
-    top: 10px; /* Adjust top position */
-    right: 10px; /* Adjust right position */
-    transition: transform 0.3s; /* Smooth animation */
+    background-color: transparent;
+    /* No background */
+    border: none;
+    /* No border */
+    color: #000;
+    /* Change to your desired color */
+    font-size: 8vw;
+    /* Adjust size */
+    cursor: pointer;
+    /* Pointer on hover */
+    position: absolute;
+    /* Position it inside the modal */
+    top: 10px;
+    /* Adjust top position */
+    right: 10px;
+    /* Adjust right position */
+    transition: transform 0.3s;
+    /* Smooth animation */
 }
 
 .close-button:hover {
-    transform: scale(1.2); /* Scale up on hover */
-    color: #f00; /* Change color on hover */
+    transform: scale(1.2);
+    /* Scale up on hover */
+    color: #f00;
+    /* Change color on hover */
 }
 
 .button-container {
-    display: flex; /* Use flexbox for alignment */
-    justify-content: center; /* Center the buttons */
-    gap: 15px; /* Gap between buttons */
-    margin-bottom: 10px; /* Space below the buttons */
+    display: flex;
+    /* Use flexbox for alignment */
+    justify-content: center;
+    /* Center the buttons */
+    gap: 15px;
+    /* Gap between buttons */
+    margin-bottom: 10px;
+    /* Space below the buttons */
 }
 
 .dropdown-button {
-    background-color: #4CAF50; /* Change to your desired background color */
-    color: white; /* Text color */
-    border: none; /* No border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 10px 20px; /* Padding for size */
-    font-size: 16px; /* Font size */
-    cursor: pointer; /* Pointer on hover */
-    transition: background-color 0.3s, transform 0.3s; /* Smooth transitions */
+    background-color: #4CAF50;
+    /* Change to your desired background color */
+    color: white;
+    /* Text color */
+    border: none;
+    /* No border */
+    border-radius: 5px;
+    /* Rounded corners */
+    padding: 10px 20px;
+    /* Padding for size */
+    font-size: 16px;
+    /* Font size */
+    cursor: pointer;
+    /* Pointer on hover */
+    transition: background-color 0.3s, transform 0.3s;
+    /* Smooth transitions */
 }
 
 .dropdown-button:hover {
-    background-color: #45a049; /* Darker shade on hover */
-    transform: scale(1.05); /* Slight scale up on hover */
+    background-color: #45a049;
+    /* Darker shade on hover */
+    transform: scale(1.05);
+    /* Slight scale up on hover */
 }
 
 .dropdown-button:active {
-    transform: scale(0.95); /* Slight scale down when active */
+    transform: scale(0.95);
+    /* Slight scale down when active */
 }

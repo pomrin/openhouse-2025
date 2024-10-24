@@ -53,7 +53,7 @@ import AddUserPage from './pages/admin/users/AddUserPage';
 import SignInPage from './pages/SignInPage';
 import LoanReceipt from './pages/loans/LoanReceipt';
 import UserLanding from './pages/UserLanding'
-import UserLandingDemo from './pages/UserLandingDemo'
+import DemoPage from './pages/UserLandingDemo'
 import BoothRedemptionPage from './pages/BoothRedemption'
 
 import AdminLogin from './pages/AdminLogin';
@@ -77,12 +77,12 @@ function App() {
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
           {/* NAV BAR */}
-          {CURRENT_USER_TYPE && <CustomSidebar />}
+
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
               <Route path={"/"} element={<UserLanding />} />
               <Route path={"/Home"} element={<UserLanding />} />
-              <Route path={"/Demo"} element={<UserLandingDemo />} />
+              <Route path={"/Demo"} element={<UserLanding />} />
 
               <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
               <Route path={"/FintechMap"} element={<Fintech />} />
