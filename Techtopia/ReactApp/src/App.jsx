@@ -53,6 +53,7 @@ import AddUserPage from './pages/admin/users/AddUserPage';
 import SignInPage from './pages/SignInPage';
 import LoanReceipt from './pages/loans/LoanReceipt';
 import UserLanding from './pages/UserLanding'
+import UserLandingDemo from './pages/UserLandingDemo'
 import BoothRedemptionPage from './pages/BoothRedemption'
 
 import AdminLogin from './pages/AdminLogin';
@@ -76,76 +77,31 @@ function App() {
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
           {/* NAV BAR */}
-          {CURRENT_USER_TYPE && <CustomSidebar />} 
+          {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
-            <Route path={"/"} element={<UserLanding />} />
-            <Route path={"/Home"} element={<UserLanding />} />
+              <Route path={"/"} element={<UserLanding />} />
+              <Route path={"/Home"} element={<UserLanding />} />
+              <Route path={"/Demo"} element={<UserLandingDemo />} />
 
-            <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
-            <Route path={"/FintechMap"} element={<Fintech />} />
-            <Route path={"/AIMap"} element={<AI />} />
-            <Route path={"/SEMap"} element={<SE />} />
-            <Route path={"/RedemptionMap"} element={<RD />} />
-            <Route path={"/MuseumMap"} element={<Museum />} />
+              <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
+              <Route path={"/FintechMap"} element={<Fintech />} />
+              <Route path={"/AIMap"} element={<AI />} />
+              <Route path={"/SEMap"} element={<SE />} />
+              <Route path={"/RedemptionMap"} element={<RD />} />
+              <Route path={"/MuseumMap"} element={<Museum />} />
 
 
 
               {/* Testing of Admin login - commented out by default */}
               {/* <Route path={"/"} element={<AdminLogin />} /> */}
-              
+
               {/* Admin Login for the 3 rows below this comment */}
               <Route path="/adminlogin" element={<AdminLogin />} />
               <Route path="/selectbooth" element={<Selectbooth />} />
               <Route path="/qrcodescanner" element={<Qrcodescanner />} />
 
-              <Route path={"/SignInPage"} element={<SignInPage />} />
-              <Route path={"/Error"} element={<Error />} />
-              <Route path={"/MyAssets"} element={<MyAssets />} />
-              <Route path={"/ReqLoan"} element={<ReqLoan />} />
-              <Route path={"/MyLoanReq"} element={<MyLoanReq />} />
-              <Route path={"/MyLoanReceipt"} element={<LoanReceipt />} />
-              <Route path={"/MyLoanReqExt"} element={<MyLoanReqExt />} />
               <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
-
-              {/* TSO, TSO Manager, AD/DD */}
-              <Route path={"/Dashboard"} element={<StaffElement><Dashboard /></StaffElement>} />
-              <Route path={"/NewIncomingReq"} element={<TSOElement><NewIncomingReq /></TSOElement>} />
-              <Route path={"/LoanReqPendingADDD"} element={<ADDDElement><LoanReqPendingADDD /></ADDDElement>} />
-              <Route path={"/LoanReqPendingTSOMGR"} element={<TSOManagerElement><LoanReqPendingTSOMGR /></TSOManagerElement>} />
-              <Route path={"/ProcessedLoanExtReq"} element={<StaffElement><ProcessedLoanExtReq /></StaffElement>} />
-              <Route path={"/ProcessedLoanReq"} element={<StaffElement><ProcessedLoanReq /></StaffElement>} />
-              <Route path={"/CreateLoanApprovalStaff"} element={<StaffElement><CreateLoanApprovalStaff /></StaffElement>} />
-              <Route path={"/ItemsDueForReturn"} element={<StaffElement><ItemsDueForReturn /></StaffElement>} />
-              <Route path={"/ItemsPendingCollection"} element={<StaffElement><ItemsPendingCollection /></StaffElement>} />
-              <Route path={"/ReturnItems"} element={<StaffElement><ReturnItems /></StaffElement>} />
-              <Route path={"/DecommissionedByMonth"} element={<StaffElement><DecommissionedByMonth /></StaffElement>} />
-              <Route path={"/MonthlyItemsOverdue"} element={<StaffElement><MonthlyItemsOverdue /></StaffElement>} />
-              <Route path={"/NewItemsByMonth"} element={<StaffElement><NewItemsByMonth /></StaffElement>} />
-              <Route path={"/OutstandingStudentLoans"} element={<StaffElement><OutstandingStudentLoans /></StaffElement>} />
-              <Route path={"/StaffLoanReq"} element={<StaffElement><StaffLoanReq /></StaffElement>} />
-              <Route path={"/StaffWithApprovedLoans"} element={<StaffElement><StaffWithApprovedLoans /></StaffElement>} />
-              <Route path={"/AddPO"} element={<StaffElement><AddPO /></StaffElement>} />
-              <Route path={"/ViewAllPO"} element={<StaffElement><ViewAllPO /></StaffElement>} />
-              <Route path={"/ManageCompany"} element={<StaffElement><ManageCompany /></StaffElement>} />
-              <Route path={"/ManageSuppliers"} element={<StaffElement><ManageSuppliers /></StaffElement>} />
-              <Route path={"/DownloadUserData"} element={<StaffElement><DownloadUserData /></StaffElement>} />
-              <Route path={"/Reports"} element={<ThemeProvider><StaffElement><AppView /></StaffElement></ThemeProvider>} />
-
-              {/* Store User/Admin */}
-              <Route path={"/ManageLocation"} element={<StoreElement><ManageLocation /></StoreElement>} />
-              <Route path={"/ManageBrands"} element={<StoreElement><ManageBrands /></StoreElement>} />
-              <Route path={"/ManageItems"} element={<StoreElement><ManageItems /></StoreElement>} />
-              <Route path={"/ManageCategories"} element={<StoreElement><ManageCategories /></StoreElement>} />
-              <Route path={"/ManageModels"} element={<StoreElement><ManageModels /></StoreElement>} />
-              <Route path={"/StoreItemsHome"} element={<StoreElement><StoreItemsHome /></StoreElement>} />
-
-              {/* Admin */}
-              <Route path={"/ManagePendingReq"} element={<StaffAdminElement><ManagePendingReq /></StaffAdminElement>} />
-              <Route path={"/ManageUsers"} element={<ThemeProvider><StaffAdminElement><ManageUsersPage /></StaffAdminElement></ThemeProvider>} />
-              <Route path={"/ManageUsers/:id"} element={<ThemeProvider><StaffAdminElement><EditStaffPage /></StaffAdminElement></ThemeProvider>} />
-              <Route path={"/AddUsers"} element={<ThemeProvider><StaffAdminElement><AddUserPage /></StaffAdminElement></ThemeProvider>} />
-              <Route path={"/ReportsTest"} element={<ThemeProvider><StaffAdminElement><ReportsTest /></StaffAdminElement></ThemeProvider>} />
             </Routes>
           </Container>
         </CombinedProvider>
@@ -153,54 +109,6 @@ function App() {
       <ToastContainer position="top-center" />
     </Router>
   );
-}
-
-function TSOElement({ children }) {
-  if (CURRENT_USER_TYPE === USER_TYPES_NAV.TSO || CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
-    return <>{children}</>
-  } else {
-    return <NoAcess />
-  }
-}
-
-function TSOManagerElement({ children }) {
-  if (CURRENT_USER_TYPE === USER_TYPES_NAV.TSO_MANAGER || CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
-    return <>{children}</>
-  } else {
-    return <NoAcess />
-  }
-}
-
-function ADDDElement({ children }) {
-  if (CURRENT_USER_TYPE === USER_TYPES_NAV.ADDD || CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
-    return <>{children}</>
-  } else {
-    return <NoAcess />
-  }
-}
-
-function StaffElement({ children }) {
-  if (CURRENT_USER_TYPE != USER_TYPES_NAV.STUDENT && CURRENT_USER_TYPE != USER_TYPES_NAV.USER) {
-    return <>{children}</>
-  } else {
-    return <NoAcess />
-  }
-}
-
-function StaffAdminElement({ children }) {
-  if (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
-    return <>{children}</>
-  } else {
-    return <NoAcess />
-  }
-}
-
-function StoreElement({ children }) {
-  if (CURRENT_USER_TYPE === USER_TYPES_NAV.STORE_ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.STORE_USER || CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
-    return <>{children}</>
-  } else {
-    return <NoAcess />
-  }
 }
 
 
