@@ -66,7 +66,7 @@ function CustomSidebar() {
         <>
         <Menu >
           <div className='menuBar'><MenuItem style={{backgroundColor: 'white'}} icon={<MenuIcon style={{color: 'black'}}/>} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>
-          <img src={nyp_logo} style={{ margin: "0px 0px 0px 0px", maxWidth: '60%'}} alt="NYP Logo" />
+          <img src={nyp_logo} style={{ margin: "0 ", maxWidth: '60%', height: 'auto  '}} alt="NYP Logo" />
           </div>
         </Menu>
           <Sidebar style={{ height: "150vh"}} collapsed={!isExpanded} collapsedWidth= "0px" width= "300px" >

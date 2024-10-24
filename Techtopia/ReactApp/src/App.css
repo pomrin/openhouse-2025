@@ -107,12 +107,21 @@
   display: flex;
   align-items: center; /* Align items vertically in the center */
   justify-content: space-between; /* Adjusts space between items */
-  padding: 5px; /* Optional: Add some padding */
+  padding: 1vh 2vw; /* Responsive padding based on viewport height and width */
   border: 2px solid #ccc; /* Add border */
   border-radius: 5px; /* Optional: Round the corners */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add some shadow */
-  width: 96.5vw; /* Use full width of the viewport */
+  width: 95.2vw; /* Use 96% of the viewport width */
+  max-width: 1920px; /* Optional: Max width for larger screens */
+  height: 6vh; /* Set height based on viewport height */
   background-color: white; /* Set background color */
+  z-index: 1; /* Ensure it stays on top of other elements */
+}
+
+.menuBar img {
+  max-width: 60%; /* Keep the image width responsive */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 6vh; /* Optional: Set a max height relative to viewport height */
 }
 
 img {
