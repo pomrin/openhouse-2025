@@ -64,18 +64,12 @@ function CustomSidebar() {
     <div className='sidebar-stick'>
       {true ?
         <>
-          <Menu >
-            <div className='menuBar'><MenuItem style={{ backgroundColor: 'white' }} icon={<MenuIcon style={{ color: 'black' }} />} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>
-              <a href="/Home"><img src={nyp_logo} style={{ margin: "0px 0px 0px 0px", maxWidth: '60%' }} alt="NYP Logo" /></a>
-            </div>
-          </Menu>
-          <Sidebar style={{ height: "150vh" }} collapsed={!isExpanded} collapsedWidth="0px" width="300px" >
         <Menu >
-          <div className='menuBar'><MenuItem style={{backgroundColor: 'white'}} icon={<MenuIcon style={{color: 'black'}}/>} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>
-          <img src={nyp_logo} style={{ margin: "0 ", maxWidth: '60%', height: 'auto  '}} alt="NYP Logo" />
+          <div className='menuBar'><MenuItem style={{ backgroundColor: 'white' }} icon={<MenuIcon style={{ color: 'black' }} />} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>
+            <a href="/Home"><img src={nyp_logo} style={{ margin: "0 ", maxWidth: '60%', height: 'auto  ' }} alt="NYP Logo" /></a>
           </div>
         </Menu>
-          <Sidebar style={{ height: "150vh"}} collapsed={!isExpanded} collapsedWidth= "0px" width= "300px" >
+        <Sidebar style={{ height: "150vh" }} collapsed={!isExpanded} collapsedWidth="0px" width="300px" >
             <Menu >
               <div style={{ padding: '10px 18px 10px 18px', color: 'white' }}>
                 <div style={{ padding: '0px 0px 0px 0px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
