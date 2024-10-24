@@ -42,6 +42,11 @@ function CustomSidebar() {
     }
   }
 
+  const handleMenuItemClick = (path) => {
+    setIsExpanded(false); // Close the navbar
+    navigate(path); // Navigate to the new path
+  };
+
   // display different landing page based on role
   const locationPfp = () => {
     if (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
@@ -75,6 +80,9 @@ function CustomSidebar() {
                     <Typography sx={{ fontSize: '13px' }}><b>{name} </b></Typography>
                     <Typography sx={{ fontSize: '10px' }}>{role}</Typography>
                   </div>
+
+                  {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
+                  <>
                   <div style={{ marginLeft: 'auto' }}>
                     <Typography sx={{ fontSize: "12px" }}>
                       <button
@@ -97,19 +105,24 @@ function CustomSidebar() {
                       </button>
                     </Typography>
                   </div>
+                  </> : null
+                  }
+
                 </div>
               </div>
               <MenuItem icon={<MenuIcon />} title="hide/un-hide" onClick={() => { handleToggle(); }}>Hide Navbar</MenuItem>
               <hr style={{ width: '80%' }} />
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR) ?
                 <>
+                   <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
                   <SubMenu icon={<ReceiptLongIcon />} label="Level 2">
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Cybersecurity </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> AI </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Software Engineering </MenuItem>
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> FinTech/BlockChain </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Redemption </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Museum </MenuItem>
+                    <MenuItem active={location.pathname === "/CybersecurityMap"} title="Cybersecurity Map" onClick={() => handleMenuItemClick("/CybersecurityMap")}> Cybersecurity </MenuItem>
+                    <MenuItem active={location.pathname === "/AIMap"} title="AI Map" onClick={() => handleMenuItemClick("/AIMap")}> AI </MenuItem>
+                    <MenuItem active={location.pathname === "/SEMap"} title="Software Engineering Map" onClick={() => handleMenuItemClick("/SEMap")}> Software Engineering </MenuItem>
+                    <MenuItem active={location.pathname === "/FintechMap"} title="Fintech Map" onClick={() => handleMenuItemClick("/FintechMap")}> FinTech/BlockChain </MenuItem>
+                    <MenuItem active={location.pathname === "/RedemptionMap"} title="Redemption Map" onClick={() => handleMenuItemClick("/RedemptionMap")}> Redemption Counter </MenuItem>
+                    <MenuItem active={location.pathname === "/MuseumMap"} title="Museum Map" onClick={() => handleMenuItemClick("/MuseumMap")}> Museum </MenuItem>
+
                   </SubMenu>
                   <SubMenu icon={<ReceiptLongIcon />} label="Level 3">
                     <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
