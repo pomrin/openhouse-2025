@@ -270,10 +270,10 @@ function UserLanding() {
                         <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
                         <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
                         <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
-                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
+                        {/* <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
                         <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
                         <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
-                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} /> */}
                         </div>
                         {/* Display message if no stamps are visible */}
                         {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
@@ -593,14 +593,21 @@ function UserLanding() {
                     <h1>Stamps:</h1>
                     <Box className="stampsBox">
                         <Box className="stamps">
+                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none', marginTop: '25px'  }} />
+           
                         </Box>
                         <Box className="stamps">
+                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none', marginTop: '25px'  }} />
+
                         </Box>
                     </Box>
                     <Box className="stampsBox">
                         <Box className="stamps">
+                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none', marginTop: '25px'  }} />
+
                         </Box>
                         <Box className="stamps">
+                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none', marginTop: '25px' }} />
                         </Box>
                     </Box>
                 </Box>
@@ -661,20 +668,7 @@ function UserLanding() {
         <Button variant="contained" color="primary"  onClick={clearLocalStorage} sx={{display: 'flex', justifyContent: 'center', alignItems: 'center',  margin: '0 auto'}}>
                     Clear Local Storage
         </Button>
-        <div class='dropdown' style={{ ...dropdownStyle }}>
-                        <div style={gridStyle}>
-                        <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none' }} />
-                        <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none' }} />
-                        <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none' }} />
-                        <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none' }} />
-                        </div>
-                        {/* Display message if no stamps are visible */}
-                        {!isAiStampVisible && !isCsStampVisible && !isFtStampVisible && !isItStampVisible && (
-                            <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '24px', fontWeight: 'bold' }}>
-                                You have not collected anything.
-                            </div>
-                        )}
-                    </div>
+        
         </Box>
         </Box>
     );

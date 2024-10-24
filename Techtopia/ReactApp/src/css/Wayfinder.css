@@ -1,15 +1,70 @@
-.container {
-    width: 100%; /* Full width of the viewport */
-    height: 100%; /* Full height of the viewport */
+.map-container {
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    margin-top: 10vh;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* Prevents overflow of the image */
+    height: 80vh;
+    background: #e0e0e0; /* Light background for the map */
+    padding: 20px;
+    overflow: hidden; /* Prevent overflow */
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: #f7eeed repeat; /* Add a texture image for map effect */
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
 }
 
 .map-image {
-    width: auto; /* Maintain aspect ratio */
-    height: 90vh; /* Sets the height to 90% of the viewport height */
-    max-width: 100%; /* Ensure it doesn’t overflow horizontally */
-    object-fit: contain; /* Ensures the image fits well within its container */
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
 }
+
+.button-container {
+    position: absolute;
+    top: 170px;
+    right: 20px;
+    display: flex;
+    gap: 15px; /* Space between buttons */
+    
+}
+
+.zoom-button {
+    background-color: #28a745; /* Soft green */
+    color: white;
+    border: none;
+    border-radius: 50px; /* Rounded button */
+    padding: 15px 20px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px; /* Fixed width for uniformity */
+    height: 45px; /* Fixed height for uniformity */
+}
+
+.zoom-button:hover {
+    background-color: #218838; /* Darker shade on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+}
+
+.zoom-button:focus {
+    outline: none; /* Remove focus outline */
+    box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.5); /* Add focus ring */
+}
+
+
