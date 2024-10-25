@@ -11,10 +11,10 @@ namespace AWSServerless1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VisitorBoothController : ControllerBase
+    public class AdminVisitorBoothController : ControllerBase
     {
         private IConfiguration _config;
-        public VisitorBoothController(IConfiguration config)
+        public AdminVisitorBoothController(IConfiguration config)
         {
             _config = config;
         }
@@ -47,17 +47,17 @@ namespace AWSServerless1.Controllers
                 {
                     if (visitorEntity.LuggageRedeemedDate != null)
                     {
-                        Console.WriteLine($"Visitor have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
-                        return Conflict($"Visitor have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
+                        Console.WriteLine($"Visitor (ticketId: {ticketId}) have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
+                        return Conflict($"Visitor (ticketId: {ticketId}) have already redeemed a luggage tag on {visitorEntity.LuggageRedeemedDate.Value.ToString("yyyy-MM-dd HHmmss")}");
                     }
                     else
                     {
-                        return Ok($"Visitor is Eligible for luggage tag redemption.");
+                        return Ok($"Visitor (ticketId: {ticketId})  is Eligible for luggage tag redemption.");
                     }
                 }
                 else
                 {
-                    return BadRequest($"Visitor have visited {boothVisited.Count()} booths but is required to visit {totalBooth.Count()} booths.");
+                    return BadRequest($"Visitor (ticketId: {ticketId}) have visited {boothVisited.Count()} booths but is required to visit {totalBooth.Count()} booths.");
                 }
             }
             else

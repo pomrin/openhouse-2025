@@ -15,10 +15,10 @@ namespace AWSServerless1.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-    public class RedemptionController : ControllerBase
+    public class AdminRedemptionController : ControllerBase
     {
         private IConfiguration _config;
-        public RedemptionController(IConfiguration config)
+        public AdminRedemptionController(IConfiguration config)
         {
             _config = config;
         }

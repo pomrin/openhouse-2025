@@ -38,6 +38,19 @@ namespace AWSServerless1.Controllers
         public IActionResult Post(AdminLoginDTO userData)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
+            Visitor visitorEntity = null;
+            if (identity.IsAuthenticated) // If user already have a valid jwt token, no need to do anything
+            {
+                var ticketId = identity.FindFirst(AMSAppSettings.CLAIMS_KEY_TICKET_ID)?.Value;
+                if (!String.IsNullOrEmpty(ticketId))
+                {
+                    visitorEntity = VisitorDAL.GetVisitorByTicketId(ticketId);
+                }
+            }
+            if (visitorEntity == null)
+            {
+                visitorEntity = VisitorDAL.RegisterVisitor();
+            }
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[AMSAppSettings.APP_SETTINGS_KEY_JWT_KEY]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -52,10 +65,14 @@ namespace AWSServerless1.Controllers
                             audience: _config[AMSAppSettings.APP_SETTINGS_KEY_JWT_ISSUER],
                             claims: new Claim[]
                             {
-                        new Claim(ClaimTypes.Name, userEntity.UserName),
-                        new Claim(ClaimTypes.Role, USER_ROLES.BOOTH_HELPER.ToDescriptionString()),
-                                //new Claim(AMSAppSettings.CLAIMS_KEY_STAFF, JsonConvert.SerializeObject(visitorEntity)),
-                                //new Claim(AMSAppSettings.CLAIMS_KEY_SCHOOL, school),
+                                new Claim(ClaimTypes.Name, userEntity.UserName),
+                                new Claim(ClaimTypes.Role, USER_ROLES.BOOTH_HELPER.ToDescriptionString()),
+                                new Claim(AMSAppSettings.CLAIMS_KEY_STAFF, JsonConvert.SerializeObject(new VisitorInfoDTO(){
+                                    TicketId = visitorEntity.TicketId,
+                                    VisitorId = visitorEntity.VisitorId,
+                                    Datecreated = DateTime.UtcNow,
+                                })),
+                                new Claim(AMSAppSettings.CLAIMS_KEY_TICKET_ID, String.IsNullOrEmpty(visitorEntity.TicketId)?"":visitorEntity.TicketId),
                                 //new Claim("MoreKey", "MoreValue"),
                             },
                             notBefore: DateTime.Now,
