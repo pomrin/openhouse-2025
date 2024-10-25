@@ -515,7 +515,7 @@ function RedemptionPage() {
     const eligibilityValidation = async (ticketId) => {   
         setScannerLoading(true);
         try {
-            const response = await fetch(`${apiUrl}/VisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
+            const response = await fetch(`${apiUrl}/AdminVisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -575,7 +575,7 @@ function RedemptionPage() {
         };
 
     try {
-        const response = await fetch(`${apiUrl}/Redemption`, {
+        const response = await fetch(`${apiUrl}/AdminRedemption`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -626,7 +626,7 @@ function RedemptionPage() {
         };
     
     try {
-        const response = await fetch(`${apiUrl}/Redemption`, {
+        const response = await fetch(`${apiUrl}/AdminRedemption`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
