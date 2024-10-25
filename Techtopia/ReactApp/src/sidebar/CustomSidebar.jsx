@@ -64,6 +64,8 @@ function CustomSidebar() {
     <div className='sidebar-stick'>
       {true ?
         <>
+        {(CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR || CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
+          <>
         <Menu >
           <div className='menuBar'><MenuItem style={{ backgroundColor: 'white' }} icon={<MenuIcon style={{ color: 'black' }} />} title="hide/un-hide" onClick={() => { handleToggle(); }}></MenuItem>
             <a href="/Home"><img src={nyp_logo} style={{ margin: "0 ", maxWidth: '100%', height: 'auto  ' }} alt="NYP Logo" /></a>
@@ -157,6 +159,8 @@ function CustomSidebar() {
               }
             </Menu>
           </Sidebar>
+          </>: null
+        }
         </> : null
       }
     </div>

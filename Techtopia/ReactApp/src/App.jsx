@@ -66,7 +66,7 @@ import AI from './pages/AI';
 import SE from './pages/SE';
 import RD from './pages/RD';
 import Museum from './pages/Museum';
-
+import Demo from './pages/UserLandingDemo'
 
 
 
@@ -74,15 +74,18 @@ import Museum from './pages/Museum';
 function App() {
   return (
     <Router>
+      
+
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
+
           {/* NAV BAR */}
           {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
               <Route path={"/"} element={<UserLanding />} />
               <Route path={"/Home"} element={<UserLanding />} />
-              <Route path={"/Demo"} element={<UserLanding />} />
+              <Route path={"/Demo"} element={<UserLanding />} /> 
 
               <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
               <Route path={"/FintechMap"} element={<Fintech />} />
