@@ -644,10 +644,6 @@ function UserLanding() {
                         {ticket_id}
                     </Typography>
                 </Box>
-                {/* Button to cycle through booth names */}
-                <Button variant="contained" color="primary" onClick={handleCycleBooth} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width: '60%' }}>
-                    Change Booth
-                </Button>
                 {/* New button to increment queue number */}
                 <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width: '60%' }}>
                     Add Queue Number
