@@ -41,11 +41,27 @@
 
 .QRBox {
     width: 40vw;
-    height: 40vw;
+    height: 45vw; /* Increased height to accommodate both the image and text */
     max-width: 120px;
-    max-height: 120px;
+    max-height: 135px; /* Increased max-height accordingly */
     margin: 10px;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.qrImage {
+    width: 100%;
+    height: 100%; /* Adjusted to leave room for the text */
+    object-fit: cover;
+}
+
+.ticketText {
+    width: 100%;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 0.8em; /* Adjust font size as needed */
 }
 
 .uploadCircle {
@@ -72,12 +88,6 @@
     background-position: center;
     background-size: cover;
 
-}
-
-.qrImage {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
 }
 
 .uploadImage {
