@@ -107,6 +107,87 @@ function UserLanding() {
         }
     };
 
+    const visitorQueueLink = 'https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorQueue'
+    const [qNumber, setQNumber] = useState(null); // State for the queue number
+
+    const fetchQueue = async () => { 
+        try {
+            const response = await axios.get(visitorQueueLink);
+            console.log("Queue: ", response.data);
+            console.log("Status code: ", response.status);
+            if (response.status === 200) {
+                const dataString = response.data;
+
+                const words = dataString.split(' ');
+                const specificWord = words[3];
+                console.log('Word',specificWord);
+                 // Update state with the parsed number
+                 const numberValue = parseInt(specificWord);
+                 setQNumber(numberValue); // Update the state
+                console.log('Number', numberValue);
+            }
+        } catch (error) {
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+    
+                // Handle specific status codes
+                if (error.response.status === 404) {
+                    console.log("Queue status: The user is not in any queue");
+                    setQNumber('Not In A Queue'); // Update the state
+                } else if (error.response.status === 500) {
+                    console.log("Server error. Please try again later.");
+                } else if (error.response.status === 400 || error.response.status === 401) {
+                    console.log("Bad Request:", error.response.status);
+                }
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
+        }
+    };
+
+    const visitorRedemptionLink = 'https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorRedemptionStatus'
+    const [rStatus, setRStatus] = useState(null); // State for the queue number
+
+    const fetchRedemption = async () => { 
+        try {
+            const response = await axios.get(visitorRedemptionLink);
+            console.log("Redemption: ", response.data);
+            console.log("Status code: ", response.status);
+            if (response.status === 200) {
+                // const dataString = response.data;
+                console.log('Visitor is eligible for redemption')
+                setRStatus('Redemption is now eligible');
+            }
+        } catch (error) {
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+    
+                // Handle specific status codes
+                if (error.response.status === 404) {
+                    console.log("Ticket ID is not found");
+                } else if (error.response.status === 500) {
+                    console.log("Server error. Please try again later.");
+                } else if (error.response.status === 400) {
+                    console.log("Visitor have not visited all required booths");
+                    setRStatus('Please Complete All Booths');
+                } else if (error.response.status === 409){
+                    console.log("Visitor has already redeemed before");
+                    setRStatus('Redemption Completed');
+
+                }
+                
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
+        }
+    };
+
     // List of booths
     const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
 
@@ -163,6 +244,11 @@ function UserLanding() {
             hasFetchedDataRefTicket.current = true; // Mark as fetched
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
+        if(!hasFetchedDataRefQueue.current){
+            hasFetchedDataRefQueue.current = true;
+            fetchQueue();
+            fetchRedemption();
+        }
         generateQR();
         dispatch(connectWebSocket({ ticketId: ticket_id, handleCycleBooth, refreshProfilePicture }));
 
@@ -575,10 +661,11 @@ function UserLanding() {
                         <Box class="detailsBox">
                             <Box>
                                 <Typography class="bold">
-                                    Engraving Queue Status
+                                    Engraving Queue Left
                                 </Typography>
                                 <Typography>
-                                    {queueNumber} {/* Queue number state */}
+                                    {qNumber}
+                                    {/* {queueNumber} Queue number state */}
                                 </Typography>
                             </Box>
                             <Box>
@@ -586,7 +673,8 @@ function UserLanding() {
                                     Redemption Status
                                 </Typography>
                                 <Typography>
-                                    {queueNumber} {/* Queue number state */}
+                                    {rStatus}
+                                    {/* {queueNumber} Queue number state */}
                                 </Typography>
                             </Box>
                         </Box>
