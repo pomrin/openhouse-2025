@@ -26,7 +26,7 @@ function AdminLogin() {
 
   // Login process
   const handleLogin = () => {
-    axios.post('https://6117kul8qd.execute-api.ap-southeast-1.amazonaws.com/Prod/api/AdminLogin', {
+    axios.post('https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/AdminLogin', {
       username: username, 
       password: password
     })
@@ -58,7 +58,7 @@ function AdminLogin() {
     <Box>
       {/* Login Form */}
       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="70vh">
-        <img src={nyp_logo} width="50%" style={{ margin: "0px 0px 20px 0px" }} alt="NYP Logo" />
+        
         <Typography variant="h5" sx={{ mt: 2 }}>
           NYP Open House Admin Login
         </Typography>

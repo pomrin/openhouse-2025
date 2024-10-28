@@ -3,12 +3,17 @@ import { Box, Typography, Button, Snackbar, IconButton, AppBar, Toolbar } from '
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import QrScanner from 'qr-scanner';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 function Qrcodescanner() {
   const [qrCodeResult, setQrCodeResult] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const videoRef = useRef(null);
   const navigate = useNavigate();
+
+  const [apiResponseMessage, setApiResponseMessage] = useState('');
+  const [apiResponseError, setApiResponseError] = useState(false);
+  const apiUrl = import.meta.env.VITE_REGISTER_API;
 
   useEffect(() => {
     // Check if accessToken exists
@@ -21,7 +26,7 @@ function Qrcodescanner() {
   }, [navigate]);
 
   const location = useLocation();
-  const { booth } = location.state || {}; // Retrieve booth name from location.state
+  const { boothId, boothName } = location.state || {}; // Retrieve booth name from location.state
 
   useEffect(() => {
     const qrScanner = new QrScanner(videoRef.current, result => handleScanSuccess(result));
@@ -35,6 +40,35 @@ function Qrcodescanner() {
   const handleScanSuccess = (result) => {
     setQrCodeResult(result);
     setSnackbarOpen(true);
+
+    // Send the "Stamp" API request
+    stampApiRequest(result);
+  };
+
+  const stampApiRequest = async (ticketId) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // POST request to the "Stamp" API
+      const response = await axios.post(apiUrl, {
+        ticketId,  
+        boothId: boothId 
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,  // Attach JWT token
+          'Content-Type': 'application/json'       
+        }
+      });
+
+      if (response.status === 200) {
+        setApiResponseMessage('Stamp added successfully!');
+        setApiResponseError(false);
+      }
+    } catch (error) {
+      console.error('Error sending Stamp API request:', error);
+      setApiResponseMessage('Failed to add stamp. Please try again.');
+      setApiResponseError(true);
+    }
   };
 
   const handleCloseSnackbar = () => {
@@ -54,8 +88,8 @@ function Qrcodescanner() {
 
   return (
     <Box>
-      {/* Fixed AppBar */}
-      <AppBar position="fixed" sx={{ width: '100vw', left: 0, right: 0 }}>
+      {/* Fixed AppBar - for testing */}
+      {/* <AppBar position="fixed" sx={{ width: '100vw', left: 0, right: 0 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             NYP Open House Admin
@@ -64,7 +98,7 @@ function Qrcodescanner() {
             Logout
           </Button>
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       <Box display="flex" 
       flexDirection="column" 
@@ -93,7 +127,7 @@ function Qrcodescanner() {
         </Typography>
 
         <Typography variant="h6" sx={{ mb: 2 }}>
-          {booth ? `Current Booth: ${booth}` : 'No Booth Selected'}
+          {boothName ? `Current Booth: ${boothName}` : 'No Booth Selected'}
         </Typography>
 
         {/* Square container for video (camera to scan QR code) */}
@@ -124,16 +158,26 @@ function Qrcodescanner() {
             <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
               {qrCodeResult}
             </Typography>
-            <Button
+            {/* <Button
               variant="contained"
               color="primary"
               onClick={() => window.open(qrCodeResult, '_blank')}
               sx={{ mt: 2 }}
             >
               Open Link
-            </Button>
+            </Button>*/}
           </Box>
         )}
+
+         {/* Display API response message */}
+         {apiResponseMessage && (
+          <Box mt={2} textAlign="center">
+            <Typography variant={apiResponseError ? 'body1' : 'h6'} color={apiResponseError ? 'error' : 'success'}>
+              {apiResponseMessage}
+            </Typography>
+          </Box>
+        )}
+
 
         <Snackbar
           open={snackbarOpen}

@@ -16,19 +16,19 @@ function Selectbooth() {
   }, [navigate]);
 
   const booths = [
-    'AI',
-    'Cyber Security',
-    'FinTech',
-    'SWENG',
-    'Redemption',
-    'Engraving',
-    'Workshop A',
-    'Workshop B',
-    'Workshop C',
-    'Workshop D',
+    {boothId: '1', boothName: 'AI'},
+    {boothId: '2', boothName: 'Cyber Security'},
+    {boothId: '3', boothName:'FinTech'},
+    {boothId: '4', boothName:'SWENG'},
+    {boothId: '5', boothName:'Redemption'},
+    {boothId: '6', boothName:'Engraving'},
+    {boothId: '7', boothName:'Workshop A'},
+    {boothId: '8', boothName:'Workshop B'},
+    {boothId: '9', boothName:'Workshop C'},
+    {boothId: '10', boothName:'Workshop D'},
   ];
 
-  const handleBoothClick = (boothName) => {
+  const handleBoothClick = (boothId, boothName) => {
     console.log(`${boothName} clicked`);
      // Separate Engraving and Redemption booths from other booths via if else statement
      if (boothName === 'Engraving') {
@@ -38,7 +38,7 @@ function Selectbooth() {
       // Redirect to the redemption page
       navigate('/redemption');
     } else {
-    navigate('/qrcodescanner', { state: { booth: boothName } });
+    navigate('/qrcodescanner', { state: { boothId, boothName } });
     }
   };
 
@@ -54,7 +54,7 @@ function Selectbooth() {
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Fixed AppBar */}
-      <AppBar position="fixed">
+      {/* <AppBar position="fixed">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             NYP Open House Admin
@@ -63,7 +63,7 @@ function Selectbooth() {
             Logout
           </Button>
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       {/* Main Content */}
       <Box
@@ -85,12 +85,13 @@ function Selectbooth() {
             {booths.map((booth, index) => (
               <Grid item xs={12} sm={6} key={index}>
                 <Button
+                  key={booth.boothId}
                   variant="contained"
                   fullWidth
                   sx={{ padding: 2 }}
-                  onClick={() => handleBoothClick(booth)}
+                  onClick={() => handleBoothClick(booth.boothId, booth.boothName)}
                 >
-                  {booth}
+                  {booth.boothName}
                 </Button>
               </Grid>
             ))}
