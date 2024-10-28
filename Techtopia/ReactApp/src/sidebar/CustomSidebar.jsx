@@ -99,8 +99,9 @@ function CustomSidebar() {
                             }}
                             onClick={() => {
                               setLoading(false);
-                              removeToken();
-                              navigate("/");
+                              localStorage.removeItem('accessToken');
+                              // removeToken();
+                              navigate("/adminlogin");
                             }}
                           >
                             <b>Logout </b>

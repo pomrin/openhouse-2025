@@ -15,7 +15,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import '../css/BoothRedemption.css';
-import placeholderTag from './../assets/images/luggage-tag.webp';
 import CustomCircularProgress from './../components/customLoader.jsx';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -87,7 +86,7 @@ function RedemptionPage() {
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
-        margin: '8% 0'
+        margin: '3% 0'
     };
 
     const popupContentStyle = {
@@ -103,7 +102,8 @@ function RedemptionPage() {
 
     const modalContentStyle = {
         width: '90%',
-        overflowY: 'hidden',
+        overflowY: 'scroll',
+        overflowX: 'hidden',
         backgroundColor: 'white',
         borderRadius: '10px',
         display: 'flex',
@@ -118,7 +118,8 @@ function RedemptionPage() {
         alignItems: 'center',
         borderRadius: '10px',
         background: '#dedede',
-        padding: '10px 0'
+        padding: '5px 0',
+        marginLeft: '3%'
     };
 
     const returnBtnStyle = {
@@ -133,7 +134,8 @@ function RedemptionPage() {
         padding: '5px', 
         backgroundColor: '#008080',
         color: 'white',
-        border: '1px solid black'
+        border: '1px solid black',
+        marginLeft: '4%'
     };
 
     const startQRscannerBtn = {
@@ -300,14 +302,30 @@ function RedemptionPage() {
                                 }}
                                 />
                                 <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                    {currentColor || '----'}  {/* Display color name */}
+                                    {currentColor || '----'}  {/* Display current color name */}
                                 </Typography>
                             </Box>
             
                             {/* Color selection form */}
-                            <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5%', margin: '0 0 10px 5%' }}>
+                            <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5% 6% 0 0', margin: '0 0 10px 4%' }}>
                                 <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
                                 <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                                <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                                <Typography variant="body1">Selected color:</Typography>
+                                <Box
+                                    sx={{
+                                        width: '30px',
+                                        height: '30px',
+                                        backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
+                                        borderRadius: '50%',
+                                        border: '1px solid black',
+                                        marginLeft: '3%'
+                                    }}
+                                />
+                                <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                    {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
+                                </Typography>
+                                </Box>
                                 {selectedColor && selectedColor.name !== currentColor && (
                                     <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
                                         Update Tag Color
@@ -320,20 +338,23 @@ function RedemptionPage() {
                 break;
             case 'eligible':
                 content = (
-                    <><Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center', marginBottom: '20px' }}>
+                    <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginBottom: '10px' }}>
                         Visitor eligible for luggage tag redemption 🎉
                     </Typography>
-                    <img src={placeholderTag} width='85%' alt="Luggage Tag" />
-                    <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5%', marginLeft: '5%' }}>
+                    <Typography variant='body2' sx={{ padding: '2%', textAlign: 'center' }}>
+                        Visitor satisifies all requirements for luggage tag redemption. <br></br> 
+                        Assist the visitor in their redemption process by selecting their preferred tag color below:
+                    </Typography>
+                    <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5% 5% 1% 5%', margin: '2% 0 1% 4%' }}>
                         <Typography variant="body1">Preferred Color: </Typography>
                         <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
-                        <Box sx={{ width: '100%', marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                        <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
                             <Typography variant="body1">Selected color:</Typography>
                             <Box
                                 sx={{
                                     width: '30px',
                                     height: '30px',
-                                    backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent',  // Display selected color
+                                    backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
                                     borderRadius: '50%',
                                     border: '1px solid black',
                                     marginLeft: '3%'
@@ -545,12 +566,12 @@ function RedemptionPage() {
                 setIsPopupOpen(true);
                 break;
             case 404:
-                // Invalid ticket ID
+                // Response 404: Invalid ticket ID
                 showToast('Ticket ID not found!', 'error');
                 startScanner();
                 break;
             case 409:
-                // Visitor has already redeemed tag
+                // Response 409: Visitor has already redeemed tag
                 setEligibilityStatus('already_redeemed');
                 const currentColor = await setCurrentTagColor(ticketId);
                 if (currentColor) {
@@ -736,7 +757,7 @@ function RedemptionPage() {
             </Backdrop>
         );
     };
-    
+
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
@@ -793,7 +814,7 @@ function RedemptionPage() {
                                 background: 'transparent',
                                 overflow: 'hidden'
                             }}>
-                                <video ref={videoEl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}></video>
+                                <video ref={videoEl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '3px' }}></video>
                                 {/* Show "Start scanner" button if the scanner is not active; else show loader if await API response */}
                                 {!scannerLoading ? (
                                     !scannerActive && (
@@ -815,7 +836,6 @@ function RedemptionPage() {
                             </Grid>
                         </Grid>
                     </Grid>
-
                 </Box>
                 <Box>
                     <Snackbar open={openToast} autoHideDuration={3000} onClose={closeToast}>

@@ -43,18 +43,10 @@ function UserLanding() {
     const [currentDate, setCurrentDate] = useState('');
     const [currentTime, setCurrentTime] = useState('');
 
-    const [isAiStampVisible, setAiStampVisible] = useState(() => {
-        return localStorage.getItem('aiStampVisible') === 'true';
-    });
-    const [isCsStampVisible, setCsStampVisible] = useState(() => {
-        return localStorage.getItem('csStampVisible') === 'true';
-    });
-    const [isFtStampVisible, setFtStampVisible] = useState(() => {
-        return localStorage.getItem('ftStampVisible') === 'true';
-    });
-    const [isItStampVisible, setItStampVisible] = useState(() => {
-        return localStorage.getItem('itStampVisible') === 'true';
-    });
+    const [isAiStampVisible, setAiStampVisible] = useState(false);
+    const [isCsStampVisible, setCsStampVisible] = useState(false);
+    const [isFtStampVisible, setFtStampVisible] = useState(false);
+    const [isItStampVisible, setItStampVisible] = useState(false);
 
     const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
@@ -188,6 +180,57 @@ function UserLanding() {
         }
     };
 
+    const visitorBoothStatusLink = 'https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorBoothStatus'
+
+    const fetchBoothStatus = async () => { 
+        try {
+            const response = await axios.get(visitorBoothStatusLink);
+            console.log("Booth Status: ", response.data);
+            console.log("Status code: ", response.status);
+            
+            
+            if (response.status === 200) {
+                const values = response.data.map(item => item.boothId);
+                console.log('Values',values);
+                if (values.includes(4)){
+                    // toggleStampVisibility('AI');
+                    stampVisibility('AI');
+                }
+                if (values.includes(1)){
+                    // toggleStampVisibility('CS');
+                    stampVisibility('CS');
+                }
+                if (values.includes(3)){
+                    // toggleStampVisibility('FT');
+                    stampVisibility('FT');
+                }
+                if (values.includes(2)){
+                    // toggleStampVisibility('IT');
+                    stampVisibility('IT');
+                }
+     
+            }
+        } catch (error) {
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+    
+                // Handle specific status codes
+                if (error.response.status === 404) {
+                    console.log("User Not in any queue");
+                } else if (error.response.status === 500) {
+                    console.log("Server error. Please try again later.");
+                } else if (error.response.status === 400) {
+                    console.log("Bad Request:",error.response.status);
+                }
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
+        }
+    };
+
     // List of booths
     const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
 
@@ -237,6 +280,10 @@ function UserLanding() {
     const hasFetchedDataRef = useRef(false);
     const hasFetchedDataRefTicket = useRef(false);
     const hasFetchedDataRefQueue = useRef(false);
+    const hasFetchedDataRefRedemp = useRef(false);
+    const hasFetchedDataRefBoothStatus = useRef(false);
+
+
 
 
     useEffect(() => {
@@ -247,7 +294,14 @@ function UserLanding() {
         if(!hasFetchedDataRefQueue.current){
             hasFetchedDataRefQueue.current = true;
             fetchQueue();
+        }
+        if(!hasFetchedDataRefRedemp.current){
+            hasFetchedDataRefRedemp.current = true;
             fetchRedemption();
+        }
+        if(!hasFetchedDataRefBoothStatus.current){
+            hasFetchedDataRefBoothStatus.current = true;
+            fetchBoothStatus();
         }
         generateQR();
         dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, toggleStampVisibility}));
@@ -408,6 +462,28 @@ const toggleStampVisibility = (stampType) => {
             return;
     }
 };
+
+    // Function to toggle stamp visibility based on the stamp type
+    const stampVisibility = (stampType) => {
+    
+        switch (stampType) {
+            case 'AI':
+                setAiStampVisible(true);
+                break;
+            case 'CS':
+                setCsStampVisible(true);
+                break;
+            case 'FT':
+                setFtStampVisible(true);
+                break;
+            case 'IT':
+                setItStampVisible(true);
+                break;
+            default:
+                console.warn(`Unknown stamp type: ${stampType}`);
+                return;
+        }
+    };
 
 
 
@@ -622,7 +698,7 @@ const toggleStampVisibility = (stampType) => {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
+                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px"}}>
                     <Box className="topdiv">
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
                             <Box className="profilePicture" sx={{ position: "relative" }}>
