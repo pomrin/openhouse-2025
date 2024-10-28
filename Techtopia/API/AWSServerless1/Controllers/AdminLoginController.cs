@@ -27,6 +27,7 @@ namespace AWSServerless1.Controllers
 
         /// <summary>
         /// Login for Booth Helper and Administrator.
+        /// This method will REQUIRE Authentication.
         /// </summary>
         /// <param name="userData"></param>
         /// <returns>

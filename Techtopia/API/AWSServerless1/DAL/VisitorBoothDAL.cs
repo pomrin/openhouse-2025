@@ -15,6 +15,7 @@ namespace AWSServerless1.DAL
                 {
                     var qVisitorBoothVisited = from q in context.VisitorBooths
                                                where q.VisitorId == visitorId
+                                               orderby q.BoothId ascending
                                                select q;
                     if (qVisitorBoothVisited != null)
                     {
@@ -91,6 +92,50 @@ namespace AWSServerless1.DAL
             {
                 Console.WriteLine($"An Exception have occurred in GetVisitorBoothByVisitorAndBooth(visitorId: {visitorEntity.VisitorId}, boothId: {boothEntity.BoothId}) - {ex.Message}");
             }
+            return result;
+        }
+
+        public static List<VisitorBooth>? GetVisitorBoothStatus(Visitor visitorEntity, bool includeNotVisited = false)
+        {
+            List<VisitorBooth> result = new List<VisitorBooth>();
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+
+                    var qVisitorBoothVisited = from q in context.VisitorBooths
+                                               where q.VisitorId == visitorEntity.VisitorId
+                                               orderby q.BoothId ascending
+                                               select q;
+                    if (qVisitorBoothVisited != null)
+                    {
+                        result.AddRange(qVisitorBoothVisited.ToList());
+                        if (includeNotVisited)
+                        {
+                            var boothIdVisited = result.Select(x => x.BoothId).ToList();
+                            var qBoothNotVisited = from q in context.Booths
+                                                   where !boothIdVisited.Contains(q.BoothId)
+                                                   select new VisitorBooth()
+                                                   {
+                                                       BoothId = q.BoothId,
+                                                       VisitorId = visitorEntity.VisitorId,
+                                                       DateVisited = null
+                                                   };
+                            if (qBoothNotVisited != null && qBoothNotVisited.Count() > 0)
+                            {
+                                result.AddRange(qBoothNotVisited);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result = null;
+                Console.WriteLine($"An Exception have occurred in GetVisitorBoothStatus(visitorId: {visitorEntity.VisitorId}) - {ex.Message}");
+            }
+
             return result;
         }
     }
