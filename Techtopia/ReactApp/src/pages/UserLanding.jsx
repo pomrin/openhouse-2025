@@ -661,7 +661,7 @@ const toggleStampVisibility = (stampType) => {
                                 </Typography>
                             </Box>
                             <Box>
-                                <Typography className="bold">
+                                <Typography class="bold">
                                     Redemption Status
                                 </Typography>
                                 <Typography>
