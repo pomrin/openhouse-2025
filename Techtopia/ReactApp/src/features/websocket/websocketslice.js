@@ -6,7 +6,7 @@ let socket = null; // WebSocket reference
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ticketId, handleCycleBooth, refreshProfilePicture }, { dispatch }) => {
+    async ({ ticketId, refreshProfilePicture, toggleStampVisibility }, { dispatch }) => {
         const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
         socket = new WebSocket(websocketUrl);
 
@@ -28,16 +28,13 @@ export const connectWebSocket = createAsyncThunk(
                 dispatch(addMessage(messageData));
 
                 // Call the functions if specific messages are received
-                if (messageData.message === 'cycleBooth') {
-                    handleCycleBooth(); // Call the passed function
-                } else if (messageData.message === 'updateImage') {
+                if (messageData.message === 'updateImage') {
                     refreshProfilePicture(); // Call the passed function
+                } else if (['AI', 'CS', 'FT', 'IT'].includes(messageData.message)) {
+                    toggleStampVisibility(messageData.message); // Pass the booth identifier to toggleStampVisibility
                 }
             } catch (error) {
                 console.log(error, event.data);
-                if (event.data === 'cycleBooth') {
-                    handleCycleBooth(); // Call the passed function for string message
-                }
                 dispatch(addMessage({ message: event.data }));
             }
         };
@@ -56,19 +53,19 @@ export const connectWebSocket = createAsyncThunk(
 export const sendMessage = createAsyncThunk(
     'websocket/sendMessage',
     async ({ recipientId, input }, { getState }) => {
-      if (!socket || socket.readyState !== WebSocket.OPEN) {
-        throw new Error('WebSocket is not connected');
-      }
-  
-      if (!recipientId || !input) {
-        throw new Error('Recipient ID and message input must not be empty');
-      }
-  
-      const messageObject = { action: "sendmessage", recipientId, message: input };
-      socket.send(JSON.stringify(messageObject));
-      console.log('Sent message:', messageObject);
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            throw new Error('WebSocket is not connected');
+        }
+
+        if (!recipientId || !input) {
+            throw new Error('Recipient ID and message input must not be empty');
+        }
+
+        const messageObject = { action: "sendmessage", recipientId, message: input };
+        socket.send(JSON.stringify(messageObject));
+        console.log('Sent message:', messageObject);
     }
-  );
+);
 
 const websocketSlice = createSlice({
     name: 'websocket',

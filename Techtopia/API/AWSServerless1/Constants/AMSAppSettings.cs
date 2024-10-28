@@ -7,5 +7,6 @@
 
         public const String CLAIMS_KEY_STAFF = "Staff";
         public const String CLAIMS_KEY_SCHOOL = "School";
+        public const String CLAIMS_KEY_TICKET_ID = "TICKET_ID";
     }
 }

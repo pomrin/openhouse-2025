@@ -250,7 +250,7 @@ function UserLanding() {
             fetchRedemption();
         }
         generateQR();
-        dispatch(connectWebSocket({ ticketId: ticket_id, handleCycleBooth, refreshProfilePicture }));
+        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, toggleStampVisibility}));
 
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -271,10 +271,6 @@ function UserLanding() {
         };
 
         updateDateTime();
-        const savedImage = localStorage.getItem('uploadedImage');
-        if (savedImage) {
-            setOutput(savedImage);
-        }
     }, [ticket_id, dispatch]);
 
     const handleSendMessage = () => {
@@ -382,33 +378,36 @@ function UserLanding() {
         </div>
     );
 
-    // Function to toggle AI stamp visibility
-    const toggleAiStamp = () => {
-        const newValue = !isAiStampVisible;
-        setAiStampVisible(newValue);
-        localStorage.setItem('aiStampVisible', newValue);
-    };
+    // Function to toggle stamp visibility based on the stamp type
+const toggleStampVisibility = (stampType) => {
+    let newValue;
 
-    // Function to toggle Cs stamp visibility
-    const toggleCsStamp = () => {
-        const newValue = !isCsStampVisible;
-        setCsStampVisible(newValue);
-        localStorage.setItem('csStampVisible', newValue);
-    };
-
-    // Function to toggle Ft stamp visibility
-    const toggleFtStamp = () => {
-        const newValue = !isFtStampVisible;
-        setFtStampVisible(newValue);
-        localStorage.setItem('ftStampVisible', newValue);
-    };
-
-    // Function to toggle It stamp visibility
-    const toggleItStamp = () => {
-        const newValue = !isItStampVisible;
-        setItStampVisible(newValue);
-        localStorage.setItem('itStampVisible', newValue);
-    };
+    switch (stampType) {
+        case 'AI':
+            newValue = !isAiStampVisible;
+            setAiStampVisible(newValue);
+            localStorage.setItem('aiStampVisible', newValue);
+            break;
+        case 'CS':
+            newValue = !isCsStampVisible;
+            setCsStampVisible(newValue);
+            localStorage.setItem('csStampVisible', newValue);
+            break;
+        case 'FT':
+            newValue = !isFtStampVisible;
+            setFtStampVisible(newValue);
+            localStorage.setItem('ftStampVisible', newValue);
+            break;
+        case 'IT':
+            newValue = !isItStampVisible;
+            setItStampVisible(newValue);
+            localStorage.setItem('itStampVisible', newValue);
+            break;
+        default:
+            console.warn(`Unknown stamp type: ${stampType}`);
+            return;
+    }
+};
 
 
 
@@ -544,8 +543,6 @@ function UserLanding() {
                 const blob = await response.blob();
                 const imageUrl = URL.createObjectURL(blob);
                 setOutput(imageUrl);
-
-                localStorage.setItem('uploadedImage', imageUrl);
                 // Create a link element to trigger download
                 const link = document.createElement('a');
                 link.href = imageUrl;
@@ -562,14 +559,6 @@ function UserLanding() {
             console.error('The provided input is not a valid File object');
             setError('Invalid file input.');
         }
-    };
-
-
-
-
-    const handleRemoveImage = () => {
-        setOutput(null);
-        localStorage.removeItem('uploadedImage');
     };
 
     const handleDropChange = (event) => {
@@ -653,12 +642,15 @@ function UserLanding() {
                         </a>
                         <Box className="QRBox">
                             <img src={qrImage} alt="QR Code" className="qrImage" />
+                            <Typography className="ticketText">
+                                {ticket_id}
+                            </Typography>
                         </Box>
                     </Box>
                 </Paper>
                 <Paper className="BoardingPass" elevation={12} sx={{ borderRadius: "20px", marginTop: "20px" }}>
                     <Box className="BoardingPassContent">
-                        <Box class="detailsBox">
+                        <Box className="detailsBox">
                             <Box>
                                 <Typography class="bold">
                                     Engraving Queue Left
@@ -669,7 +661,7 @@ function UserLanding() {
                                 </Typography>
                             </Box>
                             <Box>
-                                <Typography class="bold">
+                                <Typography className="bold">
                                     Redemption Status
                                 </Typography>
                                 <Typography>
@@ -680,26 +672,64 @@ function UserLanding() {
                         </Box>
                         <h1>Stamps:</h1>
                         <Box className="stampsBox">
-                            <Box className="stamps">
-                                <img src={aiStamp} alt="aiStamp" width='100%' style={{ ...displayStamp, display: isAiStampVisible ? 'block' : 'none', marginTop: '25px' }} />
-
+                            <Box className="stamps" onClick={() => toggleStampVisibility('AI')}>
+                                <Typography variant="subtitle1">AI Stamp</Typography>
+                                <img
+                                    src={aiStamp}
+                                    alt="aiStamp"
+                                    width="100%"
+                                    style={{
+                                        ...displayStamp,
+                                        display: isAiStampVisible ? 'block' : 'none',
+                                        marginTop: '5px'
+                                    }}
+                                />
                             </Box>
-                            <Box className="stamps">
-                                <img src={csStamp} alt="csStamp" width='100%' style={{ ...displayStamp, display: isCsStampVisible ? 'block' : 'none', marginTop: '25px' }} />
-
+                            <Box className="stamps" onClick={() => toggleStampVisibility('CS')}>
+                                <Typography variant="subtitle1">CS Stamp</Typography>
+                                <img
+                                    src={csStamp}
+                                    alt="csStamp"
+                                    width="100%"
+                                    style={{
+                                        ...displayStamp,
+                                        display: isCsStampVisible ? 'block' : 'none',
+                                        marginTop: '5px'
+                                    }}
+                                />
                             </Box>
                         </Box>
                         <Box className="stampsBox">
-                            <Box className="stamps">
-                                <img src={ftStamp} alt="ftStamp" width='100%' style={{ ...displayStamp, display: isFtStampVisible ? 'block' : 'none', marginTop: '25px' }} />
-
+                            <Box className="stamps" onClick={() => toggleStampVisibility('FT')}>
+                                <Typography variant="subtitle1">FT Stamp</Typography>
+                                <img
+                                    src={ftStamp}
+                                    alt="ftStamp"
+                                    width="100%"
+                                    style={{
+                                        ...displayStamp,
+                                        display: isFtStampVisible ? 'block' : 'none',
+                                        marginTop: '5px'
+                                    }}
+                                />
                             </Box>
-                            <Box className="stamps">
-                                <img src={itStamp} alt="itStamp" width='100%' style={{ ...displayStamp, display: isItStampVisible ? 'block' : 'none', marginTop: '25px' }} />
+                            <Box className="stamps" onClick={() => toggleStampVisibility('IT')}>
+                                <Typography variant="subtitle1">IT Stamp</Typography>
+                                <img
+                                    src={itStamp}
+                                    alt="itStamp"
+                                    width="100%"
+                                    style={{
+                                        ...displayStamp,
+                                        display: isItStampVisible ? 'block' : 'none',
+                                        marginTop: '5px'
+                                    }}
+                                />
                             </Box>
                         </Box>
                     </Box>
                 </Paper>
+
 
                 <div>
                     <h1>WebSocket Communication</h1>
@@ -737,21 +767,47 @@ function UserLanding() {
                     Add Queue Number
                 </Button>
                 {/* Gained a stamp upon each completion of booth */}
-                <Button variant="contained" color="primary" onClick={toggleAiStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => toggleStampVisibility('AI')}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
                     Completed Booth 1
                 </Button>
-                <Button variant="contained" color="primary" onClick={toggleCsStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => toggleStampVisibility('CS')}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
                     Completed Booth 2
                 </Button>
-                <Button variant="contained" color="primary" onClick={toggleFtStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => toggleStampVisibility('FT')}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
                     Completed Booth 3
                 </Button>
-                <Button variant="contained" color="primary" onClick={toggleItStamp} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => toggleStampVisibility('IT')}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
                     Completed Booth 4
                 </Button>
-                <Button variant="contained" color="primary" onClick={clearLocalStorage} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={clearLocalStorage}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
                     Clear Local Storage
                 </Button>
+
 
             </Box>
         </Box>

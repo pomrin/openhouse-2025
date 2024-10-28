@@ -10,6 +10,7 @@ using System.Text;
 using AWSServerless1.DAL;
 using Microsoft.AspNetCore.Http.Extensions;
 using AWSServerless1.Authentication;
+using AWSServerless1.DTO;
 
 namespace AWSServerless1.Controllers
 {
@@ -52,10 +53,15 @@ namespace AWSServerless1.Controllers
                         audience: _config[AMSAppSettings.APP_SETTINGS_KEY_JWT_ISSUER],
                         claims: new Claim[]
                         {
-                        new Claim(ClaimTypes.Name, visitorEntity.TicketId),
-                        new Claim(ClaimTypes.Role, USER_ROLES.VISITOR.ToDescriptionString()),
-                        new Claim(AMSAppSettings.CLAIMS_KEY_STAFF, JsonConvert.SerializeObject(visitorEntity)),
-                        //new Claim(AMSAppSettings.CLAIMS_KEY_SCHOOL, school),
+                            new Claim(ClaimTypes.Name, visitorEntity.TicketId),
+                            new Claim(ClaimTypes.Role, USER_ROLES.VISITOR.ToDescriptionString()),
+                            new Claim(AMSAppSettings.CLAIMS_KEY_STAFF, JsonConvert.SerializeObject(new VisitorInfoDTO(){
+                                TicketId = visitorEntity.TicketId,
+                                VisitorId = visitorEntity.VisitorId,
+                                Datecreated = DateTime.UtcNow,
+                            })),
+                            new Claim(AMSAppSettings.CLAIMS_KEY_TICKET_ID, visitorEntity.TicketId),
+                            //new Claim(AMSAppSettings.CLAIMS_KEY_SCHOOL, school),
                             //new Claim("MoreKey", "MoreValue"),
                         },
                         notBefore: DateTime.Now,
