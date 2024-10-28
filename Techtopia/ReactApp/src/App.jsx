@@ -101,10 +101,26 @@ function App() {
 
               {/* Admin Login for the 3 rows below this comment */}
               <Route path="/adminlogin" element={<AdminLogin />} />
-              <Route path="/selectbooth" element={<Selectbooth />} />
-              <Route path="/qrcodescanner" element={<Qrcodescanner />} />
 
+              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
+                <Route path="/selectbooth" element={<Selectbooth />} />
+              ) : (
+                <Route path="/selectbooth" element={<Navigate to="/Home" />} />
+              )}
+
+              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
+              <Route path="/qrcodescanner" element={<Qrcodescanner />} />
+              ) : (
+              <Route path="/qrcodescanner" element={<Navigate to="/Home"/>} />
+              )}
+
+              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
               <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
+              ) : (
+              <Route path={"/Redemption"} element={<Navigate to="/Home" />} />
+              )}
+
+
             </Routes>
           </Container>
         </CombinedProvider>
