@@ -1,4 +1,5 @@
 ﻿using AWSServerless1.Authentication;
+using AWSServerless1.Constants;
 using AWSServerless1.DAL;
 using AWSServerless1.DTO;
 using AWSServerless1.ResponseObject;
@@ -6,7 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ProjectEFEntities.OH25EntityModels;
+using System.Net.WebSockets;
+using System.Text;
 using System.Web.Http.Results;
 
 namespace AWSServerless1.Controllers
@@ -38,7 +42,7 @@ namespace AWSServerless1.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-        public IActionResult UpdateBoothStampStatusForVisitor(IssueStampDTO stampDTO)
+        public async Task<IActionResult> UpdateBoothStampStatusForVisitor(IssueStampDTO stampDTO)
         {
             // Get the User of the TicketId
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(stampDTO.TicketId);
@@ -62,6 +66,30 @@ namespace AWSServerless1.Controllers
                         VisitorBooth result = VisitorBoothDAL.IssueOrUpdateVisitorBoothStamp(visitorEntity, boothEntity);
                         if (result != null)
                         {
+                            // TODO: Send a Websocket message to Visitor
+                            using (var ms = new MemoryStream())
+                            {
+                                String message = $"This is a test message sent at {DateTime.Now.ToString("yyyyMMddHHmmss")}";
+
+                                var tempMessage = new
+                                {
+                                    action = "sendmessage",
+                                    recipientId = "AW3ZFdkwSQ0CHyw=",
+                                    message = message
+                                }; // TODO: Change this to send via TicketID instead of RecipientId (connectionId)
+
+                                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(tempMessage));
+                                var arraySegment = new ArraySegment<byte>(bytes);
+                                var wsClient = new ClientWebSocket();
+                                await wsClient.ConnectAsync(new Uri(_config[OHAPIAppSettings.APP_SETTINGS_KEY_WEBSOCKET_URL_PROD]), CancellationToken.None);
+                                if (wsClient.State == WebSocketState.Open)
+                                {
+                                    await wsClient.SendAsync(arraySegment, WebSocketMessageType.Text, true, CancellationToken.None);
+                                }
+                                await wsClient.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, String.Empty, CancellationToken.None);
+
+                            }
+
                             var visitorBoothResObj = VisitorBoothResObj.FromVisitorBoothEntity(result);
                             return Ok(visitorBoothResObj);
                         }

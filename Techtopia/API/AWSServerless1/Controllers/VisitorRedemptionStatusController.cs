@@ -38,7 +38,7 @@ namespace AWSServerless1.Controllers
             if (identity.IsAuthenticated) // If user already have a valid jwt token, no need to do anything
             {
                 // Get the User's ID or TicketID
-                var ticketId = identity.FindFirst(AMSAppSettings.CLAIMS_KEY_TICKET_ID)?.Value;
+                var ticketId = identity.FindFirst(OHAPIAppSettings.CLAIMS_KEY_TICKET_ID)?.Value;
                 var controller = new AdminVisitorBoothController(_config);
                 return controller.GetRedemptionStatus(ticketId);
 
