@@ -47,8 +47,8 @@ public class Startup
 
         // JWT Authentication setup Start
         // Read from appsettings.json
-        var jwtIssuer = Configuration.GetSection(AMSAppSettings.APP_SETTINGS_KEY_JWT_ISSUER).Get<string>();
-        var jwtKey = Configuration.GetSection(AMSAppSettings.APP_SETTINGS_KEY_JWT_KEY).Get<string>();
+        var jwtIssuer = Configuration.GetSection(OHAPIAppSettings.APP_SETTINGS_KEY_JWT_ISSUER).Get<string>();
+        var jwtKey = Configuration.GetSection(OHAPIAppSettings.APP_SETTINGS_KEY_JWT_KEY).Get<string>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -151,5 +151,11 @@ public class Startup
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
             options.RoutePrefix = string.Empty;
         });
+
+        //var webSocketOptions = new WebSocketOptions
+        //{
+        //    KeepAliveInterval = TimeSpan.FromMinutes(2),
+        //};
+        //app.UseWebSockets(webSocketOptions);
     }
 }

@@ -43,24 +43,24 @@ namespace AWSServerless1.Controllers
             }
             else // if user does not have a valid jwt token, register a new one and return the jwt token
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[AMSAppSettings.APP_SETTINGS_KEY_JWT_KEY]));
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[OHAPIAppSettings.APP_SETTINGS_KEY_JWT_KEY]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
                 var visitorEntity = VisitorDAL.RegisterVisitor();
 
                 var Sectoken = new JwtSecurityToken(
-                        issuer: _config[AMSAppSettings.APP_SETTINGS_KEY_JWT_ISSUER],
-                        audience: _config[AMSAppSettings.APP_SETTINGS_KEY_JWT_ISSUER],
+                        issuer: _config[OHAPIAppSettings.APP_SETTINGS_KEY_JWT_ISSUER],
+                        audience: _config[OHAPIAppSettings.APP_SETTINGS_KEY_JWT_ISSUER],
                         claims: new Claim[]
                         {
                             new Claim(ClaimTypes.Name, visitorEntity.TicketId),
                             new Claim(ClaimTypes.Role, USER_ROLES.VISITOR.ToDescriptionString()),
-                            new Claim(AMSAppSettings.CLAIMS_KEY_STAFF, JsonConvert.SerializeObject(new VisitorInfoDTO(){
+                            new Claim(OHAPIAppSettings.CLAIMS_KEY_STAFF, JsonConvert.SerializeObject(new VisitorInfoDTO(){
                                 TicketId = visitorEntity.TicketId,
                                 VisitorId = visitorEntity.VisitorId,
                                 Datecreated = DateTime.UtcNow,
                             })),
-                            new Claim(AMSAppSettings.CLAIMS_KEY_TICKET_ID, visitorEntity.TicketId),
+                            new Claim(OHAPIAppSettings.CLAIMS_KEY_TICKET_ID, visitorEntity.TicketId),
                             //new Claim(AMSAppSettings.CLAIMS_KEY_SCHOOL, school),
                             //new Claim("MoreKey", "MoreValue"),
                         },
