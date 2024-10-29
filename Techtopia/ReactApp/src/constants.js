@@ -54,7 +54,7 @@ if (token) {
     tokenDecoded = jwtDecode(token);
     role = tokenDecoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
     console.log('role:',role)
-    // role = 'BOOTH_HELPER'
+    //role = 'ADMIN'
     CURRENT_USER_TYPE = roleChecker();
 }
 

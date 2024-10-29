@@ -109,14 +109,14 @@ function UserLanding() {
             console.log("Status code: ", response.status);
             if (response.status === 200) {
                 const dataString = response.data;
-
-                const words = dataString.split(' ');
-                const specificWord = words[3];
-                console.log('Word',specificWord);
-                 // Update state with the parsed number
-                 const numberValue = parseInt(specificWord);
-                 setQNumber(numberValue); // Update the state
-                console.log('Number', numberValue);
+                setQNumber(dataString);
+                // const words = dataString.split(' ');
+                // const specificWord = words[3];
+                // console.log('Word',specificWord);
+                //  // Update state with the parsed number
+                //  const numberValue = parseInt(specificWord);
+                //  setQNumber(numberValue); // Update the state
+            
             }
         } catch (error) {
             if (error.response) {
@@ -729,7 +729,7 @@ const toggleStampVisibility = (stampType) => {
                         <Box className="detailsBox">
                             <Box>
                                 <Typography class="bold">
-                                    Engraving Queue Left
+                                    Engraving Queue Status
                                 </Typography>
                                 <Typography>
                                     {qNumber}
@@ -738,7 +738,7 @@ const toggleStampVisibility = (stampType) => {
                             </Box>
                             <Box>
                                 <Typography class="bold">
-                                    Redemption Status
+                                    Current Redemption Status
                                 </Typography>
                                 <Typography>
                                     {rStatus}
@@ -746,7 +746,7 @@ const toggleStampVisibility = (stampType) => {
                                 </Typography>
                             </Box>
                         </Box>
-                        <h1>Stamps:</h1>
+                        <h1 style={{marginTop:'-15px'}}>Stamps:</h1>
                         <Box className="stampsBox">
                             <Box className="stamps" onClick={() => toggleStampVisibility('AI')}>
                                 <Typography variant="subtitle1">AI Stamp</Typography>
