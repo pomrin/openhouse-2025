@@ -93,6 +93,7 @@ function App() {
               <Route path={"/SEMap"} element={<SE />} />
               <Route path={"/RedemptionMap"} element={<RD />} />
               <Route path={"/MuseumMap"} element={<Museum />} />
+              <Route path={"/adminlogin"} element={<AdminLogin />} />
 
 
 
@@ -100,7 +101,6 @@ function App() {
               {/* <Route path={"/"} element={<AdminLogin />} /> */}
 
               {/* Admin Login for the 3 rows below this comment */}
-              <Route path="/adminlogin" element={<AdminLogin />} />
 
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
                 <Route path="/selectbooth" element={<Selectbooth />} />
