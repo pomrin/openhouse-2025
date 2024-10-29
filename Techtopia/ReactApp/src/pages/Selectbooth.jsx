@@ -33,7 +33,7 @@ function Selectbooth() {
      // Separate Engraving and Redemption booths from other booths via if else statement
      if (boothName === 'Engraving') {
       // Redirect to the engraving page
-      navigate('/engraving');
+      navigate('/adminqueue');
     } else if (boothName === 'Redemption') {
       // Redirect to the redemption page
       navigate('/redemption');

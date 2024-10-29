@@ -53,12 +53,14 @@ import AddUserPage from './pages/admin/users/AddUserPage';
 import SignInPage from './pages/SignInPage';
 import LoanReceipt from './pages/loans/LoanReceipt';
 import UserLanding from './pages/UserLanding'
-import DemoPage from './pages/UserLandingDemo'
+import UserLandingDemo from './pages/UserLandingDemo'
 import BoothRedemptionPage from './pages/BoothRedemption'
 
 import AdminLogin from './pages/AdminLogin';
 import Selectbooth from './pages/Selectbooth';
 import Qrcodescanner from './pages/Qrcodescanner';
+import AdminQueue from "./pages/AdminQueue"
+import EngravingSelection from './pages/EngravingSelection';
 
 import Cybersecurity from './pages/Cybersecurity';
 import Fintech from './pages/Fintech';
@@ -66,7 +68,7 @@ import AI from './pages/AI';
 import SE from './pages/SE';
 import RD from './pages/RD';
 import Museum from './pages/Museum';
-import Demo from './pages/UserLandingDemo'
+
 
 
 
@@ -74,18 +76,15 @@ import Demo from './pages/UserLandingDemo'
 function App() {
   return (
     <Router>
-      
-
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
-
           {/* NAV BAR */}
           {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
               <Route path={"/"} element={<UserLanding />} />
               <Route path={"/Home"} element={<UserLanding />} />
-              <Route path={"/Demo"} element={<UserLanding />} /> 
+              <Route path={"/Demo"} element={<UserLandingDemo />} />
 
               <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
               <Route path={"/FintechMap"} element={<Fintech />} />
@@ -93,7 +92,6 @@ function App() {
               <Route path={"/SEMap"} element={<SE />} />
               <Route path={"/RedemptionMap"} element={<RD />} />
               <Route path={"/MuseumMap"} element={<Museum />} />
-              <Route path={"/adminlogin"} element={<AdminLogin />} />
 
 
 
@@ -101,26 +99,13 @@ function App() {
               {/* <Route path={"/"} element={<AdminLogin />} /> */}
 
               {/* Admin Login for the 3 rows below this comment */}
-
-              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
-                <Route path="/selectbooth" element={<Selectbooth />} />
-              ) : (
-                <Route path="/selectbooth" element={<Navigate to="/Home" />} />
-              )}
-
-              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
+              <Route path="/adminlogin" element={<AdminLogin />} />
+              <Route path="/selectbooth" element={<Selectbooth />} />
               <Route path="/qrcodescanner" element={<Qrcodescanner />} />
-              ) : (
-              <Route path="/qrcodescanner" element={<Navigate to="/Home"/>} />
-              )}
+              <Route path="/adminqueue" element={<AdminQueue/>}/>
+              <Route path="/engravingselection/:uuid" element={<EngravingSelection />} /> {/* EngravingSelection Route */}
 
-              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
               <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
-              ) : (
-              <Route path={"/Redemption"} element={<Navigate to="/Home" />} />
-              )}
-
-
             </Routes>
           </Container>
         </CombinedProvider>
