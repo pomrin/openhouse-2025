@@ -20,9 +20,11 @@ var fs = require('fs');
 // ##### Form SG
 // This is where your domain is hosted, and should match
 // the URI supplied to FormSG in the form dashboard
+
 const POST_URI = process.env.FORM_SG_POST_URL;
 
 // Your form's secret key downloaded from FormSG upon form creation
+
 const formSecretKey = process.env.FORM_SECRET_KEY;
 
 // #### Form SG for Demo
@@ -52,7 +54,7 @@ ws.on('open', () => {
     // Process the queued messages
     while (messageQueue.length > 0) {
         const message = messageQueue.shift();
-        broadcastMessage(message);
+        registerMessage(message);
     }
 });
 
@@ -66,18 +68,18 @@ ws.on('close', (code, reason) => {
     isWebSocketOpen = false;
 });
 
-function broadcastMessage(message) {
-    const broadcastPayload = JSON.stringify({
-        action: "broadcast",
+function registerMessage(message) {
+    const registerPayload = JSON.stringify({
+        action: "register",
         message: message
     });
     // Check if WebSocket is open before sending
     if (isWebSocketOpen) {
-        ws.send(broadcastPayload, (err) => {
+        ws.send(registerPayload, (err) => {
             if (err) {
-                console.error('Error sending broadcast message:', err);
+                console.error('Error registering:', err);
             } else {
-                console.log('Broadcast message sent:', message);
+                console.log('Register message sent:', message);
             }
         });
     } else {
@@ -119,7 +121,7 @@ module.exports.postRequest = async (event, context) => {
     const visitorName = submissionWithAttachments.content.responses[2].answer;
     console.log(`visitorName: ${visitorName}`);
     console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
-    broadcastMessage(ticketId);
+    registerMessage(ticketId);
     const photoInfo = submissionWithAttachments.content.responses[3].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
@@ -233,7 +235,7 @@ module.exports.postDemoRequest = async (event, context) => {
     // const visitorName = submissionWithAttachments.content.responses[2].answer;
     // console.log(`visitorName: ${visitorName}`);
     // console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
-    broadcastMessage(ticketId);
+    registerMessage(ticketId);
     const photoInfo = submissionWithAttachments.content.responses[2].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
