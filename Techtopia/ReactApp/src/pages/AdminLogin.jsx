@@ -12,18 +12,6 @@ function AdminLogin() {
 
   const navigate = useNavigate();
 
-  // This code is to minimize risk of confusion - when the admin already logged in
-  // If the admin accidentally returns to login page (e.g. removing the /selectBooth on the url link) during testing
-  useEffect(() => {
-    // Check if the token exists in localStorage
-    const token = localStorage.getItem('accessToken');
-    
-    if (token) {
-      // If token exists, the admin user will remain in the SelectBooth page
-      navigate('/selectbooth');
-    }
-  }, [navigate]);
-
   // Login process
   const handleLogin = () => {
     axios.post('https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/AdminLogin', {
