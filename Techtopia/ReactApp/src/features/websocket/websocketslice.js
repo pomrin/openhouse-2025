@@ -15,8 +15,8 @@ export const connectWebSocket = createAsyncThunk(
             dispatch(setIsConnected(true));
 
             if (ticketId) {
-                const broadcastMessage = { action: "register", message: ticketId };
-                socket.send(JSON.stringify(broadcastMessage));
+                const registerMessage = { action: "register", message: ticketId, usergroup: "Visitor"};
+                socket.send(JSON.stringify(registerMessage));
                 console.log('Registered ticket_id:', ticketId);
             }
         };

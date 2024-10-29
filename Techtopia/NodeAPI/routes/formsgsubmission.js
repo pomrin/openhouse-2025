@@ -44,6 +44,7 @@ const ws = new WebSocket(wsUrl);
 
 // Message queue for messages before the connection opens
 let messageQueue = [];
+let directMessageQueue = [];
 let isWebSocketOpen = false;
 
 // Handle WebSocket connection open event
@@ -51,10 +52,16 @@ ws.on('open', () => {
     console.log('WebSocket connection established.');
     isWebSocketOpen = true;
 
-    // Process the queued messages
+    // Process the queued registration messages
     while (messageQueue.length > 0) {
         const message = messageQueue.shift();
         registerMessage(message);
+    }
+
+    // Process the queued direct messages
+    while (directMessageQueue.length > 0) {
+        const directMessage = directMessageQueue.shift();
+        sendDirectMessage(directMessage);
     }
 });
 
@@ -71,8 +78,10 @@ ws.on('close', (code, reason) => {
 function registerMessage(message) {
     const registerPayload = JSON.stringify({
         action: "register",
-        message: message
+        message: message,
+        usergroup: "NodeAPI"
     });
+
     // Check if WebSocket is open before sending
     if (isWebSocketOpen) {
         ws.send(registerPayload, (err) => {
@@ -85,6 +94,26 @@ function registerMessage(message) {
     } else {
         console.error('WebSocket is not open. Queueing the message.');
         messageQueue.push(message);
+    }
+}
+
+function sendDirectMessage(directMessage) {
+    const directPayload = JSON.stringify({
+        action: "direct",
+        message: directMessage
+    });
+
+    // Check if WebSocket is open before sending
+    if (isWebSocketOpen) {
+        ws.send(directPayload, (err) => {
+            if (err) {
+                console.error('Error sending direct message:', err);
+            } else {
+                console.log('Direct message sent:', directMessage);
+            }
+        });
+    } else {
+        console.error('WebSocket is not open. Unable to send direct message.');
     }
 }
 
@@ -122,6 +151,7 @@ module.exports.postRequest = async (event, context) => {
     console.log(`visitorName: ${visitorName}`);
     console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
     registerMessage(ticketId);
+    sendDirectMessage("updateImage");
     const photoInfo = submissionWithAttachments.content.responses[3].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
@@ -236,6 +266,7 @@ module.exports.postDemoRequest = async (event, context) => {
     // console.log(`visitorName: ${visitorName}`);
     // console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
     registerMessage(ticketId);
+    sendDirectMessage("updateImage");
     const photoInfo = submissionWithAttachments.content.responses[2].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
