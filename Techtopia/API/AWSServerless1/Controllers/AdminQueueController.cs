@@ -1,6 +1,7 @@
 ﻿using AWSServerless1.Authentication;
 using AWSServerless1.DAL;
 using AWSServerless1.DTO;
+using AWSServerless1.WebSocket;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -82,7 +83,7 @@ namespace AWSServerless1.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-        public IActionResult AddToQueue(AddToQueueDTO addToQueueInfo)
+        public async Task<IActionResult> AddToQueue(AddToQueueDTO addToQueueInfo)
         {
             // TODO: Get the User of the TicketId
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(addToQueueInfo.TicketId);
@@ -95,6 +96,8 @@ namespace AWSServerless1.Controllers
                     case QueueDAL.QUEUE_STATUS.NOT_IN_QUEUE:
                         // TODO: Add the user to the Queue
                         EngravingQueue queueEntity = QueueDAL.AddToQueue(visitorEntity.VisitorId, addToQueueInfo);
+                        await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                        await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
                         return Created(new Uri(Request.GetEncodedUrl()), queueEntity);
                     case QueueDAL.QUEUE_STATUS.IN_QUEUE:
                     case QueueDAL.QUEUE_STATUS.ENGRAVING:
@@ -132,7 +135,7 @@ namespace AWSServerless1.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-        public IActionResult UpdateQueue(AdminQueueUpdateDTO updateQueueInfo)
+        public async Task<IActionResult> UpdateQueue(AdminQueueUpdateDTO updateQueueInfo)
         {
             // TODO: Get the User of the TicketId
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(updateQueueInfo.TicketId);
@@ -148,6 +151,8 @@ namespace AWSServerless1.Controllers
                         {
                             // TODO: Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
+                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
                             return NoContent();
                         }
                         else
@@ -161,6 +166,8 @@ namespace AWSServerless1.Controllers
                         {
                             // TODO: Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
+                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
                             return Ok(queue);
                         }
                         else
@@ -175,6 +182,8 @@ namespace AWSServerless1.Controllers
                         {
                             // TODO: Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
+                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
                             return Ok(queue);
                         }
                         else
@@ -189,6 +198,8 @@ namespace AWSServerless1.Controllers
                         {
                             // TODO: Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
+                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
                             return Ok(queue);
                         }
                         else
@@ -203,6 +214,8 @@ namespace AWSServerless1.Controllers
                         {
                             // TODO: Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
+                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
                             return Ok(queue);
                         }
                         else

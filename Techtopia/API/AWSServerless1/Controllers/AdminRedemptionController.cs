@@ -1,6 +1,7 @@
 ﻿using AWSServerless1.Authentication;
 using AWSServerless1.DAL;
 using AWSServerless1.DTO;
+using AWSServerless1.WebSocket;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ namespace AWSServerless1.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-        public IActionResult Redeem(AdminRedemptionDTO redemptionInfo)
+        public async Task<IActionResult> Redeem(AdminRedemptionDTO redemptionInfo)
         {
             // Get the User of the TicketId
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(redemptionInfo.TicketId);
@@ -59,6 +60,7 @@ namespace AWSServerless1.Controllers
                         if (luggageTagColor != null)
                         {
                             Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateRedemptionStatus); // To update their queue status in the Visitor App.
                             return Ok(visitor);
                         }
                         else
@@ -79,7 +81,7 @@ namespace AWSServerless1.Controllers
         }
 
         /// <summary>
-        /// Create or Update a redemption information.
+        /// Create or Update a redemption information. A WebSocket message will be send to the Ticket ID 
         /// This method will REQUIRE Authentication and for role BOOTH HELPER OR ABOVE.
         /// </summary>
         /// <param name="redemptionInfo"></param>
@@ -91,7 +93,7 @@ namespace AWSServerless1.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
             )]
-        public IActionResult UpdateRedemption(AdminRedemptionDTO redemptionInfo)
+        public async Task<IActionResult> UpdateRedemption(AdminRedemptionDTO redemptionInfo)
         {
             // Get the User of the TicketId
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(redemptionInfo.TicketId);
@@ -104,6 +106,7 @@ namespace AWSServerless1.Controllers
                     if (visitorEntity.LuggageRedeemedDate != null)
                     {
                         Visitor visitor = VisitorDAL.UpdateRedemptionInformation(visitorEntity.VisitorId, luggageTagColor);
+                        await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateRedemptionStatus); // To update their queue status in the Visitor App.
                         return Ok(visitor);
                     }
                     else
@@ -114,6 +117,7 @@ namespace AWSServerless1.Controllers
                         if (boothVisited.Count() == totalBooth.Count())
                         {
                             Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateRedemptionStatus); // To update their queue status in the Visitor App.
                             return Ok(visitor);
                         }
                         else
