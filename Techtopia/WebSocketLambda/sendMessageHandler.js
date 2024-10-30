@@ -1,10 +1,13 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, ScanCommand, GetCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, ScanCommand, GetCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
 const { ApiGatewayManagementApiClient, PostToConnectionCommand } = require("@aws-sdk/client-apigatewaymanagementapi");
 
-exports.handler = async function(event) {
+exports.handler = async function (event) {
   const client = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(client);
+
+
+  console.log(`Enterered`);
 
   // Parse the message
   let body;
@@ -17,7 +20,15 @@ exports.handler = async function(event) {
     };
   }
 
-  const { action } = body;
+  const { action, authKey } = body;
+
+  // Check if authKey is valid
+  if (action !== "register" && action !== "ping" && authKey !== "Av3ryS3cr3tK3y") {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ message: "Forbidden: Invalid authKey" }),
+    };
+  }
 
   // Handle send message action
   if (action === "sendmessage") {
@@ -25,6 +36,7 @@ exports.handler = async function(event) {
     const senderConnectionId = event.requestContext.connectionId;
 
     try {
+
       // Retrieve the recipient connectionId from DynamoDB
       const recipientConnection = await docClient.send(new GetCommand({
         TableName: process.env.TABLE_NAME,
@@ -65,36 +77,267 @@ exports.handler = async function(event) {
     }
   }
 
-  // Handle broadcast message action
+  if (action === "register") {
+    var { ticketId, usergroup } = body;
+    const senderConnectionId = event.requestContext.connectionId;
+    const apiClient = new ApiGatewayManagementApiClient({
+      endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
+    });
+
+    // Ensure proper parameter values for ticket id and user group
+    var errorMessage = "";
+    if ((ticketId == null || ticketId === "")) {
+      errorMessage += `Ticket ID (ticketId: ${ticketId}) cannot be null or empty`;
+    } else {
+      ticketId = ticketId.toUpperCase();
+    }
+    if ((usergroup == null || usergroup === "")) {
+      if (errorMessage.length > 0) {
+        errorMessage += ".\n";
+      }
+      errorMessage += `User Group (usergroup: ${usergroup}) cannot be null or empty`;
+    } else {
+      usergroup = usergroup.toUpperCase();
+    }
+    if (errorMessage) {
+      try {
+        await apiClient.send(new PostToConnectionCommand({
+          ConnectionId: senderConnectionId,
+          Data: JSON.stringify({ message: `Unable to Register: ${errorMessage}}` }),
+        }));
+      }
+      catch (err) {
+        console.error("Error processing registration:", err);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Internal server error" }),
+        };
+      }
+    } else {
+      try {
+
+        await docClient.send(new UpdateCommand({
+          TableName: process.env.TABLE_NAME,
+          Key: {
+            connectionId: senderConnectionId,
+          },
+          UpdateExpression: "SET ticketId = :ticketId, #ug = :usergroup",
+          ExpressionAttributeValues: {
+            ":ticketId": ticketId,
+            ":usergroup": usergroup,
+          },
+          ExpressionAttributeNames: {
+            "#ug": "usergroup",
+          },
+        }));
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            message: "Ticket ID and usergroup updated for the sender",
+          }),
+        };
+      } catch (err) {
+        console.error("Error processing registration:", err);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Internal server error" }),
+        };
+      }
+    }
+  }
+
+  if (action === "direct") {
+    var { command, message, ticketId } = body; // Include ticketId in the request body
+    const senderConnectionId = event.requestContext.connectionId;
+    const apiClient = new ApiGatewayManagementApiClient({
+      endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
+    });
+
+    // Ensure proper parameter values for ticket id and message
+    var errorMessage = "";
+    if ((command === undefined || command == null || command === "")) {
+      errorMessage += `Command (command: ${command}) cannot be null or empty`;
+    } else {
+      command = command.toUpperCase();
+    }
+    if ((ticketId == null || ticketId === "")) {
+      if (errorMessage.length > 0) {
+        errorMessage += ".\n";
+      }
+      errorMessage += `Ticket ID (ticketId: ${ticketId}) cannot be null or empty`;
+    } else {
+      ticketId = ticketId.toUpperCase();
+    }
+
+    if (errorMessage) {
+      try {
+        await apiClient.send(new PostToConnectionCommand({
+          ConnectionId: senderConnectionId,
+          Data: JSON.stringify({ message: `Unable to Send Direct Message: ${errorMessage}}` }),
+        }));
+      }
+      catch (err) {
+        console.error("Error processing Send Direct Message:", err);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Internal server error" }),
+        };
+      }
+    } else {
+      try {
+
+        // Scan the DynamoDB table to get all connections with the provided ticketId
+        const scanResult = await docClient.send(new ScanCommand({
+          TableName: process.env.TABLE_NAME,
+          FilterExpression: "ticketId = :ticketId",
+          ExpressionAttributeValues: {
+            ":ticketId": ticketId,
+          },
+        }));
+
+        // Send the direct message to all connections with matching ticketId, excluding the sender
+        const sendMessages = scanResult.Items
+          .filter(item => item.connectionId !== senderConnectionId) // Exclude the sender's connection ID
+          .map(item => {
+            const connectionId = item.connectionId;
+
+            const directMessage = {
+              // action: "sendmessage",
+              // recipientId: connectionId,
+              ticketId: ticketId,
+              command: command,
+              message: message, // Use the message from the request body
+            };
+
+            return apiClient.send(new PostToConnectionCommand({
+              ConnectionId: connectionId,
+              Data: JSON.stringify(directMessage),
+            })).catch(err => {
+              console.error(`Failed to send message to ${connectionId}:`, err);
+            });
+          });
+
+        await Promise.all(sendMessages); // Wait for all messages to be sent
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            message: "Direct message sent to all connections linked by ticket ID",
+          }),
+        };
+      } catch (err) {
+        console.error("Error processing direct message:", err);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Internal server error" }),
+        };
+      }
+    }
+
+  }
+
+
+
+  // Handle broadcast action for all connections
   if (action === "broadcast") {
-    const { message } = body;
+    var { command, message, usergroup } = body; // Get usergroup from the body
+    const senderConnectionId = event.requestContext.connectionId;
+    const apiClient = new ApiGatewayManagementApiClient({
+      endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
+    });
+
+
+    // Ensure proper parameter values for ticket id and message
+    var errorMessage = "";
+    if ((command === undefined || command == null || command === "")) {
+      errorMessage += `Command (command: ${command}) cannot be null or empty`;
+    } else {
+      command = command.toUpperCase();
+    }
+    if ((usergroup == null || usergroup === "")) {
+      if (errorMessage.length > 0) {
+        errorMessage += ".\n";
+      }
+      errorMessage += `User Group (usergroup: ${usergroup}) cannot be null or empty`;
+    } else {
+      usergroup = usergroup.toUpperCase();
+    }
+
+    // await apiClient.send(new PostToConnectionCommand({
+    //   ConnectionId: senderConnectionId,
+    //   Data: JSON.stringify({ temp:`command: ${command}, message: ${message}, usergroup: ${usergroup}` }),
+    // }));
+
+    if (errorMessage) {
+      try {
+        await apiClient.send(new PostToConnectionCommand({
+          ConnectionId: senderConnectionId,
+          Data: JSON.stringify({ message: `Unable to broadcast: ${errorMessage}}` }),
+        }));
+      }
+      catch (err) {
+        console.error("Error processing broadcast:", err);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Internal server error" }),
+        };
+      }
+    } else {
+      try {
+        // Scan all connections from the table
+        const scanResult = await docClient.send(new ScanCommand({
+          TableName: process.env.TABLE_NAME,
+        }));
+
+        // Filter connections by usergroup and exclude the sender
+        const sendMessages = scanResult.Items
+          .filter(item => item.usergroup === usergroup && item.connectionId !== senderConnectionId)
+          .map(async (item) => {
+            const connectionId = item.connectionId;
+
+            // Broadcast the message to each connection in the same usergroup
+            return apiClient.send(new PostToConnectionCommand({
+              ConnectionId: connectionId,
+              Data: JSON.stringify({ command: command, message: message }),
+            }));
+          });
+
+        await Promise.all(sendMessages); // Wait for all messages to be sent
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ message: "Broadcast message sent to all connections in the same usergroup" }),
+        };
+      } catch (err) {
+        console.error("Error processing broadcast to usergroup:", err);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Internal server error" }),
+        };
+      }
+    }
+  }
+
+  if (action === "ping") {
+    const senderConnectionId = event.requestContext.connectionId;
     const apiClient = new ApiGatewayManagementApiClient({
       endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
     });
 
     try {
-      // Scan the DynamoDB table to get all connections
-      const scanResult = await docClient.send(new ScanCommand({
-        TableName: process.env.TABLE_NAME,
+      // Send the "pong" message back to the connection that called the action
+      await apiClient.send(new PostToConnectionCommand({
+        ConnectionId: senderConnectionId,
+        Data: JSON.stringify({ message: "pong" }),
       }));
-
-      const sendMessages = scanResult.Items.map(async (item) => {
-        const connectionId = item.connectionId;
-        // Send the message to each connectionId
-        return apiClient.send(new PostToConnectionCommand({
-          ConnectionId: connectionId,
-          Data: JSON.stringify({ message: message, connectionId: event.requestContext.connectionId }),
-        }));
-      });
-
-      await Promise.all(sendMessages); // Wait for all messages to be sent
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ message: "Broadcast message sent" }),
+        body: JSON.stringify({ message: "pong" }),
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error processing ping:", err);
       return {
         statusCode: 500,
         body: JSON.stringify({ message: "Internal server error" }),

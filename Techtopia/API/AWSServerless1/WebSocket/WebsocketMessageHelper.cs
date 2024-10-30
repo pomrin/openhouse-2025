@@ -10,9 +10,9 @@ namespace AWSServerless1.WebSocket
 {
     public static class WebsocketMessageHelper
     {
-        public enum WEBSOCKET_GROUP_TYPES { Visitor, Admin, Montage };
+        public enum WEBSOCKET_GROUP_TYPES { VISITOR, BOOTHADMIN, MONTAGE };
         public enum WEBSOCKET_ACTION_TYPES { ping, direct, broadcast, register };
-        public enum WEBSOCKET_MESSAGE_TYPES { UpdatePhoto, UpdateStamp, UpdateRedemptionStatus, Jiggle, UpdatePhotos, UpdateQueues };
+        public enum WEBSOCKET_COMMAND_TYPES { UPDATE_PHOTO, UPDATE_STAMP, UPDATE_REDEMPTION_STATUS, JIGGLE, UPDATE_PHOTOS, UPDATE_QUEUES };
 
         private static readonly String authKey;
         private static readonly String wsURL;
@@ -64,7 +64,7 @@ namespace AWSServerless1.WebSocket
             return result;
         }
 
-        public static async Task<String> RegisterController(WEBSOCKET_GROUP_TYPES group)
+        public static async Task<String> Register(WEBSOCKET_GROUP_TYPES group)
         {
             String result = null;
 
@@ -102,7 +102,7 @@ namespace AWSServerless1.WebSocket
         }
 
 
-        public static async Task<String> SendDirectMessage(String ticketId, WEBSOCKET_MESSAGE_TYPES message)
+        public static async Task<String> SendDirectMessage(String ticketId, WEBSOCKET_COMMAND_TYPES command)
         {
             String result = null;
 
@@ -113,7 +113,7 @@ namespace AWSServerless1.WebSocket
                 tempMessage = new
                 {
                     action = action.ToString(),
-                    message = message.ToString(),
+                    command = command.ToString(),
                     authKey = authKey,
                 };
             }
@@ -123,7 +123,7 @@ namespace AWSServerless1.WebSocket
                 {
                     action = action.ToString(),
                     ticketId = ticketId,
-                    message = message.ToString(), // Message to the recipient
+                    command = command.ToString(), // Message to the recipient
                     authKey = authKey,
                 };
             }
@@ -148,14 +148,14 @@ namespace AWSServerless1.WebSocket
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An Exception have occurred while trying to SendDirectMessage(ticketId: {ticketId}, message: {message.ToString()}), serializedWebSocketMessage: {serializedWebSocketMessage} - {ex.ToString()}");
+                Console.WriteLine($"An Exception have occurred while trying to SendDirectMessage(ticketId: {ticketId}, message: {command.ToString()}), serializedWebSocketMessage: {serializedWebSocketMessage} - {ex.ToString()}");
             }
 
             return result;
         }
 
 
-        public static async Task<String> BroadcastMessage(WEBSOCKET_GROUP_TYPES group, WEBSOCKET_MESSAGE_TYPES message)
+        public static async Task<String> BroadcastMessage(WEBSOCKET_GROUP_TYPES group, WEBSOCKET_COMMAND_TYPES command)
         {
             String result = null;
 
@@ -166,7 +166,7 @@ namespace AWSServerless1.WebSocket
             {
                 action = action.ToString(), // ping, direct, broadcast, register
                 usergroup = group.ToString(), // intended group to receive the message eg Visitor, Admin, All, Montage
-                message = message.ToString(), // Message to the recipient
+                command = command.ToString(), // Message to the recipient
                 authKey = authKey,
             };
 
@@ -191,7 +191,7 @@ namespace AWSServerless1.WebSocket
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An Exception have occurred while trying to BroadcastMessage(group: {group.ToString()}, message: {message.ToString()}), serializedWebSocketMessage: {serializedWebSocketMessage} - {ex.ToString()}");
+                Console.WriteLine($"An Exception have occurred while trying to BroadcastMessage(group: {group.ToString()}, message: {command.ToString()}), serializedWebSocketMessage: {serializedWebSocketMessage} - {ex.ToString()}");
             }
 
             return result;

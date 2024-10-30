@@ -60,7 +60,7 @@ namespace AWSServerless1.Controllers
                         if (luggageTagColor != null)
                         {
                             Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
-                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateRedemptionStatus); // To update their queue status in the Visitor App.
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_REDEMPTION_STATUS); // To update their queue status in the Visitor App.
                             return Ok(visitor);
                         }
                         else
@@ -106,7 +106,7 @@ namespace AWSServerless1.Controllers
                     if (visitorEntity.LuggageRedeemedDate != null)
                     {
                         Visitor visitor = VisitorDAL.UpdateRedemptionInformation(visitorEntity.VisitorId, luggageTagColor);
-                        await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateRedemptionStatus); // To update their queue status in the Visitor App.
+                        await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_REDEMPTION_STATUS); // To update their queue status in the Visitor App.
                         return Ok(visitor);
                     }
                     else
@@ -117,7 +117,7 @@ namespace AWSServerless1.Controllers
                         if (boothVisited.Count() == totalBooth.Count())
                         {
                             Visitor visitor = VisitorDAL.RedeemLuggageTag(visitorEntity.VisitorId, luggageTagColor);
-                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateRedemptionStatus); // To update their queue status in the Visitor App.
+                            await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_REDEMPTION_STATUS); // To update their queue status in the Visitor App.
                             return Ok(visitor);
                         }
                         else

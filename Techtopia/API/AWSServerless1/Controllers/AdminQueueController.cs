@@ -96,8 +96,12 @@ namespace AWSServerless1.Controllers
                     case QueueDAL.QUEUE_STATUS.NOT_IN_QUEUE:
                         // TODO: Add the user to the Queue
                         EngravingQueue queueEntity = QueueDAL.AddToQueue(visitorEntity.VisitorId, addToQueueInfo);
-                        await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
-                        await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update their queue status in the Visitor App.
+                        var broadcastAdminTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                        var directMessageTask = WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update their queue status in the Visitor App.
+                        await Task.WhenAll(new List<Task>()
+                            {
+                                broadcastAdminTask, directMessageTask
+                            });
                         return Created(new Uri(Request.GetEncodedUrl()), queueEntity);
                     case QueueDAL.QUEUE_STATUS.IN_QUEUE:
                     case QueueDAL.QUEUE_STATUS.ENGRAVING:
@@ -137,7 +141,7 @@ namespace AWSServerless1.Controllers
             )]
         public async Task<IActionResult> UpdateQueue(AdminQueueUpdateDTO updateQueueInfo)
         {
-            // TODO: Get the User of the TicketId
+            // Get the User of the TicketId
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(updateQueueInfo.TicketId);
             if (visitorEntity != null)
             {
@@ -146,13 +150,17 @@ namespace AWSServerless1.Controllers
                 switch (updateQueueInfo.QUEUE_STATUS_TO_UPDATE)
                 {
                     case QueueDAL.QUEUE_STATUS.NOT_IN_QUEUE:
-                        // TODO: Remove from Queue!
+                        // Remove from Queue!
                         if (currentQueueStatus == QueueDAL.QUEUE_STATUS.IN_QUEUE)
                         {
-                            // TODO: Clear all the other dates except DateJoined
+                            // Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Visitor, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+                            var broadcastBoothAdminTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            var broadbastVisitorTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.VISITOR, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            await Task.WhenAll(new List<Task>()
+                            {
+                                broadcastBoothAdminTask, broadbastVisitorTask
+                            });
                             return NoContent();
                         }
                         else
@@ -161,13 +169,18 @@ namespace AWSServerless1.Controllers
                         }
                         break;
                     case QueueDAL.QUEUE_STATUS.IN_QUEUE:
-                        // TODO: Check that current queue status is either NOT_IN_QUEUE or ENGRAVING
+                        // Check that current queue status is either NOT_IN_QUEUE or ENGRAVING
                         if (currentQueueStatus == QueueDAL.QUEUE_STATUS.NOT_IN_QUEUE || currentQueueStatus == QueueDAL.QUEUE_STATUS.ENGRAVING)
                         {
-                            // TODO: Clear all the other dates except DateJoined
+                            // Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Visitor, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+
+                            var broadcastBoothAdminTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            var broadbastVisitorTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.VISITOR, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            await Task.WhenAll(new List<Task>()
+                            {
+                                broadcastBoothAdminTask, broadbastVisitorTask
+                            });
                             return Ok(queue);
                         }
                         else
@@ -176,14 +189,19 @@ namespace AWSServerless1.Controllers
                         }
                         break;
                     case QueueDAL.QUEUE_STATUS.ENGRAVING:
-                        // TODO: Check that current queue status is either IN_QUEUE or PENDING_COLLECTION
-                        // TODO: Clear Pending Collection and Collected date, set engrave date
+                        // Check that current queue status is either IN_QUEUE or PENDING_COLLECTION
+                        // Clear Pending Collection and Collected date, set engrave date
                         if (currentQueueStatus == QueueDAL.QUEUE_STATUS.IN_QUEUE || currentQueueStatus == QueueDAL.QUEUE_STATUS.PENDING_COLLECTION)
                         {
-                            // TODO: Clear all the other dates except DateJoined
+                            // Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Visitor, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+
+                            var broadcastBoothAdminTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            var broadbastVisitorTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.VISITOR, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            await Task.WhenAll(new List<Task>()
+                            {
+                                broadcastBoothAdminTask, broadbastVisitorTask
+                            });
                             return Ok(queue);
                         }
                         else
@@ -192,14 +210,19 @@ namespace AWSServerless1.Controllers
                         }
                         break;
                     case QueueDAL.QUEUE_STATUS.PENDING_COLLECTION:
-                        // TODO: Check that current queue status is either ENGRAVING or COLLECTED
-                        // TODO: Clear Collected date, set pending collection date
+                        // Check that current queue status is either ENGRAVING or COLLECTED
+                        // Clear Collected date, set pending collection date
                         if (currentQueueStatus == QueueDAL.QUEUE_STATUS.ENGRAVING || currentQueueStatus == QueueDAL.QUEUE_STATUS.COLLECTED)
                         {
-                            // TODO: Clear all the other dates except DateJoined
+                            // Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Visitor, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+
+                            var broadcastBoothAdminTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            var broadbastVisitorTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.VISITOR, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            await Task.WhenAll(new List<Task>()
+                            {
+                                broadcastBoothAdminTask, broadbastVisitorTask
+                            });
                             return Ok(queue);
                         }
                         else
@@ -208,14 +231,19 @@ namespace AWSServerless1.Controllers
                         }
                         break;
                     case QueueDAL.QUEUE_STATUS.COLLECTED:
-                        // TODO: Check that current queue status is PENDING_COLLECTION
-                        // TODO: Set Collected date
+                        // Check that current queue status is PENDING_COLLECTION
+                        // Set Collected date
                         if (currentQueueStatus == QueueDAL.QUEUE_STATUS.PENDING_COLLECTION)
                         {
-                            // TODO: Clear all the other dates except DateJoined
+                            // Clear all the other dates except DateJoined
                             queue = QueueDAL.UpdateQueue(visitorEntity.VisitorId, updateQueueInfo.QUEUE_STATUS_TO_UPDATE);
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Admin, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
-                            await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.Visitor, WebsocketMessageHelper.WEBSOCKET_MESSAGE_TYPES.UpdateQueues); // To update all the queues
+
+                            var broadcastBoothAdminTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            var broadbastVisitorTask = WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.VISITOR, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
+                            await Task.WhenAll(new List<Task>()
+                            {
+                                broadcastBoothAdminTask, broadbastVisitorTask
+                            });
                             return Ok(queue);
                         }
                         else
