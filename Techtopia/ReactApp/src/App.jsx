@@ -98,13 +98,12 @@ function App() {
               {/* Testing of Admin login - commented out by default */}
               {/* <Route path={"/"} element={<AdminLogin />} /> */}
 
-              {/* Admin Login for the 3 rows below this comment */}
               <Route path="/adminlogin" element={<AdminLogin />} />
               <Route path="/selectbooth" element={<Selectbooth />} />
               <Route path="/qrcodescanner" element={<Qrcodescanner />} />
               <Route path="/adminqueue" element={<AdminQueue/>}/>
               <Route path="/engravingselection/:uuid" element={<EngravingSelection />} /> {/* EngravingSelection Route */}
-
+             
               <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
             </Routes>
           </Container>
