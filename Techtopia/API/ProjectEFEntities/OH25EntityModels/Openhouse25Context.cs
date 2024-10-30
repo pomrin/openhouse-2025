@@ -144,6 +144,9 @@ public partial class Openhouse25Context : DbContext
             entity.HasIndex(e => e.TicketId, "ticket_id_UNIQUE").IsUnique();
 
             entity.Property(e => e.VisitorId).HasColumnName("visitor_id");
+            entity.Property(e => e.DateCertificateSent)
+                .HasColumnType("datetime")
+                .HasColumnName("dateCertificateSent");
             entity.Property(e => e.Datecreated)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
@@ -155,6 +158,9 @@ public partial class Openhouse25Context : DbContext
                 .HasMaxLength(64)
                 .HasComment("ARGB")
                 .HasColumnName("luggage_tag_color_name");
+            entity.Property(e => e.ProfileImageUrl)
+                .HasMaxLength(1024)
+                .HasColumnName("profileImageUrl");
             entity.Property(e => e.TicketId)
                 .HasMaxLength(12)
                 .HasComment("In the format of <DDD><visitor_id><random_3_alphabets>")

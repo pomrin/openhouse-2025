@@ -13,12 +13,12 @@ function Qrcodescanner() {
 
   const [apiResponseMessage, setApiResponseMessage] = useState('');
   const [apiResponseError, setApiResponseError] = useState(false);
-  const apiUrl = import.meta.env.VITE_REGISTER_API;
+  const apiUrl = import.meta.env.VITE_API_BASE_URL + "/Register";
 
   useEffect(() => {
     // Check if accessToken exists
     const accessToken = localStorage.getItem('accessToken');
-    
+
     // If no token, redirect to login
     if (!accessToken) {
       navigate('/adminlogin');
@@ -48,15 +48,15 @@ function Qrcodescanner() {
   const stampApiRequest = async (ticketId) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      
+
       // POST request to the "Stamp" API
       const response = await axios.post(apiUrl, {
-        ticketId,  
-        boothId: boothId 
+        ticketId,
+        boothId: boothId
       }, {
         headers: {
           Authorization: `Bearer ${accessToken}`,  // Attach JWT token
-          'Content-Type': 'application/json'       
+          'Content-Type': 'application/json'
         }
       });
 
@@ -100,19 +100,19 @@ function Qrcodescanner() {
         </Toolbar>
       </AppBar> */}
 
-      <Box display="flex" 
-      flexDirection="column" 
-      alignItems="center" 
-      justifyContent="center" 
-      height="95vh"
-      sx={{
-        flexGrow: 1,
-        display: 'flex',
-        justifyContent: 'top',
-        alignItems: 'center',
-        paddingTop: '64px', 
-        paddingBottom: '20px',
-      }}>
+      <Box display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="95vh"
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          justifyContent: 'top',
+          alignItems: 'center',
+          paddingTop: '64px',
+          paddingBottom: '20px',
+        }}>
         <Box display="flex" width="100%" justifyContent="flex-start">
           <IconButton onClick={handleBack} aria-label="Go Back">
             <ArrowBackIcon />
@@ -131,15 +131,17 @@ function Qrcodescanner() {
         </Typography>
 
         {/* Square container for video (camera to scan QR code) */}
-        <Box sx={{ width: '300px', 
-          height: '300px', 
+        <Box sx={{
+          width: '300px',
+          height: '300px',
           position: 'relative',
           border: '3px solid #3f51b5',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          borderRadius: '8px', 
-          overflow: 'hidden' }}>
+          borderRadius: '8px',
+          overflow: 'hidden'
+        }}>
           <video
             ref={videoRef}
             style={{
@@ -169,8 +171,8 @@ function Qrcodescanner() {
           </Box>
         )}
 
-         {/* Display API response message */}
-         {apiResponseMessage && (
+        {/* Display API response message */}
+        {apiResponseMessage && (
           <Box mt={2} textAlign="center">
             <Typography variant={apiResponseError ? 'body1' : 'h6'} color={apiResponseError ? 'error' : 'success'}>
               {apiResponseMessage}

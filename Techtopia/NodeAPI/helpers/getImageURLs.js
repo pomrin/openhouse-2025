@@ -23,22 +23,9 @@ async function saveBase64ToTmp(base64file, folderPath, fileName, fileExt) {
     const formatted_filename = `${fileName}.${fileExt}`;
     // console.log(`file_name: ${formatted_filename}`);
 
+
     let imageFullPath = path.join(folderPath, formatted_filename);
     imageFullPath = imageFullPath.replace(/\\/g, '/');
-    // console.log(`imageFullPath: ${imageFullPath}`);
-
-    // const params = {
-    //   Bucket: S3_BUCKET_NAME,
-    //   Key: imageFullPath,
-    //   Body: buff,
-    //   // ACL: "public-read",
-    //   ContentEncoding: 'base64',
-    //   ContentType: format
-    // };
-
-    // // console.log(`params: ${JSON.stringify(params)}`);
-
-    // const stored = await s3.upload(params).promise();
 
     const command = new PutObjectCommand({
       Bucket: S3_BUCKET_NAME,
@@ -51,7 +38,7 @@ async function saveBase64ToTmp(base64file, folderPath, fileName, fileExt) {
 
     const response = await s3.send(command);
     console.log(`S3 PutObjectCOmmand Response: ${response}`);
-
+    return imageFullPath;
 
     // console.log(`Result: ${stored}`);
     // return stored.Location;

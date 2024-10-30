@@ -5,5 +5,5 @@ if (process.env.NODE_ENV === 'production') {
   module.exports = require('./dbProd');
 } else {
   // console.log('Using Development DB!');
-  module.exports = require('./dbDev');
+  module.exports = require('./dbProd');
 }

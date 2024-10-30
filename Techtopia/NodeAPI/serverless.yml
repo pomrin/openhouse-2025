@@ -53,6 +53,9 @@ provider:
     FORM_SECRET_KEY_DEMO: ${env:FORM_SECRET_KEY_DEMO}
     # CutOutPro
     CUT_OUT_PRO_API: ${env:CUT_OUT_PRO_API}
+    # Websocket
+    WEBSOCKET_URL: ${env:WEBSOCKET_URL}
+    WEBSOCKET_SECRET_KEY: ${env:WEBSOCKET_SECRET_KEY}
 
 
 functions:

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Link } from '@mui/material';
+import { Container, AppBar, Toolbar, Box, Typography, Button, Link } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import nyp_logo from "./../assets/images/RGB_SIT_1.png";
-import '../css/UserLanding.css';
+import '../css/UserLandingDemo.css';
+import '../App.css';
 import plane_image from './../assets/images/plane_image.png';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
@@ -77,11 +77,11 @@ function UserLanding() {
     };
 
     // Fetch the ticket ID
-    const apiUrl = import.meta.env.VITE_REGISTER_API;
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
     const fetchTicketId = async () => {
         try {
-            const response = await axios.post(apiUrl, {}, {
+            const response = await axios.post(apiUrl + "/Register", {}, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -158,12 +158,38 @@ function UserLanding() {
     const hasFetchedDataRefTicket = useRef(false);
     const hasFetchedDataRefQueue = useRef(false);
 
+    async function LoadUserData(ticketId) {
+        try {
+
+            // POST request to the "Stamp" API
+            const response = await axios.get(apiUrl + "/VisitorMyInfo");
+
+            if (response.status === 200) {
+                console.log(`response: ${JSON.stringify(response.data)}`);
+                // var data = JSON.parse(response);
+                // console.log(`data: ${response.data["profileImageUrl"]}`);
+                if (response.data["profileImageUrl"]) {
+                    var profileImageUrl = response.data["profileImageUrl"];
+                    var fullPath = `${imageRepo}${ticket_id}/${profileImageUrl}?t=${new Date().getTime()}`;
+                    console.log(`fullPath: ${fullPath}`);
+                    setImageSource(fullPath);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending Stamp API request:', error);
+        }
+    };
 
     useEffect(() => {
         if (!ticket_id && !hasFetchedDataRefTicket.current) {
             hasFetchedDataRefTicket.current = true; // Mark as fetched
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
+        else {
+            // Get the existing data from database, if any.
+            console.log(`Get data here!`);
+            LoadUserData(ticket_id);
+        }
         generateQR();
         dispatch(connectWebSocket({ ticketId: ticket_id, handleCycleBooth, refreshProfilePicture }));
 
@@ -493,14 +519,14 @@ function UserLanding() {
 
     const imageRepo = import.meta.env.VITE_IMAGE_REPO
 
-    const photoLink = `${imageRepo}${ticket_id}/cartoonprofile.jpg`;
+    const photoLink = ``;
     const [imageSource, setImageSource] = useState(photoLink);
 
     // Function to refresh the profile picture
-    const refreshProfilePicture = () => {
+    const refreshProfilePicture = (imageURL) => {
         setTimeout(() => {
-            setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
-            console.log("photo updated");
+            setImageSource(`${imageRepo}${ticket_id}/${imageURL}?t=${new Date().getTime()}`); // Append timestamp to force refresh
+            console.log(`photo updated - ${imageRepo}${ticket_id}/${imageURL}`);
         }, 5000); // 5000 milliseconds = 5 seconds
     };
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
@@ -526,56 +552,64 @@ function UserLanding() {
     };
 
     return (
-        <Box className="bodyBox">
-            <Box>
-                {loading && <p>Loading...</p>}
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-                <h2 class="boardingpassSubHeader">*Early Access*</h2>
-                <h3 class="boardingpassSubHeader">
-                    Do you want to see what you would look like as a digital avatar?
-                </h3>
-                <br />
-                <div
-                    onMouseEnter={onHover}
-                    onMouseLeave={onLeave}>
-                    <h3>
-                        Upload your photo now and join us as we aim to set a Singapore Book of Records title for
-                        'Most People Contributing to a Digital Avatar Montage.'</h3>
-                </div>
-                <br />
-                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
-                    <Box className="topdiv">
-                        <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                            <Box className="profilePicture" sx={{ position: "relative" }}>
-                                <img
-                                    src={imageSource}
-                                    alt="Profile"
-                                    className="profileImage"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = noImageUploaded; // Fallback image on error
-                                    }}
-                                />
-                                <div className="uploadCircle">
-                                    <img src={uploadProfile} alt="Upload" className="uploadImage" />
-                                </div>
-                                {showOverlay && <div className="CircleAnimationDiv">
-                                </div>}
+        <Container>
+            <div class='container'>
+                <img src="/images/rgb_sit_1.png" alt="image" style={{ width: 'auto', height: '100%' }} ></img>
+            </div>
+            <Box className="bodyBox">
+                {/* <div className='centertopdiv'>
+                <img src={nyp_logo} alt="NYP Logo" />
+            </div> */}
+                <Box>
+                    {loading && <p>Loading...</p>}
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
+                    <h2 class="boardingpassSubHeader">*Early Access*</h2>
+                    <h3 class="boardingpassSubHeader">
+                        Do you want to see what you would look like as a digital avatar?
+                    </h3>
+                    <br />
+                    <div
+                        onMouseEnter={onHover}
+                        onMouseLeave={onLeave}>
+                        <h3>
+                            Upload your photo now and join us as we aim to set a Singapore Book of Records title for
+                            'Most People Contributing to a Digital Avatar Montage.'</h3>
+                    </div>
+                    <br />
+                    <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
+                        <Box className="topdiv">
+                            <a href={form_sg} target="_blank" rel="noopener noreferrer">
+                                <Box className="profilePicture" sx={{ position: "relative" }}>
+                                    <img
+                                        src={imageSource}
+                                        alt="Profile"
+                                        className="profileImage"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = noImageUploaded; // Fallback image on error
+                                        }}
+                                    />
+                                    <div className="uploadCircle">
+                                        <img src={uploadProfile} alt="Upload" className="uploadImage" />
+                                    </div>
+                                    {showOverlay && <div className="CircleAnimationDiv">
+                                    </div>}
+                                </Box>
+                            </a>
+                            <Box className="QRBox">
+                                <img src={qrImage} alt="QR Code" className="qrImage" />
                             </Box>
-                        </a>
-                        <Box className="QRBox">
-                            <img src={qrImage} alt="QR Code" className="qrImage" />
+                            <Box>
+                                <Typography class="bold">
+                                    Ticket ID: {ticket_id}
+                                </Typography>
+                            </Box>
                         </Box>
-                        <Box>
-                            <Typography class="bold">
-                                Ticket ID: {ticket_id}
-                            </Typography>
-                        </Box>
-                    </Box>
-                </Paper>
-            </Box>
-        </Box>
+                    </Paper>
+                </Box>
+            </Box >
+        </Container >
     );
 }
 

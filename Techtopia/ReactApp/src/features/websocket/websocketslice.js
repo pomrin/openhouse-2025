@@ -15,7 +15,7 @@ export const connectWebSocket = createAsyncThunk(
             dispatch(setIsConnected(true));
 
             if (ticketId) {
-                const registerMessage = { action: "register", message: ticketId, userGroup: "Visitor"};
+                const registerMessage = { action: "register", ticketId: ticketId, userGroup: "Visitor"};
                 socket.send(JSON.stringify(registerMessage));
                 console.log('Registered ticket_id:', ticketId);
             }
@@ -28,8 +28,8 @@ export const connectWebSocket = createAsyncThunk(
                 dispatch(addMessage(messageData));
 
                 // Call the functions if specific messages are received
-                if (messageData.message === 'updateImage') {
-                    refreshProfilePicture(); // Call the passed function
+                if (messageData.command === 'UPDATE_PHOTO') {
+                    refreshProfilePicture(messageData.message); // Call the passed function
                 } else if (['AI', 'CS', 'FT', 'IT'].includes(messageData.message)) {
                     toggleStampVisibility(messageData.message); // Pass the booth identifier to toggleStampVisibility
                 }

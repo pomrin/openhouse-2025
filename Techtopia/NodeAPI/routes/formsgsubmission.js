@@ -16,6 +16,7 @@ const { default: axios } = require("axios");
 const { blob } = require('node:stream/consumers');
 var request = require('request');
 var fs = require('fs');
+const visitorDAL = require("../dal/visitordal");
 
 // ##### Form SG
 // This is where your domain is hosted, and should match
@@ -39,12 +40,13 @@ const formSecretKey_DEMO = process.env.FORM_SECRET_KEY_DEMO;
 const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
 
 // const wsUrl = process.env.WEBSOCKET_API;
-const wsUrl = 'wss://ygfo8jqflc.execute-api.ap-southeast-1.amazonaws.com/production/';
-const ws = new WebSocket(wsUrl);
+// const wsUrl = 'wss://ygfo8jqflc.execute-api.ap-southeast-1.amazonaws.com/production/';
+const ws = new WebSocket(process.env.WEBSOCKET_URL);
 
 // Message queues for messages before the connection opens
 let messageQueue = [];
 let directMessageQueue = [];
+let broadcastMessageQueue = [];
 let isWebSocketOpen = false;
 
 // Handle WebSocket connection open event
@@ -55,13 +57,20 @@ ws.on('open', () => {
     // Process the queued registration messages
     while (messageQueue.length > 0) {
         const message = messageQueue.shift();
-        registerMessage(message);
+        registerMessage(message["ticketId"], message["userGroup"]);
     }
 
     // Process the queued direct messages
     while (directMessageQueue.length > 0) {
-        const directMessage = directMessageQueue.shift();
-        sendDirectMessage(directMessage.ticketId, directMessage.message);
+        const message = directMessageQueue.shift();
+        // console.log(`message: ${message}`);
+        sendDirectMessage(message["message"], message["ticketId"], message["command"]);
+    }
+
+    // Process the queued broadcast messages
+    while (broadcastMessageQueue.length > 0) {
+        const message = broadcastMessageQueue.shift();
+        broadcastMessage(message["message"], message["userGroup"], message["command"]);
     }
 });
 
@@ -75,12 +84,34 @@ ws.on('close', (code, reason) => {
     isWebSocketOpen = false;
 });
 
-function registerMessage(message) {
-    const registerPayload = JSON.stringify({
+// function ping() {
+//     const registerPayload = JSON.stringify({
+//         action: "ping"
+//     });
+
+//     // Check if WebSocket is open before sending
+//     if (isWebSocketOpen) {
+//         ws.send(registerPayload, (err) => {
+//             if (err) {
+//                 console.error('Error registering:', err);
+//             } else {
+//                 console.log('Ping sent');
+//             }
+//         });
+//     } else {
+//         console.error('WebSocket is not open. Queueing the message.');
+//     }
+// }
+
+function registerMessage(message, userGroup) {
+
+    const payload = {
         action: "register",
         message: message,
-        userGroup: "NodeAPI",
-    });
+        usergroup: userGroup
+    };
+
+    const registerPayload = JSON.stringify(payload);
 
     // Check if WebSocket is open before sending
     if (isWebSocketOpen) {
@@ -93,31 +124,66 @@ function registerMessage(message) {
         });
     } else {
         console.error('WebSocket is not open. Queueing the message.');
-        messageQueue.push(message);
+        messageQueue.push(payload);
     }
 }
 
-function sendDirectMessage(ticket_id, directMessage) {
-    const directPayload = JSON.stringify({
+function sendDirectMessage(message, ticketId, command) {
+    console.log('Entered Direct Message');
+
+    const payload = {
         action: "direct",
-        message: directMessage,
-        ticketId: ticket_id,
-        authKey: "Av3ryS3cr3tK3y"
-    });
+        ticketId: ticketId,
+        command: command,
+        message: message,
+        authKey: process.env.WEBSOCKET_SECRET_KEY
+    };
+
+    const directPayload = JSON.stringify(payload);
+    console.log(`Direct PayLoad: ${directPayload}`);
 
     // Check if WebSocket is open before sending
     if (isWebSocketOpen) {
+        console.log(`Starting direct message send...`);
         ws.send(directPayload, (err) => {
             if (err) {
                 console.error('Error sending direct message:', err);
             } else {
-                console.log('Direct message sent:', directMessage);
+                console.log('Direct message sent:', directPayload);
             }
         });
     } else {
         console.error('WebSocket is not open. Queueing the direct message.');
         // Queue the direct message if the WebSocket is not open
-        directMessageQueue.push({ ticketId: ticket_id, message: directMessage });
+        directMessageQueue.push(payload);
+    }
+}
+
+function broadcastMessage(message, userGroup, command) {
+    console.log('Entered broadcastMessage');
+    const payload = {
+        action: "broadcast",
+        userGroup: userGroup,
+        command: command,
+        message: message,
+        authKey: process.env.WEBSOCKET_SECRET_KEY
+    };
+    const directPayload = JSON.stringify(payload);
+    console.log(`Broadcast PayLoad: ${directPayload}`);
+
+    // Check if WebSocket is open before sending
+    if (isWebSocketOpen) {
+        console.log(`Starting broadcast message send...`);
+        ws.send(directPayload, (err) => {
+            if (err) {
+                console.error('Error sending broadcast message:', err);
+            } else {
+                console.log('broadcast message sent:', message);
+            }
+        });
+    } else {
+        console.error('WebSocket is not open. Unable to send broadcast message.');
+        broadcastMessageQueue.push(payload);
     }
 }
 
@@ -147,15 +213,15 @@ module.exports.postRequest = async (event, context) => {
     // console.log(`submissionWithAttachments.content.responses[0]: ${JSON.stringify(submissionWithAttachments.content.responses[0])}`);
     const ticketId = submissionWithAttachments.content.responses[0].answer;
     console.log(`ticketId: ${ticketId}`);
-    console.log(`submissionWithAttachments.content.responses[1]: ${JSON.stringify(submissionWithAttachments.content.responses[1])}`);
+    // console.log(`submissionWithAttachments.content.responses[1]: ${JSON.stringify(submissionWithAttachments.content.responses[1])}`);
     const email = submissionWithAttachments.content.responses[1].answer;
     console.log(`email: ${email}`);
-    console.log(`submissionWithAttachments.content.responses[2]: ${JSON.stringify(submissionWithAttachments.content.responses[2])}`);
+    // console.log(`submissionWithAttachments.content.responses[2]: ${JSON.stringify(submissionWithAttachments.content.responses[2])}`);
     const visitorName = submissionWithAttachments.content.responses[2].answer;
     console.log(`visitorName: ${visitorName}`);
-    console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
-    registerMessage(ticketId);
-    sendDirectMessage(ticketId, "updateImage");
+    // console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
+    // registerMessage(ticketId);
+    // sendDirectMessage(ticketId, "updateImage");
     const photoInfo = submissionWithAttachments.content.responses[3].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
@@ -166,7 +232,7 @@ module.exports.postRequest = async (event, context) => {
         // console.log(`submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"]: ${JSON.stringify(submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"])}`);
         // console.log(`submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content: ${JSON.stringify(submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content)}`);
         const imageBase64 = submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content;
-        console.log(`imageBase64: ${JSON.stringify(imageBase64)}`);
+        // console.log(`imageBase64: ${JSON.stringify(imageBase64)}`);
         // const test_blob = base64ToBlob(imageBase64, `image/${photoExt}`);
         // const formData = new FormData();
         // formData.append('file', test_blob, 'filename.png'); // Specify filename
@@ -198,14 +264,17 @@ module.exports.postRequest = async (event, context) => {
             } else {
 
                 // var responseBody = JSON.parse(response.data.code);
-                console.log(`response.data.data - ${response.data.data}`);
-                console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
+                // console.log(`response.data.data - ${response.data.data}`);
+                // console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
                 var base64String = response.data.data.imageBase64;
                 console.log(`response.data.data.imageUrl - ${response.data.data.imageUrl}`); // CYL: Possible to save this to User database
 
                 if (base64String) {
                     var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
                     console.log(`response: ${response2}`);
+                    await visitorDAL.updateProfileImageUrlByTicketId(ticketId, "cartoonprofile." + photoExt);
+                    sendDirectMessage("cartoonprofile." + photoExt, ticketId, "UPDATE_PHOTO");
+                    broadcastMessage(ticketId, "MONTAGE", "UPDATE_PHOTOS");
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }
@@ -277,11 +346,11 @@ module.exports.postDemoRequest = async (event, context) => {
         const photoExt = path.extname(photoInfo)?.substring(1);
         console.log(`photoExt: ${photoExt}`);
 
-        console.log(`submissionWithAttachments.attachments: ${JSON.stringify(submissionWithAttachments.attachments)}`);
+        // console.log(`submissionWithAttachments.attachments: ${JSON.stringify(submissionWithAttachments.attachments)}`);
         // console.log(`submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"]: ${JSON.stringify(submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"])}`);
         // console.log(`submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content: ${JSON.stringify(submissionWithAttachments.attachments["66e14a5fa1d7884a360306fe"].content)}`);
         const imageBase64 = submissionWithAttachments.attachments["671a14e7db4e9bb1471c82c0"].content;
-        console.log(`imageBase64: ${JSON.stringify(imageBase64)}`);
+        // console.log(`imageBase64: ${JSON.stringify(imageBase64)}`);
         // const test_blob = base64ToBlob(imageBase64, `image/${photoExt}`);
         // const formData = new FormData();
         // formData.append('file', test_blob, 'filename.png'); // Specify filename
@@ -313,14 +382,17 @@ module.exports.postDemoRequest = async (event, context) => {
             } else {
 
                 // var responseBody = JSON.parse(response.data.code);
-                console.log(`response.data.data - ${response.data.data}`);
-                console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
+                // console.log(`response.data.data - ${response.data.data}`);
+                // console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
                 var base64String = response.data.data.imageBase64;
                 console.log(`response.data.data.imageUrl - ${response.data.data.imageUrl}`); // CYL: Possible to save this to User database
 
                 if (base64String) {
                     var response2 = await saveImageToS3BucketFolder(base64String, ticketId, photoExt);
                     console.log(`response: ${response2}`);
+                    await visitorDAL.updateProfileImageUrlByTicketId(ticketId, "cartoonprofile." + photoExt);
+                    sendDirectMessage("cartoonprofile." + photoExt, ticketId, "UPDATE_PHOTO");
+                    broadcastMessage(ticketId, "MONTAGE", "UPDATE_PHOTOS");
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }
@@ -408,41 +480,7 @@ module.exports.testLocal = async (event, context) => {
 };
 
 module.exports.testLocalAxios = async (event, context) => {
-
-    // const imagePath = path.join(__dirname, 'static', 'images', 'student-initiatives-banner-img.png');
-    const readStream = fs.createReadStream(`D:/Users/Cephylite/Pictures/temp - Copy.jpg`);
-
-    const myFile = await blob(readStream);
-
-    const formData = new FormData();
-    formData.append('file', myFile, "bar.png"); // Specify filename
-
-    var go = true;
-    if (go == true) {
-        const response = await axios.post('https://www.cutout.pro/api/v1/cartoonSelfie2?cartoonType=1', formData, {
-            headers: {
-                'APIKEY': API_KEY_CUT_OUT_PRO, // Replace with your API key
-                'Content-Type': 'multipart/form-data' // Important for file uploads
-            },
-            encoding: null,
-        });
-        console.log(`Response - ${response}`);
-        // console.log(`Response stringify- ${JSON.stringify(response)}`);
-        console.log(`response.data - ${response.data}`);
-        console.log(`response.data stringify- ${JSON.stringify(response.data)}`);
-
-        var responseCode = response.data.code;
-        console.log(`responseCode - ${responseCode}`);
-        if (responseCode == 4001) {
-            console.log("Insufficient Credit!");
-        } else {
-
-            // var responseBody = JSON.parse(response.data.code);
-            console.log(`response.data.data - ${response.data.data}`);
-            console.log(`response.data.data.imageBase64 - ${response.data.data.imageBase64}`);
-            console.log(`response.data.data.imageUrl - ${response.data.data.imageUrl}`);
-        }
-    }
+    await visitorDAL.updateProfileImageUrlByTicketId("NYP0217WED", "123");
 
     return createLambdaResponse(event, 200, 'Post Success!');
 };
