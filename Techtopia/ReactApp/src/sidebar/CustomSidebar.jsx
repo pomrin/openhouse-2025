@@ -157,9 +157,7 @@ function CustomSidebar() {
 
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
                 <>
-                  <SubMenu icon={<ReceiptLongIcon />} label="Home Page">
-                      <MenuItem active={location.pathname === "/Home"} title="Home Page" component={<Link to="/" />}> Home Page </MenuItem>
-                  </SubMenu>
+                  <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
                   <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
                     {[
                       { boothId: '1', boothName: 'AI' },
