@@ -78,7 +78,7 @@ exports.handler = async function (event) {
   }
 
   if (action === "register") {
-    var { ticketId, usergroup } = body;
+    var { ticketId, userGroup } = body;
     const senderConnectionId = event.requestContext.connectionId;
     const apiClient = new ApiGatewayManagementApiClient({
       endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
@@ -91,13 +91,13 @@ exports.handler = async function (event) {
     } else {
       ticketId = ticketId.toUpperCase();
     }
-    if ((usergroup == null || usergroup === "")) {
+    if ((userGroup == null || userGroup === "")) {
       if (errorMessage.length > 0) {
         errorMessage += ".\n";
       }
-      errorMessage += `User Group (usergroup: ${usergroup}) cannot be null or empty`;
+      errorMessage += `User Group (userGroup: ${userGroup}) cannot be null or empty`;
     } else {
-      usergroup = usergroup.toUpperCase();
+      userGroup = userGroup.toUpperCase();
     }
     if (errorMessage) {
       try {
@@ -121,20 +121,20 @@ exports.handler = async function (event) {
           Key: {
             connectionId: senderConnectionId,
           },
-          UpdateExpression: "SET ticketId = :ticketId, #ug = :usergroup",
+          UpdateExpression: "SET ticketId = :ticketId, #ug = :userGroup",
           ExpressionAttributeValues: {
             ":ticketId": ticketId,
-            ":usergroup": usergroup,
+            ":userGroup": userGroup,
           },
           ExpressionAttributeNames: {
-            "#ug": "usergroup",
+            "#ug": "userGroup",
           },
         }));
 
         return {
           statusCode: 200,
           body: JSON.stringify({
-            message: "Ticket ID and usergroup updated for the sender",
+            message: "Ticket ID and userGroup updated for the sender",
           }),
         };
       } catch (err) {
@@ -241,7 +241,7 @@ exports.handler = async function (event) {
 
   // Handle broadcast action for all connections
   if (action === "broadcast") {
-    var { command, message, usergroup } = body; // Get usergroup from the body
+    var { command, message, userGroup } = body; // Get userGroup from the body
     const senderConnectionId = event.requestContext.connectionId;
     const apiClient = new ApiGatewayManagementApiClient({
       endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
@@ -255,18 +255,18 @@ exports.handler = async function (event) {
     } else {
       command = command.toUpperCase();
     }
-    if ((usergroup == null || usergroup === "")) {
+    if ((userGroup == null || userGroup === "")) {
       if (errorMessage.length > 0) {
         errorMessage += ".\n";
       }
-      errorMessage += `User Group (usergroup: ${usergroup}) cannot be null or empty`;
+      errorMessage += `User Group (userGroup: ${userGroup}) cannot be null or empty`;
     } else {
-      usergroup = usergroup.toUpperCase();
+      userGroup = userGroup.toUpperCase();
     }
 
     // await apiClient.send(new PostToConnectionCommand({
     //   ConnectionId: senderConnectionId,
-    //   Data: JSON.stringify({ temp:`command: ${command}, message: ${message}, usergroup: ${usergroup}` }),
+    //   Data: JSON.stringify({ temp:`command: ${command}, message: ${message}, userGroup: ${userGroup}` }),
     // }));
 
     if (errorMessage) {
@@ -290,13 +290,13 @@ exports.handler = async function (event) {
           TableName: process.env.TABLE_NAME,
         }));
 
-        // Filter connections by usergroup and exclude the sender
+        // Filter connections by userGroup and exclude the sender
         const sendMessages = scanResult.Items
-          .filter(item => item.usergroup === usergroup && item.connectionId !== senderConnectionId)
+          .filter(item => item.userGroup === userGroup && item.connectionId !== senderConnectionId)
           .map(async (item) => {
             const connectionId = item.connectionId;
 
-            // Broadcast the message to each connection in the same usergroup
+            // Broadcast the message to each connection in the same userGroup
             return apiClient.send(new PostToConnectionCommand({
               ConnectionId: connectionId,
               Data: JSON.stringify({ command: command, message: message }),
@@ -307,10 +307,10 @@ exports.handler = async function (event) {
 
         return {
           statusCode: 200,
-          body: JSON.stringify({ message: "Broadcast message sent to all connections in the same usergroup" }),
+          body: JSON.stringify({ message: `Broadcast message sent to all connections in the same userGroup (${userGroup})` }),
         };
       } catch (err) {
-        console.error("Error processing broadcast to usergroup:", err);
+        console.error("Error processing broadcast to userGroup:", err);
         return {
           statusCode: 500,
           body: JSON.stringify({ message: "Internal server error" }),
