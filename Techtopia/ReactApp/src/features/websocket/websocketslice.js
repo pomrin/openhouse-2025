@@ -61,7 +61,7 @@ export const sendMessage = createAsyncThunk(
             throw new Error('Recipient ID and message input must not be empty');
         }
 
-        const messageObject = { action: "sendmessage", recipientId, message: input };
+        const messageObject = { action: "sendmessage", recipientId, message: input, authKey:"Av3ryS3cr3tK3y" };
         socket.send(JSON.stringify(messageObject));
         console.log('Sent message:', messageObject);
     }

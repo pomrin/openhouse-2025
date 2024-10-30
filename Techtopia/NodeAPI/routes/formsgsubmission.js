@@ -38,11 +38,11 @@ const formSecretKey_DEMO = process.env.FORM_SECRET_KEY_DEMO;
 // #### Cut Out Pro
 const API_KEY_CUT_OUT_PRO = process.env.CUT_OUT_PRO_API;
 
-//const wsUrl = process.env.WEBSOCKET_API;
+// const wsUrl = process.env.WEBSOCKET_API;
 const wsUrl = 'wss://ygfo8jqflc.execute-api.ap-southeast-1.amazonaws.com/production/';
 const ws = new WebSocket(wsUrl);
 
-// Message queue for messages before the connection opens
+// Message queues for messages before the connection opens
 let messageQueue = [];
 let directMessageQueue = [];
 let isWebSocketOpen = false;
@@ -61,7 +61,7 @@ ws.on('open', () => {
     // Process the queued direct messages
     while (directMessageQueue.length > 0) {
         const directMessage = directMessageQueue.shift();
-        sendDirectMessage(directMessage);
+        sendDirectMessage(directMessage.ticketId, directMessage.message);
     }
 });
 
@@ -79,7 +79,7 @@ function registerMessage(message) {
     const registerPayload = JSON.stringify({
         action: "register",
         message: message,
-        usergroup: "NodeAPI"
+        usergroup: "NodeAPI",
     });
 
     // Check if WebSocket is open before sending
@@ -97,10 +97,12 @@ function registerMessage(message) {
     }
 }
 
-function sendDirectMessage(directMessage) {
+function sendDirectMessage(ticket_id, directMessage) {
     const directPayload = JSON.stringify({
         action: "direct",
-        message: directMessage
+        message: directMessage,
+        ticketId: ticket_id,
+        authKey: "Av3ryS3cr3tK3y"
     });
 
     // Check if WebSocket is open before sending
@@ -113,7 +115,9 @@ function sendDirectMessage(directMessage) {
             }
         });
     } else {
-        console.error('WebSocket is not open. Unable to send direct message.');
+        console.error('WebSocket is not open. Queueing the direct message.');
+        // Queue the direct message if the WebSocket is not open
+        directMessageQueue.push({ ticketId: ticket_id, message: directMessage });
     }
 }
 
@@ -151,7 +155,7 @@ module.exports.postRequest = async (event, context) => {
     console.log(`visitorName: ${visitorName}`);
     console.log(`submissionWithAttachments.content.responses[3]: ${JSON.stringify(submissionWithAttachments.content.responses[3])}`);
     registerMessage(ticketId);
-    sendDirectMessage("updateImage");
+    sendDirectMessage(ticketId, "updateImage");
     const photoInfo = submissionWithAttachments.content.responses[3].answer;
     console.log(`photoInfo: ${photoInfo}`);
     if (photoInfo) {
