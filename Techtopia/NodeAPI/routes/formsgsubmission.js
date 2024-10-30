@@ -79,7 +79,7 @@ function registerMessage(message) {
     const registerPayload = JSON.stringify({
         action: "register",
         message: message,
-        usergroup: "NodeAPI",
+        userGroup: "NodeAPI",
     });
 
     // Check if WebSocket is open before sending
