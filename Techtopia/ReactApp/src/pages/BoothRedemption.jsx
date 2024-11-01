@@ -119,7 +119,8 @@ function RedemptionPage() {
         borderRadius: '10px',
         background: '#dedede',
         padding: '5px 0',
-        marginLeft: '3%'
+        marginLeft: '3%',
+        overflowX: 'hidden'
     };
 
     const returnBtnStyle = {
@@ -256,6 +257,9 @@ function RedemptionPage() {
         setHasValidated(false);
         setScannerActive(true);
 
+        // Clear selected color value (in the case user selected a color but cancelled)
+        setSelectedColor(null);
+
         // Reset scanner timeout when closing popup
         resetScannerTimeout();
         
@@ -264,78 +268,11 @@ function RedemptionPage() {
         }, 1000);
     };
     
-    // The 3 different popup contents -> eligible / already_redeemed / missing_stamps
+    // The 3 different popup contents -> eligible / already_redeemed / ineligible
     const EligibilityContent = ({ eligibility, selectedColor, setSelectedColor }) => {
         let content;
 
         switch (eligibility) {
-            case 'missing_stamps':
-                content = (
-                    <Typography variant="body2" sx={{ textAlign: 'center', marginY: '10px', width: '80%' }}>
-                        Visitor has yet to collect all stamps ❌
-                    </Typography>
-                );
-                break;
-            case 'already_redeemed':
-                content = (
-                    <Box sx={{ textAlign: 'center', padding: '2%' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, marginY: '10px' }}>
-                            Visitor already redeemed their luggage tag 🏷️
-                        </Typography>
-                        <Typography variant='body2'>
-                            If they are requesting for a color change*, please select their new color choice below:
-                        </Typography>
-                        <Typography variant='caption'>
-                            *Color change applicable only for unengraved tags
-                        </Typography>
-                        <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '1%', borderRadius: '8px', marginTop: '2%' }}>
-                            {/* Display Current Color */}
-                            <Box sx={{ marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                                <Typography variant="body2">Current tag color:</Typography>
-                                <Box sx={{
-                                    width: '30px',
-                                    height: '30px',
-                                    backgroundColor: currentColor ? currentColor.toLowerCase() : 'transparent',
-                                    borderRadius: '50%',
-                                    border: '1px solid black',
-                                    marginLeft: '3%',
-                                }}
-                                />
-                                <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                    {currentColor || '----'}  {/* Display current color name */}
-                                </Typography>
-                            </Box>
-            
-                            {/* Color selection form */}
-                            <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5% 6% 0 0', margin: '0 0 10px 4%' }}>
-                                <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
-                                <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-                                <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                                <Typography variant="body1">Selected color:</Typography>
-                                <Box
-                                    sx={{
-                                        width: '30px',
-                                        height: '30px',
-                                        backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
-                                        borderRadius: '50%',
-                                        border: '1px solid black',
-                                        marginLeft: '3%'
-                                    }}
-                                />
-                                <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                    {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
-                                </Typography>
-                                </Box>
-                                {selectedColor && selectedColor.name !== currentColor && (
-                                    <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
-                                        Update Tag Color
-                                    </Button>
-                                )}
-                            </FormControl>
-                        </Box>
-                    </Box>
-                );
-                break;
             case 'eligible':
                 content = (
                     <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginBottom: '10px' }}>
@@ -370,6 +307,74 @@ function RedemptionPage() {
                             </Button>
                         )}
                     </FormControl></>
+                );
+                break;
+            case 'already_redeemed':
+                content = (
+                    <><Typography variant="h6" sx={{ fontWeight: 700, marginY: '10px', textAlign: 'center' }}>
+                        Visitor already redeemed their luggage tag 🏷️
+                    </Typography>
+                    <Typography variant='body2' sx={{ textAlign: 'center' }}>
+                        If they are requesting for a color change*, please select their new color choice below:
+                    </Typography>
+                    <Typography variant='caption' sx={{ color: '#ff0000' }}>
+                        *Color change applicable only for unengraved tags
+                    </Typography>
+                    <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '2%', borderRadius: '8px', marginTop: '2%' }}>
+                        {/* Display Current Color */}
+                        <Box sx={{ marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                            <Typography variant="body2">Current tag color:</Typography>
+                            <Box sx={{
+                                width: '30px',
+                                height: '30px',
+                                backgroundColor: currentColor ? currentColor.toLowerCase() : 'transparent',
+                                borderRadius: '50%',
+                                border: '1px solid black',
+                                marginLeft: '3%',
+                            }}
+                            />
+                            <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                {currentColor || '----'}  {/* Display current color name */}
+                            </Typography>
+                        </Box>
+        
+                        {/* Color selection form */}
+                        <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5% 6% 0 0', margin: '0 0 10px 3%' }}>
+                            <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
+                            <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                            <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                            <Typography variant="body1">Selected color:</Typography>
+                            <Box
+                                sx={{
+                                    width: '30px',
+                                    height: '30px',
+                                    backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
+                                    borderRadius: '50%',
+                                    border: '1px solid black',
+                                    marginLeft: '3%'
+                                }}
+                            />
+                            <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
+                            </Typography>
+                            </Box>
+                            {selectedColor && selectedColor.luggageTagColorName !== currentColor && (
+                                <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
+                                    Update Tag Color
+                                </Button>
+                            )}
+                        </FormControl>
+                    </Box></>
+                );
+                break;
+            case 'ineligible':
+                content = (
+                    <><Typography variant="body2" sx={{ textAlign: 'center', marginY: '10px', width: '80%' }}>
+                        Visitor ineligible for luggage tag redemption ❌
+                    </Typography>
+                    <Typography variant='body2'>
+                        Visitor has not met redemption prerequisites by not visiting and collecting stamps from all required booths.
+                    </Typography></>
                 );
                 break;
             default:
@@ -562,7 +567,7 @@ function RedemptionPage() {
                 break;
             case 400:
                 // Response 400: Visitor has not visited all required booths
-                setEligibilityStatus('missing_stamps');
+                setEligibilityStatus('ineligible');
                 setIsPopupOpen(true);
                 break;
             case 404:
