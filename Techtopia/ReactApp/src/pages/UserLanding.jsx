@@ -105,7 +105,7 @@ function UserLanding() {
     const visitorQueueLink = apiUrl + '/VisitorQueue';
     const [qNumber, setQNumber] = useState(null); // State for the queue number
 
-    const fetchQueue = async () => {
+    const fetchQueue = async () => { 
         try {
             const response = await axios.get(visitorQueueLink);
             console.log("Queue: ", response.data);
@@ -125,7 +125,7 @@ function UserLanding() {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-
+    
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("Queue status: The user is not in any queue");
@@ -146,7 +146,7 @@ function UserLanding() {
     const visitorRedemptionLink = apiUrl + '/VisitorRedemptionStatus';
     const [rStatus, setRStatus] = useState(null); // State for the queue number
 
-    const fetchRedemption = async () => {
+    const fetchRedemption = async () => { 
         try {
             const response = await axios.get(visitorRedemptionLink);
             console.log("Redemption: ", response.data);
@@ -160,7 +160,7 @@ function UserLanding() {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-
+    
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("Ticket ID is not found");
@@ -174,7 +174,7 @@ function UserLanding() {
                     setRStatus('Redemption Completed');
 
                 }
-
+                
             } else if (error.request) {
                 console.error("No response received:", error.request);
             } else {
@@ -185,13 +185,13 @@ function UserLanding() {
 
     const visitorBoothStatusLink = apiUrl + '/VisitorBoothStatus';
 
-    const fetchBoothStatus = async () => {
+    const fetchBoothStatus = async () => { 
         try {
             const response = await axios.get(visitorBoothStatusLink);
             console.log("Booth Status: ", response.data);
             console.log("Status code: ", response.status);
-
-
+            
+            
             if (response.status === 200) {
                 const values = response.data.map(item => item.boothId);
                 console.log('Values', values);
@@ -211,13 +211,13 @@ function UserLanding() {
                     // toggleStampVisibility('IT');
                     stampVisibility('IT');
                 }
-
+     
             }
         } catch (error) {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-
+    
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("User Not in any queue");
@@ -234,38 +234,7 @@ function UserLanding() {
         }
     };
 
-    // List of booths
-    const booths = ['Fintech', 'Cybersec', 'AI', 'Infotech'];
-
-    //List of images:
-    const boothImages = [boothimage1, boothimage2, boothimage3, boothimage4]
-
-    const [currentBooth, setCurrentBooth] = useState('Fintech');
-    const [currentImage, setCurrentImage] = useState(boothImages[0]);
-
-    // Function to cycle through the booth names
-    const handleCycleBooth = () => {
-        setCurrentBooth((prevBooth) => {
-            const currentIndex = booths.indexOf(prevBooth);
-            const nextIndex = (currentIndex + 1) % booths.length;
-            return booths[nextIndex];
-        });
-        setCurrentImage((prevImage) => {
-            const currentIndex = boothImages.indexOf(prevImage);
-            const nextIndex = (currentIndex + 1) % boothImages.length;
-            return boothImages[nextIndex];
-        });
-    };
-
-    // Function to increment the queue number and format it as a 4-digit string
-    const handleIncrementQueue = () => {
-        setQueueNumber((prevQueueNumber) => {
-            const nextQueueNumber = (parseInt(prevQueueNumber) + 1).toString().padStart(4, '0');
-            return nextQueueNumber;
-        });
-    };
-
-    // Placeholder QR function
+    //QR function
     const [qrImage, setQrImage] = useState('');
 
     const generateQR = () => {
@@ -355,7 +324,7 @@ function UserLanding() {
             fetchData();
         }
         generateQR();
-        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, toggleStampVisibility }));
+        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus}));
 
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -484,39 +453,39 @@ function UserLanding() {
     );
 
     // Function to toggle stamp visibility based on the stamp type
-    const toggleStampVisibility = (stampType) => {
-        let newValue;
+const toggleStampVisibility = (stampType) => {
+    let newValue;
 
-        switch (stampType) {
-            case 'AI':
-                newValue = !isAiStampVisible;
-                setAiStampVisible(newValue);
-                localStorage.setItem('aiStampVisible', newValue);
-                break;
-            case 'CS':
-                newValue = !isCsStampVisible;
-                setCsStampVisible(newValue);
-                localStorage.setItem('csStampVisible', newValue);
-                break;
-            case 'FT':
-                newValue = !isFtStampVisible;
-                setFtStampVisible(newValue);
-                localStorage.setItem('ftStampVisible', newValue);
-                break;
-            case 'IT':
-                newValue = !isItStampVisible;
-                setItStampVisible(newValue);
-                localStorage.setItem('itStampVisible', newValue);
-                break;
-            default:
-                console.warn(`Unknown stamp type: ${stampType}`);
-                return;
-        }
-    };
+    switch (stampType) {
+        case 'AI':
+            newValue = !isAiStampVisible;
+            setAiStampVisible(newValue);
+            localStorage.setItem('aiStampVisible', newValue);
+            break;
+        case 'CS':
+            newValue = !isCsStampVisible;
+            setCsStampVisible(newValue);
+            localStorage.setItem('csStampVisible', newValue);
+            break;
+        case 'FT':
+            newValue = !isFtStampVisible;
+            setFtStampVisible(newValue);
+            localStorage.setItem('ftStampVisible', newValue);
+            break;
+        case 'IT':
+            newValue = !isItStampVisible;
+            setItStampVisible(newValue);
+            localStorage.setItem('itStampVisible', newValue);
+            break;
+        default:
+            console.warn(`Unknown stamp type: ${stampType}`);
+            return;
+    }
+};
 
     // Function to toggle stamp visibility based on the stamp type
     const stampVisibility = (stampType) => {
-
+    
         switch (stampType) {
             case 'AI':
                 setAiStampVisible(true);
@@ -692,16 +661,55 @@ function UserLanding() {
         setSelectedValue(event.target.value);
     };
 
-    const imageRepo = import.meta.env.VITE_IMAGE_REPO;
+    // State to hold timestamp to force refresh
+    const [qNumberTimestamp, setQNumberTimestamp] = useState(Date.now());
+    const [rStatusTimestamp, setRStatusTimestamp] = useState(Date.now());
 
-    const photoLink = ``;
+    // Function to refresh the queue number
+    const refreshQueueNumber = () => {
+        // Simulate fetching a new queue number
+        setQNumber(prev => prev + 1); // Increment queue number as an example
+        setQNumberTimestamp(Date.now()); // Update timestamp to force refresh
+        console.log("Queue number updated");
+    };
+
+    // Function to refresh the redemption status
+    const refreshRedemptionStatus = () => {
+        const statuses = ['Pending', 'In Progress', 'Completed', 'Failed'];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        setRStatus(randomStatus); // Update to a random status
+        setRStatusTimestamp(Date.now()); // Update timestamp to force refresh
+        console.log("Redemption status updated");
+    };
+
+    // Image URLs with timestamp for each stamp to force refresh
+    const [aiStampSource, setAiStampSource] = useState(`${aiStamp}?t=${new Date().getTime()}`);
+    const [csStampSource, setCsStampSource] = useState(`${csStamp}?t=${new Date().getTime()}`);
+    const [ftStampSource, setFtStampSource] = useState(`${ftStamp}?t=${new Date().getTime()}`);
+    const [itStampSource, setItStampSource] = useState(`${itStamp}?t=${new Date().getTime()}`);
+
+    // Function to refresh the stamps images
+    const refreshStamps = () => {
+        setTimeout(() => {
+            const timestamp = new Date().getTime();
+            setAiStampSource(`${aiStamp}?t=${timestamp}`);
+            setCsStampSource(`${csStamp}?t=${timestamp}`);
+            setFtStampSource(`${ftStamp}?t=${timestamp}`);
+            setItStampSource(`${itStamp}?t=${timestamp}`);
+            console.log("Stamps updated");
+        }, 2000); // 2000 milliseconds = 2 seconds
+    };
+
+    const imageRepo = import.meta.env.VITE_IMAGE_REPO
+
+    const photoLink = `${imageRepo}${ticket_id}/cartoonprofile.jpg`;
     const [imageSource, setImageSource] = useState(photoLink);
 
     // Function to refresh the profile picture
-    const refreshProfilePicture = (imageURL) => {
+    const refreshProfilePicture = () => {
         setTimeout(() => {
-            setImageSource(`${imageRepo}${ticket_id}/${imageURL}?t=${new Date().getTime()}`); // Append timestamp to force refresh
-            console.log(`photo updated - ${imageRepo}${ticket_id}/${imageURL}`);
+            setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
+            console.log("photo updated");
         }, 5000); // 5000 milliseconds = 5 seconds
     };
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
@@ -750,7 +758,7 @@ function UserLanding() {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
+                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px"}}>
                     <Box className="topdiv">
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
                             <Box className="profilePicture" sx={{ position: "relative" }}>
@@ -781,29 +789,29 @@ function UserLanding() {
                         <Box className="detailsBox">
                             <Box>
                                 <Typography class="bold">
-                                    Engraving Queue Status
+                                    Engraving Queue Left
                                 </Typography>
-                                <Typography>
+                                <Typography key={qNumberTimestamp}>
                                     {qNumber}
                                     {/* {queueNumber} Queue number state */}
                                 </Typography>
                             </Box>
                             <Box>
                                 <Typography class="bold">
-                                    Current Redemption Status
+                                    Redemption Status
                                 </Typography>
-                                <Typography>
+                                <Typography key={rStatusTimestamp}>
                                     {rStatus}
                                     {/* {queueNumber} Queue number state */}
                                 </Typography>
                             </Box>
                         </Box>
-                        <h1 style={{ marginTop: '-15px' }}>Stamps:</h1>
+                        <h1>Stamps:</h1>
                         <Box className="stampsBox">
-                            <Box className="stamps" onClick={() => toggleStampVisibility('AI')}>
+                            <Box className="stamps">
                                 <Typography variant="subtitle1">AI Stamp</Typography>
                                 <img
-                                    src={aiStamp}
+                                    src={aiStampSource}
                                     alt="aiStamp"
                                     width="100%"
                                     style={{
@@ -813,10 +821,10 @@ function UserLanding() {
                                     }}
                                 />
                             </Box>
-                            <Box className="stamps" onClick={() => toggleStampVisibility('CS')}>
+                            <Box className="stamps">
                                 <Typography variant="subtitle1">CS Stamp</Typography>
                                 <img
-                                    src={csStamp}
+                                    src={csStampSource}
                                     alt="csStamp"
                                     width="100%"
                                     style={{
@@ -828,10 +836,10 @@ function UserLanding() {
                             </Box>
                         </Box>
                         <Box className="stampsBox">
-                            <Box className="stamps" onClick={() => toggleStampVisibility('FT')}>
+                            <Box className="stamps">
                                 <Typography variant="subtitle1">FT Stamp</Typography>
                                 <img
-                                    src={ftStamp}
+                                    src={ftStampSource}
                                     alt="ftStamp"
                                     width="100%"
                                     style={{
@@ -841,10 +849,10 @@ function UserLanding() {
                                     }}
                                 />
                             </Box>
-                            <Box className="stamps" onClick={() => toggleStampVisibility('IT')}>
+                            <Box className="stamps">
                                 <Typography variant="subtitle1">IT Stamp</Typography>
                                 <img
-                                    src={itStamp}
+                                    src={itStampSource}
                                     alt="itStamp"
                                     width="100%"
                                     style={{
@@ -890,11 +898,14 @@ function UserLanding() {
                         {ticket_id}
                     </Typography>
                 </Box>
-                {/* New button to increment queue number */}
-                <Button variant="contained" color="primary" onClick={handleIncrementQueue} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', margin: '0 auto', width: '60%' }}>
-                    Add Queue Number
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => refreshStamps()}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
+                    Refresh Stamps
                 </Button>
-                {/* Gained a stamp upon each completion of booth */}
                 <Button
                     variant="contained"
                     color="primary"
