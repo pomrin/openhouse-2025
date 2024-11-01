@@ -37,14 +37,14 @@ export const connectWebSocket = createAsyncThunk(
                 dispatch(addMessage(messageData));
 
                 // Call the functions if specific messages are received
-                if (messageData.command === 'UPDATE_PHOTO') {
-                    refreshProfilePicture(messageData.message); // Call the passed function
-                } else if (['UPDATE_STAMP'].includes(messageData.message)) {
-                    refreshStamps(messageData.message); // refreshes stamps
-                } else if (['UPDATE_QUEUES'].includes(messageData.message)) {
-                    refreshQueueNumber(messageData.message); // refreshes stamps
-                } else if (['UPDATE_REDEMPTION_STATUS'].includes(messageData.message)) {
-                    refreshRedemptionStatus(messageData.message); // refreshes stamps
+                if (messageData.command === 'UPDATE_STAMP') {
+                    refreshStamps(messageData.message);
+                } else if (messageData.command  === 'UPDATE_PHOTO') {
+                    refreshProfilePicture(messageData.message);
+                } else if (messageData.command  === 'UPDATE_QUEUES') {
+                    refreshQueueNumber(messageData.message);
+                } else if (messageData.command  === 'UPDATE_REDEMPTION_STATUS') {
+                    refreshRedemptionStatus(messageData.message);
                 }
             } catch (error) {
                 console.log(error, event.data);

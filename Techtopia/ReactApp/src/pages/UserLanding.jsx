@@ -668,16 +668,12 @@ const toggleStampVisibility = (stampType) => {
     // Function to refresh the queue number
     const refreshQueueNumber = () => {
         // Simulate fetching a new queue number
-        setQNumber(prev => prev + 1); // Increment queue number as an example
         setQNumberTimestamp(Date.now()); // Update timestamp to force refresh
         console.log("Queue number updated");
     };
 
     // Function to refresh the redemption status
     const refreshRedemptionStatus = () => {
-        const statuses = ['Pending', 'In Progress', 'Completed', 'Failed'];
-        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-        setRStatus(randomStatus); // Update to a random status
         setRStatusTimestamp(Date.now()); // Update timestamp to force refresh
         console.log("Redemption status updated");
     };
