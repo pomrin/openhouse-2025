@@ -26,7 +26,6 @@ import { connectWebSocket, sendMessage } from '../features/websocket/websocketsl
 // import axios from 'axios';
 
 
-
 function UserLanding() {
 
     // websocket in redux
@@ -52,6 +51,8 @@ function UserLanding() {
 
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [loadingfetch, setLoadingFetch] = useState(false);
+
     const [error, setError] = useState(null);
     const [output, setOutput] = useState(null);
 
@@ -86,6 +87,8 @@ function UserLanding() {
             setUniqueId(newTicketId);
             localStorage.setItem('ticket_id', newTicketId);
             localStorage.setItem('accessToken', token);
+            location.reload();
+            
 
         } catch (error) {
             if (error.response) {
@@ -282,6 +285,8 @@ function UserLanding() {
     const hasFetchedDataRefQueue = useRef(false);
     const hasFetchedDataRefRedemp = useRef(false);
     const hasFetchedDataRefBoothStatus = useRef(false);
+    const hasFetchedDataRefAll = useRef(false);
+
 
 
     async function LoadUserData(ticketId) {
@@ -307,26 +312,47 @@ function UserLanding() {
     };
 
     useEffect(() => {
-        if (!ticket_id && !hasFetchedDataRefTicket.current) {
-            hasFetchedDataRefTicket.current = true; // Mark as fetched
-            fetchTicketId(); // Fetch ticket ID if not in local storage
-        } // Call the function to fetch ticket ID on component mount
-        else {
-            // Get the existing data from database, if any.
-            console.log(`Get data here!`);
-            LoadUserData(ticket_id);
-        }
-        if (!hasFetchedDataRefQueue.current) {
-            hasFetchedDataRefQueue.current = true;
-            fetchQueue();
-        }
-        if (!hasFetchedDataRefRedemp.current) {
-            hasFetchedDataRefRedemp.current = true;
-            fetchRedemption();
-        }
-        if (!hasFetchedDataRefBoothStatus.current) {
-            hasFetchedDataRefBoothStatus.current = true;
-            fetchBoothStatus();
+        // if (!ticket_id && !hasFetchedDataRefTicket.current) {
+        //     hasFetchedDataRefTicket.current = true; // Mark as fetched
+        //     fetchTicketId(); // Fetch ticket ID if not in local storage
+            
+        // } // Call the function to fetch ticket ID on component mount
+        // else {
+        //     // Get the existing data from database, if any.
+        //     console.log(`Get data here!`);
+        //     LoadUserData(ticket_id);
+        // }
+        const fetchData = async () => {
+            try {
+                setLoadingFetch(true); // Set loading to true before fetching data
+                let ticketId = localStorage.getItem('ticket_id');
+
+                if (!ticketId && !hasFetchedDataRefTicket.current) {
+                    hasFetchedDataRefTicket.current = true; // Mark as fetched
+                    ticketId = await fetchTicketId(); // Fetch ticket ID if not found
+                }
+                else {
+                    console.log(`Get data here!`);
+                    LoadUserData(ticket_id);
+                }
+
+                if (!hasFetchedDataRefQueue.current && !hasFetchedDataRefRedemp.current && !hasFetchedDataRefBoothStatus.current) {
+                    // Now that we have the ticket ID, fetch other data
+                    await fetchQueue();
+                    await fetchRedemption();
+                    await fetchBoothStatus();
+                }
+                
+            } catch (error) {
+                console.error("Error during fetching data:", error);
+            } finally {
+                setLoadingFetch(false); // Set loading to false after all data is fetched
+            }
+        };
+        
+        if(!hasFetchedDataRefAll.current){
+            hasFetchedDataRefAll.current = true;
+            fetchData();
         }
         generateQR();
         dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, toggleStampVisibility }));
@@ -687,6 +713,7 @@ function UserLanding() {
     function clearLocalStorage() {
         localStorage.clear();
     }
+
     return (
         <Box className="bodyBox">
             <Box>

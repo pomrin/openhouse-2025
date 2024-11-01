@@ -1,6 +1,6 @@
 import './App.css';
 import { Container } from '@mui/material';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -78,6 +78,7 @@ function App() {
     <Router>
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
+          
           {/* NAV BAR */}
           {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
@@ -98,13 +99,20 @@ function App() {
               {/* Testing of Admin login - commented out by default */}
               {/* <Route path={"/"} element={<AdminLogin />} /> */}
 
-              <Route path="/adminlogin" element={<AdminLogin />} />
-              <Route path="/selectbooth" element={<Selectbooth />} />
-              <Route path="/qrcodescanner" element={<Qrcodescanner />} />
-              <Route path="/adminqueue" element={<AdminQueue/>}/>
-              <Route path="/engravingselection/:uuid" element={<EngravingSelection />} /> {/* EngravingSelection Route */}
-             
-              <Route path={"/Redemption"} element={<BoothRedemptionPage />} />
+              {/* To ensure these pages can only be accessible to Admin and Booth Helper Only! */}
+              { (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
+                <>
+                  <Route path="/adminlogin" element={<AdminLogin />} />
+                  <Route path="/selectbooth" element={<Selectbooth />} />
+                  <Route path="/qrcodescanner" element={<Qrcodescanner />} />
+                  <Route path="/adminqueue" element={<AdminQueue />} />
+                  <Route path="/engravingselection/:uuid" element={<EngravingSelection />} />
+                  <Route path="/Redemption" element={<BoothRedemptionPage />} />
+                </>
+              ) : (
+                <Route path="*" element={<Navigate to="/" />} /> // Redirect to Home for any unmatched route
+              )}
+              
             </Routes>
           </Container>
         </CombinedProvider>
