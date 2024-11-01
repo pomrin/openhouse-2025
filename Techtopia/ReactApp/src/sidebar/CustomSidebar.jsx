@@ -142,6 +142,8 @@ function CustomSidebar() {
 
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
                 <>
+                  <MenuItem active={location.pathname === "/selectBooth"} title="Select Booth" onClick={() => handleMenuItemClick("/selectBooth")}> Select Booth </MenuItem>
+
                   <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
                     <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Cybersecurity </MenuItem>
                     <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> AI </MenuItem>
@@ -155,6 +157,7 @@ function CustomSidebar() {
                     <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Workshop 2 </MenuItem>
                     <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Workshop 3 </MenuItem>
                   </SubMenu>
+                  
                   {/* <MenuItem icon={<DashboardIcon />} active={location.pathname === "/Dashboard"} title="Dashboard" component={<Link to="/Dashboard" />}> Dashboard</MenuItem> */}
                 </> : null
               }
