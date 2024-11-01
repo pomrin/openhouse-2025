@@ -15,8 +15,8 @@ export const connectWebSocket = createAsyncThunk(
             dispatch(setIsConnected(true));
 
             if (ticketId) {
-                const broadcastMessage = { action: "register", message: ticketId };
-                socket.send(JSON.stringify(broadcastMessage));
+                const registerMessage = { action: "register", ticketId: ticketId, userGroup: "Visitor"};
+                socket.send(JSON.stringify(registerMessage));
                 console.log('Registered ticket_id:', ticketId);
             }
         };
@@ -28,8 +28,8 @@ export const connectWebSocket = createAsyncThunk(
                 dispatch(addMessage(messageData));
 
                 // Call the functions if specific messages are received
-                if (messageData.message === 'updateImage') {
-                    refreshProfilePicture(); // Call the passed function
+                if (messageData.command === 'UPDATE_PHOTO') {
+                    refreshProfilePicture(messageData.message); // Call the passed function
                 } else if (['AI', 'CS', 'FT', 'IT'].includes(messageData.message)) {
                     toggleStampVisibility(messageData.message); // Pass the booth identifier to toggleStampVisibility
                 }
@@ -61,7 +61,7 @@ export const sendMessage = createAsyncThunk(
             throw new Error('Recipient ID and message input must not be empty');
         }
 
-        const messageObject = { action: "sendmessage", recipientId, message: input };
+        const messageObject = { action: "sendmessage", recipientId, message: input, authKey:"Av3ryS3cr3tK3y" };
         socket.send(JSON.stringify(messageObject));
         console.log('Sent message:', messageObject);
     }

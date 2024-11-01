@@ -3,6 +3,7 @@ using AWSServerless1.Constants;
 using AWSServerless1.DAL;
 using AWSServerless1.DTO;
 using AWSServerless1.ResponseObject;
+using AWSServerless1.WebSocket;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -66,29 +67,8 @@ namespace AWSServerless1.Controllers
                         VisitorBooth result = VisitorBoothDAL.IssueOrUpdateVisitorBoothStamp(visitorEntity, boothEntity);
                         if (result != null)
                         {
-                            // TODO: Send a Websocket message to Visitor
-                            using (var ms = new MemoryStream())
-                            {
-                                String message = $"This is a test message sent at {DateTime.Now.ToString("yyyyMMddHHmmss")}";
-
-                                var tempMessage = new
-                                {
-                                    action = "sendmessage",
-                                    recipientId = "AW3ZFdkwSQ0CHyw=",
-                                    message = message
-                                }; // TODO: Change this to send via TicketID instead of RecipientId (connectionId)
-
-                                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(tempMessage));
-                                var arraySegment = new ArraySegment<byte>(bytes);
-                                var wsClient = new ClientWebSocket();
-                                await wsClient.ConnectAsync(new Uri(_config[OHAPIAppSettings.APP_SETTINGS_KEY_WEBSOCKET_URL_PROD]), CancellationToken.None);
-                                if (wsClient.State == WebSocketState.Open)
-                                {
-                                    await wsClient.SendAsync(arraySegment, WebSocketMessageType.Text, true, CancellationToken.None);
-                                }
-                                await wsClient.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, String.Empty, CancellationToken.None);
-
-                            }
+                            //var responseMessage = await WebsocketMessageHelper.Ping();
+                            var responseMessage2 = await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_STAMP);
 
                             var visitorBoothResObj = VisitorBoothResObj.FromVisitorBoothEntity(result);
                             return Ok(visitorBoothResObj);

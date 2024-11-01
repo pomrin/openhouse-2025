@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Web.Cors;
@@ -11,6 +12,7 @@ namespace AWSServerless1;
 
 public class Startup
 {
+
     private static readonly String API_NAME = "Customers API V1";
     String MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -19,6 +21,8 @@ public class Startup
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+
     }
 
     public IConfiguration Configuration { get; }

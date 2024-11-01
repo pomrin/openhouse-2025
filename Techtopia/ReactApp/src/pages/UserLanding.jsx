@@ -68,11 +68,11 @@ function UserLanding() {
     };
 
     // Fetch the ticket ID
-    const apiUrl = import.meta.env.VITE_REGISTER_API;
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
     const fetchTicketId = async () => {
         try {
-            const response = await axios.post(apiUrl, {}, {
+            const response = await axios.post(apiUrl + "/Register", {}, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -99,10 +99,10 @@ function UserLanding() {
         }
     };
 
-    const visitorQueueLink = 'https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorQueue'
+    const visitorQueueLink = apiUrl + '/VisitorQueue';
     const [qNumber, setQNumber] = useState(null); // State for the queue number
 
-    const fetchQueue = async () => { 
+    const fetchQueue = async () => {
         try {
             const response = await axios.get(visitorQueueLink);
             console.log("Queue: ", response.data);
@@ -116,13 +116,13 @@ function UserLanding() {
                 //  // Update state with the parsed number
                 //  const numberValue = parseInt(specificWord);
                 //  setQNumber(numberValue); // Update the state
-            
+
             }
         } catch (error) {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-    
+
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("Queue status: The user is not in any queue");
@@ -140,10 +140,10 @@ function UserLanding() {
         }
     };
 
-    const visitorRedemptionLink = 'https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorRedemptionStatus'
+    const visitorRedemptionLink = apiUrl + '/VisitorRedemptionStatus';
     const [rStatus, setRStatus] = useState(null); // State for the queue number
 
-    const fetchRedemption = async () => { 
+    const fetchRedemption = async () => {
         try {
             const response = await axios.get(visitorRedemptionLink);
             console.log("Redemption: ", response.data);
@@ -157,7 +157,7 @@ function UserLanding() {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-    
+
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("Ticket ID is not found");
@@ -166,12 +166,12 @@ function UserLanding() {
                 } else if (error.response.status === 400) {
                     console.log("Visitor have not visited all required booths");
                     setRStatus('Please Complete All Booths');
-                } else if (error.response.status === 409){
+                } else if (error.response.status === 409) {
                     console.log("Visitor has already redeemed before");
                     setRStatus('Redemption Completed');
 
                 }
-                
+
             } else if (error.request) {
                 console.error("No response received:", error.request);
             } else {
@@ -180,48 +180,48 @@ function UserLanding() {
         }
     };
 
-    const visitorBoothStatusLink = 'https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/VisitorBoothStatus'
+    const visitorBoothStatusLink = apiUrl + '/VisitorBoothStatus';
 
-    const fetchBoothStatus = async () => { 
+    const fetchBoothStatus = async () => {
         try {
             const response = await axios.get(visitorBoothStatusLink);
             console.log("Booth Status: ", response.data);
             console.log("Status code: ", response.status);
-            
-            
+
+
             if (response.status === 200) {
                 const values = response.data.map(item => item.boothId);
-                console.log('Values',values);
-                if (values.includes(4)){
+                console.log('Values', values);
+                if (values.includes(4)) {
                     // toggleStampVisibility('AI');
                     stampVisibility('AI');
                 }
-                if (values.includes(1)){
+                if (values.includes(1)) {
                     // toggleStampVisibility('CS');
                     stampVisibility('CS');
                 }
-                if (values.includes(3)){
+                if (values.includes(3)) {
                     // toggleStampVisibility('FT');
                     stampVisibility('FT');
                 }
-                if (values.includes(2)){
+                if (values.includes(2)) {
                     // toggleStampVisibility('IT');
                     stampVisibility('IT');
                 }
-     
+
             }
         } catch (error) {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-    
+
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("User Not in any queue");
                 } else if (error.response.status === 500) {
                     console.log("Server error. Please try again later.");
                 } else if (error.response.status === 400) {
-                    console.log("Bad Request:",error.response.status);
+                    console.log("Bad Request:", error.response.status);
                 }
             } else if (error.request) {
                 console.error("No response received:", error.request);
@@ -284,27 +284,52 @@ function UserLanding() {
     const hasFetchedDataRefBoothStatus = useRef(false);
 
 
+    async function LoadUserData(ticketId) {
+        try {
 
+            // POST request to the "Stamp" API
+            const response = await axios.get(apiUrl + "/VisitorMyInfo");
+
+            if (response.status === 200) {
+                console.log(`response: ${JSON.stringify(response.data)}`);
+                // var data = JSON.parse(response);
+                // console.log(`data: ${response.data["profileImageUrl"]}`);
+                if (response.data["profileImageUrl"]) {
+                    var profileImageUrl = response.data["profileImageUrl"];
+                    var fullPath = `${imageRepo}${ticket_id}/${profileImageUrl}?t=${new Date().getTime()}`;
+                    console.log(`fullPath: ${fullPath}`);
+                    setImageSource(fullPath);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending Stamp API request:', error);
+        }
+    };
 
     useEffect(() => {
         if (!ticket_id && !hasFetchedDataRefTicket.current) {
             hasFetchedDataRefTicket.current = true; // Mark as fetched
             fetchTicketId(); // Fetch ticket ID if not in local storage
         } // Call the function to fetch ticket ID on component mount
-        if(!hasFetchedDataRefQueue.current){
+        else {
+            // Get the existing data from database, if any.
+            console.log(`Get data here!`);
+            LoadUserData(ticket_id);
+        }
+        if (!hasFetchedDataRefQueue.current) {
             hasFetchedDataRefQueue.current = true;
             fetchQueue();
         }
-        if(!hasFetchedDataRefRedemp.current){
+        if (!hasFetchedDataRefRedemp.current) {
             hasFetchedDataRefRedemp.current = true;
             fetchRedemption();
         }
-        if(!hasFetchedDataRefBoothStatus.current){
+        if (!hasFetchedDataRefBoothStatus.current) {
             hasFetchedDataRefBoothStatus.current = true;
             fetchBoothStatus();
         }
         generateQR();
-        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, toggleStampVisibility}));
+        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, toggleStampVisibility }));
 
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -433,39 +458,39 @@ function UserLanding() {
     );
 
     // Function to toggle stamp visibility based on the stamp type
-const toggleStampVisibility = (stampType) => {
-    let newValue;
+    const toggleStampVisibility = (stampType) => {
+        let newValue;
 
-    switch (stampType) {
-        case 'AI':
-            newValue = !isAiStampVisible;
-            setAiStampVisible(newValue);
-            localStorage.setItem('aiStampVisible', newValue);
-            break;
-        case 'CS':
-            newValue = !isCsStampVisible;
-            setCsStampVisible(newValue);
-            localStorage.setItem('csStampVisible', newValue);
-            break;
-        case 'FT':
-            newValue = !isFtStampVisible;
-            setFtStampVisible(newValue);
-            localStorage.setItem('ftStampVisible', newValue);
-            break;
-        case 'IT':
-            newValue = !isItStampVisible;
-            setItStampVisible(newValue);
-            localStorage.setItem('itStampVisible', newValue);
-            break;
-        default:
-            console.warn(`Unknown stamp type: ${stampType}`);
-            return;
-    }
-};
+        switch (stampType) {
+            case 'AI':
+                newValue = !isAiStampVisible;
+                setAiStampVisible(newValue);
+                localStorage.setItem('aiStampVisible', newValue);
+                break;
+            case 'CS':
+                newValue = !isCsStampVisible;
+                setCsStampVisible(newValue);
+                localStorage.setItem('csStampVisible', newValue);
+                break;
+            case 'FT':
+                newValue = !isFtStampVisible;
+                setFtStampVisible(newValue);
+                localStorage.setItem('ftStampVisible', newValue);
+                break;
+            case 'IT':
+                newValue = !isItStampVisible;
+                setItStampVisible(newValue);
+                localStorage.setItem('itStampVisible', newValue);
+                break;
+            default:
+                console.warn(`Unknown stamp type: ${stampType}`);
+                return;
+        }
+    };
 
     // Function to toggle stamp visibility based on the stamp type
     const stampVisibility = (stampType) => {
-    
+
         switch (stampType) {
             case 'AI':
                 setAiStampVisible(true);
@@ -641,16 +666,16 @@ const toggleStampVisibility = (stampType) => {
         setSelectedValue(event.target.value);
     };
 
-    const imageRepo = import.meta.env.VITE_IMAGE_REPO
+    const imageRepo = import.meta.env.VITE_IMAGE_REPO;
 
-    const photoLink = `${imageRepo}${ticket_id}/cartoonprofile.jpg`;
+    const photoLink = ``;
     const [imageSource, setImageSource] = useState(photoLink);
 
     // Function to refresh the profile picture
-    const refreshProfilePicture = () => {
+    const refreshProfilePicture = (imageURL) => {
         setTimeout(() => {
-            setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
-            console.log("photo updated");
+            setImageSource(`${imageRepo}${ticket_id}/${imageURL}?t=${new Date().getTime()}`); // Append timestamp to force refresh
+            console.log(`photo updated - ${imageRepo}${ticket_id}/${imageURL}`);
         }, 5000); // 5000 milliseconds = 5 seconds
     };
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
@@ -698,7 +723,7 @@ const toggleStampVisibility = (stampType) => {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px"}}>
+                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
                     <Box className="topdiv">
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
                             <Box className="profilePicture" sx={{ position: "relative" }}>
@@ -746,7 +771,7 @@ const toggleStampVisibility = (stampType) => {
                                 </Typography>
                             </Box>
                         </Box>
-                        <h1 style={{marginTop:'-15px'}}>Stamps:</h1>
+                        <h1 style={{ marginTop: '-15px' }}>Stamps:</h1>
                         <Box className="stampsBox">
                             <Box className="stamps" onClick={() => toggleStampVisibility('AI')}>
                                 <Typography variant="subtitle1">AI Stamp</Typography>

@@ -6,6 +6,7 @@
         public static readonly String APP_SETTINGS_KEY_JWT_ISSUER = "Jwt:Issuer";
 
         public static readonly String APP_SETTINGS_KEY_WEBSOCKET_URL_PROD = "WebSocket:ProductionUrl";
+        public static readonly String APP_SETTINGS_KEY_WEBSOCKET_AUTH_KEY = "WebSocket:AuthKey";
 
 
         public const String CLAIMS_KEY_STAFF = "Staff";

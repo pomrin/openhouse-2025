@@ -47,6 +47,21 @@ function CustomSidebar() {
     navigate(path); // Navigate to the new path
   };
 
+  const handleBoothClick = (boothId, boothName) => {
+    console.log(`${boothName} clicked`);
+     // Separate Engraving and Redemption booths from other booths via if else statement
+     if (boothName === 'Engraving') {
+      // Redirect to the engraving page
+      navigate('/adminqueue');
+    } else if (boothName === 'Redemption') {
+      // Redirect to the redemption page
+      navigate('/redemption');
+    } else {
+    navigate('/qrcodescanner', { state: { boothId, boothName } });
+    setIsExpanded(false); // Close the navbar after selection
+    }
+  };
+
   // display different landing page based on role
   const locationPfp = () => {
     if (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN) {
@@ -142,23 +157,40 @@ function CustomSidebar() {
 
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
                 <>
-                  <MenuItem active={location.pathname === "/selectBooth"} title="Select Booth" onClick={() => handleMenuItemClick("/selectBooth")}> Select Booth </MenuItem>
-
+                  <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
                   <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Cybersecurity </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> AI </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Software Engineering </MenuItem>
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> FinTech/BlockChain </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Redemption </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Museum </MenuItem>
+                    {[
+                      { boothId: '1', boothName: 'AI' },
+                      { boothId: '2', boothName: 'Cyber Security' },
+                      { boothId: '3', boothName: 'FinTech' },
+                      { boothId: '4', boothName: 'SWENG' },
+                      { boothId: '5', boothName: 'Redemption' },
+                      { boothId: '6', boothName: 'Engraving' }
+                    ].map(booth => (
+                      <MenuItem 
+                        key={booth.boothId} 
+                        onClick={() => handleBoothClick(booth.boothId, booth.boothName)} 
+                      >
+                        {booth.boothName}
+                      </MenuItem>
+                      
+                    ))}
                   </SubMenu>
                   <SubMenu icon={<ReceiptLongIcon />} label="Scan Workshops">
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Workshop 1 </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Workshop 2 </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Workshop 3 </MenuItem>
+                  {[
+                      { boothId: '7', boothName: 'Workshop A' },
+                      { boothId: '8', boothName: 'Workshop B' },
+                      { boothId: '9', boothName: 'Workshop C' },
+                      { boothId: '10', boothName: 'Workshop D' },
+                    ].map(booth => (
+                      <MenuItem 
+                        key={booth.boothId} 
+                        onClick={() => handleBoothClick(booth.boothId, booth.boothName)} 
+                      >
+                        {booth.boothName}
+                      </MenuItem>
+                    ))}          
                   </SubMenu>
-                  
-                  {/* <MenuItem icon={<DashboardIcon />} active={location.pathname === "/Dashboard"} title="Dashboard" component={<Link to="/Dashboard" />}> Dashboard</MenuItem> */}
                 </> : null
               }
             </Menu>

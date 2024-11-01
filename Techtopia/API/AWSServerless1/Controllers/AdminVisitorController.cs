@@ -36,14 +36,7 @@ namespace AWSServerless1.Controllers
             var visitorEntity = VisitorDAL.GetVisitorByTicketId(ticketId);
             if (visitorEntity != null)
             {
-                VisitorInfoDTO result = new VisitorInfoDTO()
-                {
-                    Datecreated = visitorEntity.Datecreated,
-                    LuggageRedeemedDate = visitorEntity.LuggageRedeemedDate,
-                    LuggageTagColorName = visitorEntity.LuggageTagColorName,
-                    TicketId = visitorEntity.TicketId,
-                    VisitorId = visitorEntity.VisitorId,
-                };
+                VisitorInfoDTO result = VisitorInfoDTO.FromVisitorEntity(visitorEntity);
                 return Ok(result);
             }
             else
