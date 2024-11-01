@@ -2,11 +2,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 let socket = null; // WebSocket reference
+let pingInterval = null;
 
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ ticketId, refreshProfilePicture, toggleStampVisibility }, { dispatch }) => {
+    async ({ ticketId, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus }, { dispatch }) => {
         const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
         socket = new WebSocket(websocketUrl);
 
@@ -19,6 +20,14 @@ export const connectWebSocket = createAsyncThunk(
                 socket.send(JSON.stringify(registerMessage));
                 console.log('Registered ticket_id:', ticketId);
             }
+
+            pingInterval = setInterval(() => {
+                if (socket.readyState === WebSocket.OPEN) {
+                    const pingMessage = { action: "ping" };
+                    socket.send(JSON.stringify(pingMessage));
+                    console.log('Sent ping');
+                }
+            }, 2 * 60 * 1000); // 2 minutes
         };
 
         socket.onmessage = (event) => {
@@ -30,8 +39,12 @@ export const connectWebSocket = createAsyncThunk(
                 // Call the functions if specific messages are received
                 if (messageData.command === 'UPDATE_PHOTO') {
                     refreshProfilePicture(messageData.message); // Call the passed function
-                } else if (['AI', 'CS', 'FT', 'IT'].includes(messageData.message)) {
-                    toggleStampVisibility(messageData.message); // Pass the booth identifier to toggleStampVisibility
+                } else if (['UPDATE_STAMP'].includes(messageData.message)) {
+                    refreshStamps(messageData.message); // refreshes stamps
+                } else if (['UPDATE_QUEUES'].includes(messageData.message)) {
+                    refreshQueueNumber(messageData.message); // refreshes stamps
+                } else if (['UPDATE_REDEMPTION_STATUS'].includes(messageData.message)) {
+                    refreshRedemptionStatus(messageData.message); // refreshes stamps
                 }
             } catch (error) {
                 console.log(error, event.data);
@@ -40,6 +53,7 @@ export const connectWebSocket = createAsyncThunk(
         };
 
         socket.onclose = () => {
+            clearInterval(pingInterval);
             console.log('WebSocket connection closed');
             dispatch(setIsConnected(false));
         };
