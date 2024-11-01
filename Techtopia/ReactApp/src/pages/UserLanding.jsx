@@ -324,7 +324,17 @@ function UserLanding() {
             fetchData();
         }
         generateQR();
+        console.log('Establish active');
         dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus, refreshAll}));
+
+        // For active and inactive state
+        const handleVisibilityChange = () => {
+            console.log('Not active anymore');
+            if (document.visibilityState === 'visible') {
+                console.log('Reactive');
+            }
+        };
+        window.addEventListener('visibilitychange', handleVisibilityChange);
 
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -345,6 +355,10 @@ function UserLanding() {
         };
 
         updateDateTime();
+        return () => {
+            window.removeEventListener('visibilitychange', handleVisibilityChange);
+            // Optionally, you might want to disconnect the WebSocket here
+        };
     }, [ticket_id, dispatch]);
 
     const handleSendMessage = () => {
