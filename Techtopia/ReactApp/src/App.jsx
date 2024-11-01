@@ -99,10 +99,11 @@ function App() {
               {/* Testing of Admin login - commented out by default */}
               {/* <Route path={"/"} element={<AdminLogin />} /> */}
 
+              <Route path="/adminlogin" element={<AdminLogin />} />
+
               {/* To ensure these pages can only be accessible to Admin and Booth Helper Only! */}
               { (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
                 <>
-                  <Route path="/adminlogin" element={<AdminLogin />} />
                   <Route path="/selectbooth" element={<Selectbooth />} />
                   <Route path="/qrcodescanner" element={<Qrcodescanner />} />
                   <Route path="/adminqueue" element={<AdminQueue />} />
