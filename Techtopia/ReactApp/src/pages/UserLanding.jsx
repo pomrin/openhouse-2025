@@ -324,7 +324,7 @@ function UserLanding() {
             fetchData();
         }
         generateQR();
-        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus}));
+        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus, refreshAll}));
 
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -708,6 +708,13 @@ const toggleStampVisibility = (stampType) => {
             console.log("photo updated");
         }, 5000); // 5000 milliseconds = 5 seconds
     };
+
+    const refreshAll = ()=> {
+        refreshProfilePicture();
+        refreshStamps();
+        refreshRedemptionStatus();
+        refreshQueueNumber();
+    }
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
