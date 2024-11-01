@@ -191,7 +191,7 @@ function UserLanding() {
             LoadUserData(ticket_id);
         }
         generateQR();
-        dispatch(connectWebSocket({ ticketId: ticket_id, handleCycleBooth, refreshProfilePicture }));
+        dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler, refreshAll }));
 
         const updateDateTime = () => {
             const currentDate = new Date();
@@ -523,12 +523,19 @@ function UserLanding() {
     const [imageSource, setImageSource] = useState(photoLink);
 
     // Function to refresh the profile picture
-    const refreshProfilePicture = (imageURL) => {
+    function onMessageHandler(messageData) {
         setTimeout(() => {
+            var imageURL = messageData.message;
             setImageSource(`${imageRepo}${ticket_id}/${imageURL}?t=${new Date().getTime()}`); // Append timestamp to force refresh
             console.log(`photo updated - ${imageRepo}${ticket_id}/${imageURL}`);
         }, 5000); // 5000 milliseconds = 5 seconds
     };
+
+    function refreshAll() {
+        if (ticket_id) {
+            LoadUserData(ticket_id);
+        }
+    }
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 

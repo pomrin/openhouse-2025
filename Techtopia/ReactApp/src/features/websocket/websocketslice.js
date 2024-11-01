@@ -12,9 +12,9 @@ const RECONNECT_DELAY_BASE = 1000; // Initial delay in ms (1 second)
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ ticketId, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus, refreshAll }, { dispatch }) => {
+    async ({ ticketId, onMessageHandler, refreshAll }, { dispatch }) => {
         const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
-        
+
         const establishConnection = () => {
             socket = new WebSocket(websocketUrl);
 
@@ -52,17 +52,7 @@ export const connectWebSocket = createAsyncThunk(
                 try {
                     const messageData = JSON.parse(event.data);
                     dispatch(addMessage(messageData));
-
-                    // Call the functions if specific messages are received
-                    if (messageData.command === 'UPDATE_STAMP') {
-                        refreshStamps(messageData.message);
-                    } else if (messageData.command === 'UPDATE_PHOTO') {
-                        refreshProfilePicture(messageData.message);
-                    } else if (messageData.command === 'UPDATE_QUEUES') {
-                        refreshQueueNumber(messageData.message);
-                    } else if (messageData.command === 'UPDATE_REDEMPTION_STATUS') {
-                        refreshRedemptionStatus(messageData.message);
-                    }
+                    onMessageHandler(messageData);
                 } catch (error) {
                     console.log(error, event.data);
                     dispatch(addMessage({ message: event.data }));
@@ -73,7 +63,7 @@ export const connectWebSocket = createAsyncThunk(
                 clearInterval(pingInterval);
                 console.log('WebSocket connection closed');
                 dispatch(setIsConnected(false));
-                
+
                 // Attempt to reconnect with exponential backoff
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                     const delay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttempts);

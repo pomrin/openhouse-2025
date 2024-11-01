@@ -88,7 +88,7 @@ function UserLanding() {
             localStorage.setItem('ticket_id', newTicketId);
             localStorage.setItem('accessToken', token);
             location.reload();
-            
+
 
         } catch (error) {
             if (error.response) {
@@ -105,7 +105,7 @@ function UserLanding() {
     const visitorQueueLink = apiUrl + '/VisitorQueue';
     const [qNumber, setQNumber] = useState(null); // State for the queue number
 
-    const fetchQueue = async () => { 
+    const fetchQueue = async () => {
         try {
             const response = await axios.get(visitorQueueLink);
             console.log("Queue: ", response.data);
@@ -125,7 +125,7 @@ function UserLanding() {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-    
+
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("Queue status: The user is not in any queue");
@@ -146,7 +146,7 @@ function UserLanding() {
     const visitorRedemptionLink = apiUrl + '/VisitorRedemptionStatus';
     const [rStatus, setRStatus] = useState(null); // State for the queue number
 
-    const fetchRedemption = async () => { 
+    const fetchRedemption = async () => {
         try {
             const response = await axios.get(visitorRedemptionLink);
             console.log("Redemption: ", response.data);
@@ -160,7 +160,7 @@ function UserLanding() {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-    
+
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("Ticket ID is not found");
@@ -174,7 +174,7 @@ function UserLanding() {
                     setRStatus('Redemption Completed');
 
                 }
-                
+
             } else if (error.request) {
                 console.error("No response received:", error.request);
             } else {
@@ -185,13 +185,13 @@ function UserLanding() {
 
     const visitorBoothStatusLink = apiUrl + '/VisitorBoothStatus';
 
-    const fetchBoothStatus = async () => { 
+    const fetchBoothStatus = async () => {
         try {
             const response = await axios.get(visitorBoothStatusLink);
             console.log("Booth Status: ", response.data);
             console.log("Status code: ", response.status);
-            
-            
+
+
             if (response.status === 200) {
                 const values = response.data.map(item => item.boothId);
                 console.log('Values', values);
@@ -211,13 +211,13 @@ function UserLanding() {
                     // toggleStampVisibility('IT');
                     stampVisibility('IT');
                 }
-     
+
             }
         } catch (error) {
             if (error.response) {
                 console.error("Error response:", error.response.data);
                 console.error("Error status:", error.response.status);
-    
+
                 // Handle specific status codes
                 if (error.response.status === 404) {
                     console.log("User Not in any queue");
@@ -284,7 +284,7 @@ function UserLanding() {
         // if (!ticket_id && !hasFetchedDataRefTicket.current) {
         //     hasFetchedDataRefTicket.current = true; // Mark as fetched
         //     fetchTicketId(); // Fetch ticket ID if not in local storage
-            
+
         // } // Call the function to fetch ticket ID on component mount
         // else {
         //     // Get the existing data from database, if any.
@@ -311,21 +311,21 @@ function UserLanding() {
                     await fetchRedemption();
                     await fetchBoothStatus();
                 }
-                
+
             } catch (error) {
                 console.error("Error during fetching data:", error);
             } finally {
                 setLoadingFetch(false); // Set loading to false after all data is fetched
             }
         };
-        
-        if(!hasFetchedDataRefAll.current){
+
+        if (!hasFetchedDataRefAll.current) {
             hasFetchedDataRefAll.current = true;
             fetchData();
         }
         generateQR();
         console.log('Establish active');
-        dispatch(connectWebSocket({ ticketId: ticket_id, refreshProfilePicture, refreshStamps, refreshQueueNumber, refreshRedemptionStatus, refreshAll}));
+        dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler, refreshAll }));
 
         // For active and inactive state
         const handleVisibilityChange = () => {
@@ -467,39 +467,39 @@ function UserLanding() {
     );
 
     // Function to toggle stamp visibility based on the stamp type
-const toggleStampVisibility = (stampType) => {
-    let newValue;
+    const toggleStampVisibility = (stampType) => {
+        let newValue;
 
-    switch (stampType) {
-        case 'AI':
-            newValue = !isAiStampVisible;
-            setAiStampVisible(newValue);
-            localStorage.setItem('aiStampVisible', newValue);
-            break;
-        case 'CS':
-            newValue = !isCsStampVisible;
-            setCsStampVisible(newValue);
-            localStorage.setItem('csStampVisible', newValue);
-            break;
-        case 'FT':
-            newValue = !isFtStampVisible;
-            setFtStampVisible(newValue);
-            localStorage.setItem('ftStampVisible', newValue);
-            break;
-        case 'IT':
-            newValue = !isItStampVisible;
-            setItStampVisible(newValue);
-            localStorage.setItem('itStampVisible', newValue);
-            break;
-        default:
-            console.warn(`Unknown stamp type: ${stampType}`);
-            return;
-    }
-};
+        switch (stampType) {
+            case 'AI':
+                newValue = !isAiStampVisible;
+                setAiStampVisible(newValue);
+                localStorage.setItem('aiStampVisible', newValue);
+                break;
+            case 'CS':
+                newValue = !isCsStampVisible;
+                setCsStampVisible(newValue);
+                localStorage.setItem('csStampVisible', newValue);
+                break;
+            case 'FT':
+                newValue = !isFtStampVisible;
+                setFtStampVisible(newValue);
+                localStorage.setItem('ftStampVisible', newValue);
+                break;
+            case 'IT':
+                newValue = !isItStampVisible;
+                setItStampVisible(newValue);
+                localStorage.setItem('itStampVisible', newValue);
+                break;
+            default:
+                console.warn(`Unknown stamp type: ${stampType}`);
+                return;
+        }
+    };
 
     // Function to toggle stamp visibility based on the stamp type
     const stampVisibility = (stampType) => {
-    
+
         switch (stampType) {
             case 'AI':
                 setAiStampVisible(true);
@@ -723,12 +723,28 @@ const toggleStampVisibility = (stampType) => {
         }, 5000); // 5000 milliseconds = 5 seconds
     };
 
-    const refreshAll = ()=> {
+    function onMessageHandler(messageData) {
+        // Call the functions if specific messages are received
+        if (messageData.command === 'UPDATE_STAMP') {
+            refreshStamps(messageData.message);
+        } else if (messageData.command === 'UPDATE_PHOTO') {
+            refreshProfilePicture(messageData.message);
+        } else if (messageData.command === 'UPDATE_QUEUES') {
+            refreshQueueNumber(messageData.message);
+        } else if (messageData.command === 'UPDATE_REDEMPTION_STATUS') {
+            refreshRedemptionStatus(messageData.message);
+        }
+    };
+
+
+    function refreshAll() {
         refreshProfilePicture();
         refreshStamps();
         refreshRedemptionStatus();
         refreshQueueNumber();
     }
+
+
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
 
@@ -775,7 +791,7 @@ const toggleStampVisibility = (stampType) => {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px"}}>
+                <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
                     <Box className="topdiv">
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
                             <Box className="profilePicture" sx={{ position: "relative" }}>

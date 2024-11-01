@@ -78,7 +78,7 @@ function App() {
     <Router>
       <div style={{ display: 'flex' }}>
         <CombinedProvider>
-          
+
           {/* NAV BAR */}
           {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
@@ -102,7 +102,7 @@ function App() {
               <Route path="/adminlogin" element={<AdminLogin />} />
 
               {/* To ensure these pages can only be accessible to Admin and Booth Helper Only! */}
-              { (CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
+              {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ? (
                 <>
                   <Route path="/selectbooth" element={<Selectbooth />} />
                   <Route path="/qrcodescanner" element={<Qrcodescanner />} />
@@ -113,7 +113,7 @@ function App() {
               ) : (
                 <Route path="*" element={<Navigate to="/" />} /> // Redirect to Home for any unmatched route
               )}
-              
+
             </Routes>
           </Container>
         </CombinedProvider>
