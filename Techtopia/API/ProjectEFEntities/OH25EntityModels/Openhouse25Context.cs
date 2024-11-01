@@ -144,9 +144,6 @@ public partial class Openhouse25Context : DbContext
             entity.HasIndex(e => e.TicketId, "ticket_id_UNIQUE").IsUnique();
 
             entity.Property(e => e.VisitorId).HasColumnName("visitor_id");
-            entity.Property(e => e.DateCertificateSent)
-                .HasColumnType("datetime")
-                .HasColumnName("dateCertificateSent");
             entity.Property(e => e.Datecreated)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")

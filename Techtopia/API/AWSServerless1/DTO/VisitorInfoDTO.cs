@@ -29,7 +29,6 @@ namespace AWSServerless1.DTO
         {
             var result = new VisitorInfoDTO()
             {
-                DateCertificateSent = visitorEntity.DateCertificateSent,
                 Datecreated = visitorEntity.Datecreated,
                 LuggageRedeemedDate = visitorEntity.LuggageRedeemedDate,
                 LuggageTagColorName = visitorEntity.LuggageTagColorName,

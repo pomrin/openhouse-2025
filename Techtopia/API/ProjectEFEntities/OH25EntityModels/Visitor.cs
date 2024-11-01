@@ -23,8 +23,6 @@ public partial class Visitor
 
     public string? ProfileImageUrl { get; set; }
 
-    public DateTime? DateCertificateSent { get; set; }
-
     public virtual ICollection<EngravingQueue> EngravingQueues { get; set; } = new List<EngravingQueue>();
 
     public virtual LuggageTagColor? LuggageTagColorNameNavigation { get; set; }

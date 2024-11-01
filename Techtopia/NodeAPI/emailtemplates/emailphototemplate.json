@@ -1,0 +1,8 @@
+{
+    "TemplateName": "EmailTemplateRegistrationPreview",
+    "TemplateContent": {
+        "Subject": "Thank you for joining the OH2025 Preview!",
+        "Text": "Dear {{name}},\r\nThank you for participating the OH2025 Preview! As a token of participation, you can download your very own Cartoonized Image from this <a href=`{{url}}`>URL</a>.",
+        "Html": "<h1>Dear {{name}},</h1><p>Thank you for participating the OH2025 Preview! As a token of participation, you can download your very own Cartoonized Image from this <a href=\"{{url}}\">URL</a>.</p>"
+    }
+}

@@ -17,6 +17,7 @@ const { blob } = require('node:stream/consumers');
 var request = require('request');
 var fs = require('fs');
 const visitorDAL = require("../dal/visitordal");
+import AWSSesHelper from "../helpers/AWSSesHelper";
 
 // ##### Form SG
 // This is where your domain is hosted, and should match
@@ -393,6 +394,8 @@ module.exports.postDemoRequest = async (event, context) => {
                     await visitorDAL.updateProfileImageUrlByTicketId(ticketId, "cartoonprofile." + photoExt);
                     sendDirectMessage("cartoonprofile." + photoExt, ticketId, "UPDATE_PHOTO");
                     broadcastMessage(ticketId, "MONTAGE", "UPDATE_PHOTOS");
+                    var emailResult = await AWSSesHelper.sendRegistrationCompleteEmail("Budding Techtopian", email, `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${response2}`);
+                    console.log(`Email to ${email} - ${JSON.stringify(emailResult)}`);
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }
@@ -480,9 +483,16 @@ module.exports.testLocal = async (event, context) => {
 };
 
 module.exports.testLocalAxios = async (event, context) => {
-    await visitorDAL.updateProfileImageUrlByTicketId("NYP0217WED", "123");
 
-    return createLambdaResponse(event, 200, 'Post Success!');
+    var result = 'abc';
+    if (false) {
+    } else {
+        var imagePath = "user_profile/NYP0353WED/cartoonprofile.jpg";
+        // https://openhouse2025-images-repo-prod.s3.ap-southeast-1.amazonaws.com/user_profile/NYP0353WED/cartoonprofile.jpg
+        result = await AWSSesHelper.sendRegistrationCompleteEmail("Axios Local", "chanyuenloong.nyp@outlook.com", `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${imagePath}`);
+    }
+
+    return createLambdaResponse(event, 200, `Post Success! ${JSON.stringify(result)}`);
 };
 
 
