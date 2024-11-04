@@ -31,8 +31,8 @@
 
 .button-container {
     position: absolute;
-    top: 30%; /* Use percentage for vertical positioning */
-    right: 2%; /* Use percentage for horizontal positioning */
+    top: 90%; /* Use percentage for vertical positioning */
+    right: 1%; /* Use percentage for horizontal positioning */
     display: flex;
     gap: 15px; /* Space between buttons */
     z-index: 1;
@@ -64,7 +64,7 @@
         
     }
     .button-container {
-        top: 30%;
+        top: 90%;
     }
 }
 
@@ -74,8 +74,8 @@
         padding: 0.5em 1em; /* Further increase padding for extra-large screens */
     }
     .button-container{
-        top: 20%;
-        right: 10%;
+        top: 90%;
+        right: 1%;
     }
 }
 
