@@ -133,7 +133,7 @@ function CustomSidebar() {
               {(CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR) ?
                 <>
                   <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
-                  <SubMenu icon={<ReceiptLongIcon />} label="Level 2">
+                  <SubMenu icon={<ReceiptLongIcon />} label="Level 2 Maps">
                     <MenuItem active={location.pathname === "/CybersecurityMap"} title="Cybersecurity Map" onClick={() => handleMenuItemClick("/CybersecurityMap")}> Cybersecurity </MenuItem>
                     <MenuItem active={location.pathname === "/AIMap"} title="AI Map" onClick={() => handleMenuItemClick("/AIMap")}> AI </MenuItem>
                     <MenuItem active={location.pathname === "/SEMap"} title="Software Engineering Map" onClick={() => handleMenuItemClick("/SEMap")}> Software Engineering </MenuItem>
@@ -142,12 +142,12 @@ function CustomSidebar() {
                     <MenuItem active={location.pathname === "/MuseumMap"} title="Museum Map" onClick={() => handleMenuItemClick("/MuseumMap")}> Museum </MenuItem>
 
                   </SubMenu>
-                  <SubMenu icon={<ReceiptLongIcon />} label="Level 3">
+                  <SubMenu icon={<ReceiptLongIcon />} label="Level 3 Maps">
                     <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
                     <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Laser Engraving </MenuItem>
                     <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Projects </MenuItem>
                   </SubMenu>
-                  <SubMenu icon={<ReceiptLongIcon />} label="Level 5">
+                  <SubMenu icon={<ReceiptLongIcon />} label="Level 5 Maps">
                     <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
                     <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Workshops </MenuItem>
                   </SubMenu>

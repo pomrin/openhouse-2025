@@ -246,7 +246,7 @@ function UserLanding() {
     const hasFetchedDataRefBoothStatus = useRef(false);
     const hasFetchedDataRefAll = useRef(false);
 
-
+    let image;
 
     async function LoadUserData(ticketId) {
         try {
@@ -259,8 +259,10 @@ function UserLanding() {
                 // var data = JSON.parse(response);
                 // console.log(`data: ${response.data["profileImageUrl"]}`);
                 if (response.data["profileImageUrl"]) {
-                    var profileImageUrl = response.data["profileImageUrl"];
-                    var fullPath = `${imageRepo}${ticket_id}/${profileImageUrl}?t=${new Date().getTime()}`;
+                    console.log('LOAD USER: IAM FIRST')
+                    //var profileImageUrl = response.data["profileImageUrl"];
+                    image = response.data["profileImageUrl"];
+                    var fullPath = `${imageRepo}${ticket_id}/${image}?t=${new Date().getTime()}`;
                     console.log(`fullPath: ${fullPath}`);
                     setImageSource(fullPath);
                 }
@@ -682,16 +684,25 @@ function UserLanding() {
 
     const imageRepo = import.meta.env.VITE_IMAGE_REPO
 
-    const photoLink = `${imageRepo}${ticket_id}/cartoonprofile.jpg`;
-    const [imageSource, setImageSource] = useState(photoLink);
+   
+    const [imageSource, setImageSource] = useState('');
 
     // Function to refresh the profile picture
     const refreshProfilePicture = () => {
         setTimeout(() => {
+            console.log('Refresh pic: Iam first')
+            const photoLink = `${imageRepo}${ticket_id}/${image}`;
+            console.log('second path',photoLink)
+
+    
             setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
+
             console.log("photo updated");
         }, 5000); // 5000 milliseconds = 5 seconds
     };
+
+
+
 
     function onMessageHandler(messageData) {
         // Call the functions if specific messages are received
