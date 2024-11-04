@@ -723,10 +723,8 @@ function UserLanding() {
             console.log('Refresh pic: Iam first')
             const photoLink = `${imageRepo}${ticket_id}/${image}`;
             console.log('second path',photoLink)
-
-    
+            LoadUserData(ticket_id);
             setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
-
             console.log("photo updated");
         }, 5000); // 5000 milliseconds = 5 seconds
     };
