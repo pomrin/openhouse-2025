@@ -275,47 +275,50 @@ function RedemptionPage() {
         switch (eligibility) {
             case 'eligible':
                 content = (
-                    <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginBottom: '10px' }}>
-                        Visitor eligible for luggage tag redemption 🎉
+                    <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginY: '10px' }}>
+                        Visitor is eligible for luggage tag redemption 🎉
                     </Typography>
                     <Typography variant='body2' sx={{ padding: '2%', textAlign: 'center' }}>
-                        Visitor satisifies all requirements for luggage tag redemption. <br></br> 
                         Assist the visitor in their redemption process by selecting their preferred tag color below:
                     </Typography>
-                    <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5% 5% 1% 5%', margin: '2% 0 1% 4%' }}>
-                        <Typography variant="body1">Preferred Color: </Typography>
-                        <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
-                        <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                            <Typography variant="body1">Selected color:</Typography>
-                            <Box
-                                sx={{
-                                    width: '30px',
-                                    height: '30px',
-                                    backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
-                                    borderRadius: '50%',
-                                    border: '1px solid black',
-                                    marginLeft: '3%'
-                                }}
-                            />
-                            <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
-                            </Typography>
-                        </Box>
-                        {selectedColor && (
-                            <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
-                                Proceed with Redemption
-                            </Button>
-                        )}
-                    </FormControl></>
+
+                    <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '2%', borderRadius: '8px', marginTop: '2%' }}>
+                        {/* Color selection form */}
+                        <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5% 5% 1% 5%', margin: '2% 0 1% 4%' }}>
+                            <Typography variant="body1">Preferred Color: </Typography>
+                            <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
+                            <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                                <Typography variant="body1">Selected color:</Typography>
+                                <Box
+                                    sx={{
+                                        width: '30px',
+                                        height: '30px',
+                                        backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
+                                        borderRadius: '50%',
+                                        border: '1px solid black',
+                                        marginLeft: '3%'
+                                    }}
+                                />
+                                <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                    {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
+                                </Typography>
+                            </Box>
+                            {selectedColor && (
+                                <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
+                                    Proceed with Redemption
+                                </Button>
+                            )}
+                        </FormControl>
+                    </Box></>
                 );
                 break;
             case 'already_redeemed':
                 content = (
                     <><Typography variant="h6" sx={{ fontWeight: 700, marginY: '10px', textAlign: 'center' }}>
-                        Visitor already redeemed their luggage tag 🏷️
+                        Visitor has already redeemed their luggage tag 🏷️
                     </Typography>
                     <Typography variant='body2' sx={{ textAlign: 'center' }}>
-                        If they are requesting for a color change*, please select their new color choice below:
+                        If they would like a tag color change*, please select their new color choice below.
                     </Typography>
                     <Typography variant='caption' sx={{ color: '#ff0000' }}>
                         *Color change applicable only for unengraved tags
@@ -369,11 +372,11 @@ function RedemptionPage() {
                 break;
             case 'ineligible':
                 content = (
-                    <><Typography variant="body2" sx={{ textAlign: 'center', marginY: '10px', width: '80%' }}>
-                        Visitor ineligible for luggage tag redemption ❌
+                    <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginY: '10px' }}>
+                        Visitor is ineligible for luggage tag redemption ❌
                     </Typography>
-                    <Typography variant='body2'>
-                        Visitor has not met redemption prerequisites by not visiting and collecting stamps from all required booths.
+                    <Typography variant='body2' sx={{ textAlign: 'center', padding: '1%' }}>
+                        Visitor has not met redemption prerequisites by visiting and collecting stamps from all required booths.
                     </Typography></>
                 );
                 break;
@@ -754,7 +757,7 @@ function RedemptionPage() {
         }
     };
 
-    // Render a loading spinner if token not ready
+    // Render a loading spinner if token not retrieved yet
     if (loading) {
         return (
             <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
@@ -775,7 +778,9 @@ function RedemptionPage() {
                 alignItems: 'center',
                 paddingTop: '64px', 
                 paddingBottom: '20px',
-                }}>
+            }}>
+            
+            {/* Back button */}
             <Box display="flex" width="100%" justifyContent="flex-start">
                 <IconButton onClick={handleBack} aria-label="Go Back">
                     <ArrowBackIcon />
@@ -784,7 +789,7 @@ function RedemptionPage() {
                     </Typography>
                 </IconButton>
             </Box>
-        
+            
             {/* Successful scan popup */}
             <Popup open={isPopupOpen} onClose={closePopup} 
                 modal 
@@ -802,13 +807,18 @@ function RedemptionPage() {
                     width: '100%',
                     height: '100vh'
                 }}>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                         {/* Booth name */}
-                        <Grid item xs={12} id="boothName">
-                            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 700, marginY: '5%' }}>
-                                REDEMPTION
+                        <Grid item xs={12} id="boothName" sx={{ textAlign: 'center' }}>
+                            <Typography variant="h5" sx={{ my: 2 }}>
+                                QR Code Scanner
+                            </Typography>
+
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Current Booth: Redemption
                             </Typography>
                         </Grid>
+
                         {/* QR scanner */}
                         <Grid item xs={12} className="QRscannerContainer">
                             <Box id="QRscanner" sx={{
@@ -820,10 +830,10 @@ function RedemptionPage() {
                                 overflow: 'hidden'
                             }}>
                                 <video ref={videoEl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '3px' }}></video>
-                                {/* Show "Start scanner" button if the scanner is not active; else show loader if await API response */}
+                                {/* Show "Start scanner" button if the scanner is not active; else show loader if awaiting API response */}
                                 {!scannerLoading ? (
                                     !scannerActive && (
-                                        <Button onClick={startScanner} style={{...startQRscannerBtn,  zIndex: scannerActive ? -99 : 90}}>
+                                        <Button onClick={startScanner} style={{...startQRscannerBtn,  zIndex: scannerActive ? -99 : 1 }}>
                                         Start scanner
                                     </Button>
                                     )
