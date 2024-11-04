@@ -17,7 +17,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="0.8*" />
             <RowDefinition Height="0.05*" />
-            <RowDefinition Height="0" />
+            <RowDefinition Height="0.05*" />
         </Grid.RowDefinitions>
         <mycustomusercontrols:Montage Grid.Row="0" DataContext="{Binding MontageViewModel}" 
                                       HorizontalAlignment="Stretch" 
@@ -35,6 +35,7 @@
                 Content="Simulate A Jiggle" 
                 Click="Button_Click" 
                 HorizontalAlignment="Stretch"
+                Background="Green"
                 />
     </Grid>
 </Page>
