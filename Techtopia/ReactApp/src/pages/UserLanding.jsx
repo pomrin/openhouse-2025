@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, Link } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import nyp_logo from "./../assets/images/RGB_SIT_1.png";
 import '../css/UserLanding.css';
-import plane_image from './../assets/images/plane_image.png';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import aiStamp from './../assets/images/ai_stamp.svg';
@@ -12,10 +10,6 @@ import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import noImageUploaded from './../assets/images/noImageUploaded.png';
-import boothimage1 from './../assets/images/step1.png';
-import boothimage2 from './../assets/images/step2.png';
-import boothimage3 from './../assets/images/step3.png';
-import boothimage4 from './../assets/images/step4.png';
 import uploadProfile from './../assets/images/upload_profile.png';
 // import http from './http';
 import axios from './http';
@@ -39,15 +33,11 @@ function UserLanding() {
 
     //set const
     const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
-    const [currentDate, setCurrentDate] = useState('');
-    const [currentTime, setCurrentTime] = useState('');
 
     const [isAiStampVisible, setAiStampVisible] = useState(false);
     const [isCsStampVisible, setCsStampVisible] = useState(false);
     const [isFtStampVisible, setFtStampVisible] = useState(false);
     const [isItStampVisible, setItStampVisible] = useState(false);
-
-    const [queueNumber, setQueueNumber] = useState('0001');  // Queue number state
 
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -337,26 +327,6 @@ function UserLanding() {
             }
         };
         window.addEventListener('visibilitychange', handleVisibilityChange);
-
-        const updateDateTime = () => {
-            const currentDate = new Date();
-
-            const day = String(currentDate.getDate()).padStart(2, '0');
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const year = currentDate.getFullYear();
-            const formattedDate = `${day}/${month}/${year}`;
-            setCurrentDate(formattedDate);
-
-            const hours = currentDate.getHours();
-            const minutes = String(currentDate.getMinutes()).padStart(2, '0');
-            const isAm = hours < 12;
-            const formattedHours = hours % 12 || 12;
-            const amPm = isAm ? 'AM' : 'PM';
-            const formattedTime = `${formattedHours}:${minutes} ${amPm}`;
-            setCurrentTime(formattedTime);
-        };
-
-        updateDateTime();
         return () => {
             window.removeEventListener('visibilitychange', handleVisibilityChange);
             // Optionally, you might want to disconnect the WebSocket here
