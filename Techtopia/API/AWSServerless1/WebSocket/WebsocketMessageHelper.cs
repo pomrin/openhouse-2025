@@ -1,6 +1,7 @@
 ﻿using AWSServerless1.Constants;
 using AWSServerless1.Controllers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Net.WebSockets;
 using System.Reflection.Metadata.Ecma335;
@@ -71,7 +72,7 @@ namespace AWSServerless1.WebSocket
             var tempMessage = new
             {
                 action = WEBSOCKET_ACTION_TYPES.register.ToString(),
-                usergroup = group.ToString()
+                userGroup = group.ToString()
             };
             var serializedWebSocketMessage = JsonConvert.SerializeObject(tempMessage);
             try
@@ -155,20 +156,57 @@ namespace AWSServerless1.WebSocket
         }
 
 
-        public static async Task<String> BroadcastMessage(WEBSOCKET_GROUP_TYPES group, WEBSOCKET_COMMAND_TYPES command)
+        public static async Task<String> BroadcastMessage(WEBSOCKET_GROUP_TYPES group, WEBSOCKET_COMMAND_TYPES command, String ticketId = null, String message = null)
         {
             String result = null;
 
             var action = WEBSOCKET_ACTION_TYPES.broadcast;
             dynamic tempMessage = null;
 
-            tempMessage = new
+            if (!String.IsNullOrEmpty(ticketId) && !String.IsNullOrEmpty(message))
             {
-                action = action.ToString(), // ping, direct, broadcast, register
-                usergroup = group.ToString(), // intended group to receive the message eg Visitor, Admin, All, Montage
-                command = command.ToString(), // Message to the recipient
-                authKey = authKey,
-            };
+                tempMessage = new
+                {
+                    action = action.ToString(), // ping, direct, broadcast, register
+                    userGroup = group.ToString(), // intended group to receive the message eg Visitor, Admin, All, Montage
+                    command = command.ToString(), // Message to the recipient
+                    message = message,
+                    ticketId = ticketId,
+                    authKey = authKey,
+                };
+            }
+            else if (!String.IsNullOrEmpty(ticketId) && String.IsNullOrEmpty(message))
+            {
+                tempMessage = new
+                {
+                    action = action.ToString(), // ping, direct, broadcast, register
+                    userGroup = group.ToString(), // intended group to receive the message eg Visitor, Admin, All, Montage
+                    command = command.ToString(), // Message to the recipient
+                    ticketId = ticketId,
+                    authKey = authKey,
+                };
+            }
+            else if (String.IsNullOrEmpty(ticketId) && !String.IsNullOrEmpty(message))
+            {
+                tempMessage = new
+                {
+                    action = action.ToString(), // ping, direct, broadcast, register
+                    userGroup = group.ToString(), // intended group to receive the message eg Visitor, Admin, All, Montage
+                    command = command.ToString(), // Message to the recipient
+                    message = message,
+                    authKey = authKey,
+                };
+            }
+            else
+            {
+                tempMessage = new
+                {
+                    action = action.ToString(), // ping, direct, broadcast, register
+                    userGroup = group.ToString(), // intended group to receive the message eg Visitor, Admin, All, Montage
+                    command = command.ToString(), // Message to the recipient
+                    authKey = authKey,
+                };
+            }
 
             var serializedWebSocketMessage = JsonConvert.SerializeObject(tempMessage);
             try
@@ -191,7 +229,7 @@ namespace AWSServerless1.WebSocket
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An Exception have occurred while trying to BroadcastMessage(group: {group.ToString()}, message: {command.ToString()}), serializedWebSocketMessage: {serializedWebSocketMessage} - {ex.ToString()}");
+                Console.WriteLine($"An Exception have occurred while trying to BroadcastMessage(group: {group.ToString()}, message: {command.ToString()}, ticketId: {ticketId}), serializedWebSocketMessage: {serializedWebSocketMessage} - {ex.ToString()}");
             }
 
             return result;
