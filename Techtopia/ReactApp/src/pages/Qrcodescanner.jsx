@@ -13,7 +13,7 @@ function Qrcodescanner() {
 
   const [apiResponseMessage, setApiResponseMessage] = useState('');
   const [apiResponseError, setApiResponseError] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_BASE_URL + "/Register";
+  const apiUrl = import.meta.env.VITE_API_BASE_URL + "/AdminIssueStamp";
 
   useEffect(() => {
     // Check if accessToken exists
@@ -49,8 +49,8 @@ function Qrcodescanner() {
     try {
       const accessToken = localStorage.getItem('accessToken');
 
-      // POST request to the "Stamp" API
-      const response = await axios.post(apiUrl, {
+      // PUT request to the "Stamp" API
+      const response = await axios.put(apiUrl, {
         ticketId,
         boothId: boothId
       }, {
