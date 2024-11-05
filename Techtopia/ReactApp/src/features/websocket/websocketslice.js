@@ -9,10 +9,14 @@ let isFirstConnection = true;
 const MAX_RECONNECT_ATTEMPTS = 5; // Optional limit on the number of attempts
 const RECONNECT_DELAY_BASE = 1000; // Initial delay in ms (1 second)
 
+export const isWebSocketConnected = () => {
+    return socket && socket.readyState === WebSocket.OPEN;
+};
+
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ ticketId, onMessageHandler, refreshAll }, { dispatch }) => {
+    async ({ ticketId, onMessageHandler }, { dispatch }) => {
         const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
 
         const establishConnection = () => {
@@ -22,14 +26,6 @@ export const connectWebSocket = createAsyncThunk(
                 console.log('Connected to WebSocket');
                 reconnectAttempts = 0; // Reset attempts on successful connection
                 dispatch(setIsConnected(true));
-
-                if (!isFirstConnection && refreshAll) {
-                    refreshAll();
-                    console.log("All components updated")
-                }
-
-                // Set to false after the first connection
-                isFirstConnection = false;
 
                 if (ticketId) {
                     const registerMessage = { action: "register", ticketId: ticketId, userGroup: "Visitor" };
@@ -61,17 +57,17 @@ export const connectWebSocket = createAsyncThunk(
 
             socket.onclose = () => {
                 clearInterval(pingInterval);
-                console.log('WebSocket connection closed');
                 dispatch(setIsConnected(false));
+                console.log('WebSocket connection closed. Attempting reconnection...');
 
-                // Attempt to reconnect with exponential backoff
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                    const delay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttempts);
+                    const reconnectDelay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttempts);
                     setTimeout(() => {
                         reconnectAttempts += 1;
-                        console.log(`Attempting to reconnect... (Attempt ${reconnectAttempts})`);
-                        establishConnection(); // Recursive attempt to reconnect
-                    }, delay);
+                        establishConnection();
+                    }, reconnectDelay);
+                } else {
+                    console.warn('Max reconnect attempts reached.');
                 }
             };
 
@@ -80,7 +76,6 @@ export const connectWebSocket = createAsyncThunk(
                 socket.close(); // Close socket on error to trigger reconnect in `onclose`
             };
         };
-
         establishConnection(); // Initial connection attempt
     }
 );

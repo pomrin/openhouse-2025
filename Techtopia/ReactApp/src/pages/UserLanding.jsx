@@ -11,12 +11,15 @@ import itStamp from './../assets/images/it_stamp.svg';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import noImageUploaded from './../assets/images/noImageUploaded.png';
 import uploadProfile from './../assets/images/upload_profile.png';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // import http from './http';
 import axios from './http';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 //redux
 import { useDispatch, useSelector } from 'react-redux';
 import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
+import { isWebSocketConnected } from '../features/websocket/websocketslice';
 // import axios from 'axios';
 
 
@@ -317,13 +320,18 @@ function UserLanding() {
         }
         generateQR();
         console.log('Establish active');
-        dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler, refreshAll }));
-
+        dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler }));
+        
         // For active and inactive state
         const handleVisibilityChange = () => {
             console.log('Not active anymore');
             if (document.visibilityState === 'visible') {
                 console.log('Reactive');
+                if (document.visibilityState === 'visible' && !isWebSocketConnected()) {
+                    dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler }));
+                    console.log('Reconnecting WebSocket...');
+                    refreshAll();
+                }
             }
         };
         window.addEventListener('visibilitychange', handleVisibilityChange);
@@ -714,6 +722,8 @@ function UserLanding() {
             refreshQueueNumber(messageData.message);
         } else if (messageData.command === 'UPDATE_REDEMPTION_STATUS') {
             refreshRedemptionStatus(messageData.message);
+        } else if (messageData.message === 'Internal server error') {
+            toast.error("WebSocket server down, please refresh manually");
         }
     };
 
