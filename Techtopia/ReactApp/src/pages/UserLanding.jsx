@@ -659,12 +659,14 @@ function UserLanding() {
     // Function to refresh the queue number
     const refreshQueueNumber = () => {
         // Simulate fetching a new queue number
+        fetchQueue();
         setQNumberTimestamp(Date.now()); // Update timestamp to force refresh
         console.log("Queue number updated");
     };
 
     // Function to refresh the redemption status
     const refreshRedemptionStatus = () => {
+        fetchRedemption();
         setRStatusTimestamp(Date.now()); // Update timestamp to force refresh
         console.log("Redemption status updated");
     };
