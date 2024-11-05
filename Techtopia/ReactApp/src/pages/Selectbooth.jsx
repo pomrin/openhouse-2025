@@ -15,11 +15,12 @@ function Selectbooth() {
     }
   }, [navigate]);
 
+    // Updated booth based on Database - Refer to booth table
   const booths = [
-    {boothId: '1', boothName: 'AI'},
-    {boothId: '2', boothName: 'Cyber Security'},
+    {boothId: '1', boothName: 'Cyber Security'},
+    {boothId: '2', boothName: 'Data Analytics'},
     {boothId: '3', boothName:'FinTech'},
-    {boothId: '4', boothName:'SWENG'},
+    {boothId: '4', boothName:'AI'},
     {boothId: '5', boothName:'Redemption'},
     {boothId: '6', boothName:'Engraving'},
     {boothId: '7', boothName:'Workshop A'},
