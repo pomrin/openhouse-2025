@@ -14,6 +14,13 @@ namespace OHMontageUWP
         public static readonly String JIGGLE_ANIMATION_RESOURCE_PATH = "JiggleAnimationResources";
         public static readonly String DEFAULT_USER_IMAGE_NAME = "defaultuser.png";
 
+        
+
+        static ProjectHelper()
+        {
+
+        }
+
         public static String GetProjectImageFolder()
         {
             String folderPath = null;
