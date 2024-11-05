@@ -51,6 +51,11 @@ function UserLanding() {
     const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
     const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
+    const [aiStampSource, setAiStampSource] = useState({aiStamp});
+    const [csStampSource, setCsStampSource] = useState({csStamp});
+    const [ftStampSource, setFtStampSource] = useState({ftStamp});
+    const [itStampSource, setItStampSource] = useState(itStamp);
+
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Fix for URL-safe base64
@@ -665,15 +670,18 @@ function UserLanding() {
     };
 
     // Image URLs with timestamp for each stamp to force refresh
-    const [aiStampSource, setAiStampSource] = useState(`${aiStamp}?t=${new Date().getTime()}`);
-    const [csStampSource, setCsStampSource] = useState(`${csStamp}?t=${new Date().getTime()}`);
-    const [ftStampSource, setFtStampSource] = useState(`${ftStamp}?t=${new Date().getTime()}`);
-    const [itStampSource, setItStampSource] = useState(`${itStamp}?t=${new Date().getTime()}`);
+    // const [aiStampSource, setAiStampSource] = useState(`${aiStamp}?t=${new Date().getTime()}`);
+    // const [csStampSource, setCsStampSource] = useState(`${csStamp}?t=${new Date().getTime()}`);
+    // const [ftStampSource, setFtStampSource] = useState(`${ftStamp}?t=${new Date().getTime()}`);
+    // const [itStampSource, setItStampSource] = useState(`${itStamp}?t=${new Date().getTime()}`);
+    
 
     // Function to refresh the stamps images
     const refreshStamps = () => {
         setTimeout(() => {
             const timestamp = new Date().getTime();
+            console.log(`${aiStamp}?t=${timestamp}`)
+            fetchBoothStatus();
             setAiStampSource(`${aiStamp}?t=${timestamp}`);
             setCsStampSource(`${csStamp}?t=${timestamp}`);
             setFtStampSource(`${ftStamp}?t=${timestamp}`);
