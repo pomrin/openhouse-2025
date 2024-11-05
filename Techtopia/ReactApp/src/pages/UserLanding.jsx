@@ -54,6 +54,11 @@ function UserLanding() {
     const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
     const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
+    const [aiStampSource, setAiStampSource] = useState({aiStamp});
+    const [csStampSource, setCsStampSource] = useState({csStamp});
+    const [ftStampSource, setFtStampSource] = useState({ftStamp});
+    const [itStampSource, setItStampSource] = useState(itStamp);
+
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Fix for URL-safe base64
@@ -662,26 +667,31 @@ function UserLanding() {
     // Function to refresh the queue number
     const refreshQueueNumber = () => {
         // Simulate fetching a new queue number
+        fetchQueue();
         setQNumberTimestamp(Date.now()); // Update timestamp to force refresh
         console.log("Queue number updated");
     };
 
     // Function to refresh the redemption status
     const refreshRedemptionStatus = () => {
+        fetchRedemption();
         setRStatusTimestamp(Date.now()); // Update timestamp to force refresh
         console.log("Redemption status updated");
     };
 
     // Image URLs with timestamp for each stamp to force refresh
-    const [aiStampSource, setAiStampSource] = useState(`${aiStamp}?t=${new Date().getTime()}`);
-    const [csStampSource, setCsStampSource] = useState(`${csStamp}?t=${new Date().getTime()}`);
-    const [ftStampSource, setFtStampSource] = useState(`${ftStamp}?t=${new Date().getTime()}`);
-    const [itStampSource, setItStampSource] = useState(`${itStamp}?t=${new Date().getTime()}`);
+    // const [aiStampSource, setAiStampSource] = useState(`${aiStamp}?t=${new Date().getTime()}`);
+    // const [csStampSource, setCsStampSource] = useState(`${csStamp}?t=${new Date().getTime()}`);
+    // const [ftStampSource, setFtStampSource] = useState(`${ftStamp}?t=${new Date().getTime()}`);
+    // const [itStampSource, setItStampSource] = useState(`${itStamp}?t=${new Date().getTime()}`);
+    
 
     // Function to refresh the stamps images
     const refreshStamps = () => {
         setTimeout(() => {
             const timestamp = new Date().getTime();
+            console.log(`${aiStamp}?t=${timestamp}`)
+            fetchBoothStatus();
             setAiStampSource(`${aiStamp}?t=${timestamp}`);
             setCsStampSource(`${csStamp}?t=${timestamp}`);
             setFtStampSource(`${ftStamp}?t=${timestamp}`);
@@ -701,10 +711,8 @@ function UserLanding() {
             console.log('Refresh pic: Iam first')
             const photoLink = `${imageRepo}${ticket_id}/${image}`;
             console.log('second path',photoLink)
-
-    
+            LoadUserData(ticket_id);
             setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
-
             console.log("photo updated");
         }, 5000); // 5000 milliseconds = 5 seconds
     };

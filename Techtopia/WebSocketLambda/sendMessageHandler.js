@@ -1,11 +1,18 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, ScanCommand, GetCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
-const { ApiGatewayManagementApiClient, PostToConnectionCommand } = require("@aws-sdk/client-apigatewaymanagementapi");
+const {
+  DynamoDBDocumentClient,
+  ScanCommand,
+  GetCommand,
+  UpdateCommand,
+} = require("@aws-sdk/lib-dynamodb");
+const {
+  ApiGatewayManagementApiClient,
+  PostToConnectionCommand,
+} = require("@aws-sdk/client-apigatewaymanagementapi");
 
 exports.handler = async function (event) {
   const client = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(client);
-
 
   console.log(`Enterered`);
 
@@ -23,7 +30,11 @@ exports.handler = async function (event) {
   const { action, authKey } = body;
 
   // Check if authKey is valid
-  if (action !== "register" && action !== "ping" && authKey !== "Av3ryS3cr3tK3y") {
+  if (
+    action !== "register" &&
+    action !== "ping" &&
+    authKey !== "Av3ryS3cr3tK3y"
+  ) {
     return {
       statusCode: 403,
       body: JSON.stringify({ message: "Forbidden: Invalid authKey" }),
@@ -36,14 +47,15 @@ exports.handler = async function (event) {
     const senderConnectionId = event.requestContext.connectionId;
 
     try {
-
       // Retrieve the recipient connectionId from DynamoDB
-      const recipientConnection = await docClient.send(new GetCommand({
-        TableName: process.env.TABLE_NAME,
-        Key: {
-          connectionId: recipientId,
-        },
-      }));
+      const recipientConnection = await docClient.send(
+        new GetCommand({
+          TableName: process.env.TABLE_NAME,
+          Key: {
+            connectionId: recipientId,
+          },
+        })
+      );
 
       if (!recipientConnection.Item) {
         return {
@@ -59,10 +71,15 @@ exports.handler = async function (event) {
         endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
       });
 
-      await apiClient.send(new PostToConnectionCommand({
-        ConnectionId: connectionId,
-        Data: JSON.stringify({ message: message, connectionId: senderConnectionId }),
-      }));
+      await apiClient.send(
+        new PostToConnectionCommand({
+          ConnectionId: connectionId,
+          Data: JSON.stringify({
+            message: message,
+            connectionId: senderConnectionId,
+          }),
+        })
+      );
 
       return {
         statusCode: 200,
@@ -86,12 +103,12 @@ exports.handler = async function (event) {
 
     // Ensure proper parameter values for ticket id and user group
     var errorMessage = "";
-    if ((ticketId == null || ticketId === "")) {
+    if (ticketId == null || ticketId === "") {
       errorMessage += `Ticket ID (ticketId: ${ticketId}) cannot be null or empty`;
     } else {
       ticketId = ticketId.toUpperCase();
     }
-    if ((userGroup == null || userGroup === "")) {
+    if (userGroup == null || userGroup === "") {
       if (errorMessage.length > 0) {
         errorMessage += ".\n";
       }
@@ -101,12 +118,15 @@ exports.handler = async function (event) {
     }
     if (errorMessage) {
       try {
-        await apiClient.send(new PostToConnectionCommand({
-          ConnectionId: senderConnectionId,
-          Data: JSON.stringify({ message: `Unable to Register: ${errorMessage}}` }),
-        }));
-      }
-      catch (err) {
+        await apiClient.send(
+          new PostToConnectionCommand({
+            ConnectionId: senderConnectionId,
+            Data: JSON.stringify({
+              message: `Unable to Register: ${errorMessage}}`,
+            }),
+          })
+        );
+      } catch (err) {
         console.error("Error processing registration:", err);
         return {
           statusCode: 500,
@@ -115,21 +135,22 @@ exports.handler = async function (event) {
       }
     } else {
       try {
-
-        await docClient.send(new UpdateCommand({
-          TableName: process.env.TABLE_NAME,
-          Key: {
-            connectionId: senderConnectionId,
-          },
-          UpdateExpression: "SET ticketId = :ticketId, #ug = :userGroup",
-          ExpressionAttributeValues: {
-            ":ticketId": ticketId,
-            ":userGroup": userGroup,
-          },
-          ExpressionAttributeNames: {
-            "#ug": "userGroup",
-          },
-        }));
+        await docClient.send(
+          new UpdateCommand({
+            TableName: process.env.TABLE_NAME,
+            Key: {
+              connectionId: senderConnectionId,
+            },
+            UpdateExpression: "SET ticketId = :ticketId, #ug = :userGroup",
+            ExpressionAttributeValues: {
+              ":ticketId": ticketId,
+              ":userGroup": userGroup,
+            },
+            ExpressionAttributeNames: {
+              "#ug": "userGroup",
+            },
+          })
+        );
 
         return {
           statusCode: 200,
@@ -153,15 +174,18 @@ exports.handler = async function (event) {
     const apiClient = new ApiGatewayManagementApiClient({
       endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
     });
+    console.log(
+      `Sender - ticketId: ${ticketId}, connectionId: ${senderConnectionId}`
+    );
 
     // Ensure proper parameter values for ticket id and message
     var errorMessage = "";
-    if ((command === undefined || command == null || command === "")) {
+    if (command === undefined || command == null || command === "") {
       errorMessage += `Command (command: ${command}) cannot be null or empty`;
     } else {
       command = command.toUpperCase();
     }
-    if ((ticketId == null || ticketId === "")) {
+    if (ticketId == null || ticketId === "") {
       if (errorMessage.length > 0) {
         errorMessage += ".\n";
       }
@@ -172,12 +196,15 @@ exports.handler = async function (event) {
 
     if (errorMessage) {
       try {
-        await apiClient.send(new PostToConnectionCommand({
-          ConnectionId: senderConnectionId,
-          Data: JSON.stringify({ message: `Unable to Send Direct Message: ${errorMessage}}` }),
-        }));
-      }
-      catch (err) {
+        await apiClient.send(
+          new PostToConnectionCommand({
+            ConnectionId: senderConnectionId,
+            Data: JSON.stringify({
+              message: `Unable to Send Direct Message: ${errorMessage}}`,
+            }),
+          })
+        );
+      } catch (err) {
         console.error("Error processing Send Direct Message:", err);
         return {
           statusCode: 500,
@@ -186,21 +213,26 @@ exports.handler = async function (event) {
       }
     } else {
       try {
-
         // Scan the DynamoDB table to get all connections with the provided ticketId
-        const scanResult = await docClient.send(new ScanCommand({
-          TableName: process.env.TABLE_NAME,
-          FilterExpression: "ticketId = :ticketId",
-          ExpressionAttributeValues: {
-            ":ticketId": ticketId,
-          },
-        }));
+        const scanResult = await docClient.send(
+          new ScanCommand({
+            TableName: process.env.TABLE_NAME,
+            FilterExpression: "ticketId = :ticketId",
+            ExpressionAttributeValues: {
+              ":ticketId": ticketId,
+            },
+          })
+        );
 
         // Send the direct message to all connections with matching ticketId, excluding the sender
-        const sendMessages = scanResult.Items
-          .filter(item => item.connectionId !== senderConnectionId) // Exclude the sender's connection ID
-          .map(item => {
+        const sendMessages = scanResult.Items.filter(
+          (item) => item.connectionId !== senderConnectionId
+        ) // Exclude the sender's connection ID
+          .map((item) => {
             const connectionId = item.connectionId;
+            console.log(
+              `Receiver - ticketId: ${ticketId}, connectionId: ${connectionId}`
+            );
 
             const directMessage = {
               // action: "sendmessage",
@@ -210,12 +242,19 @@ exports.handler = async function (event) {
               message: message, // Use the message from the request body
             };
 
-            return apiClient.send(new PostToConnectionCommand({
-              ConnectionId: connectionId,
-              Data: JSON.stringify(directMessage),
-            })).catch(err => {
-              console.error(`Failed to send message to ${connectionId}:`, err);
-            });
+            return apiClient
+              .send(
+                new PostToConnectionCommand({
+                  ConnectionId: connectionId,
+                  Data: JSON.stringify(directMessage),
+                })
+              )
+              .catch((err) => {
+                console.error(
+                  `Failed to send message to ${connectionId}:`,
+                  err
+                );
+              });
           });
 
         await Promise.all(sendMessages); // Wait for all messages to be sent
@@ -223,7 +262,8 @@ exports.handler = async function (event) {
         return {
           statusCode: 200,
           body: JSON.stringify({
-            message: "Direct message sent to all connections linked by ticket ID",
+            message:
+              "Direct message sent to all connections linked by ticket ID",
           }),
         };
       } catch (err) {
@@ -234,28 +274,27 @@ exports.handler = async function (event) {
         };
       }
     }
-
   }
-
-
 
   // Handle broadcast action for all connections
   if (action === "broadcast") {
-    var { command, message, userGroup } = body; // Get userGroup from the body
+    var { command, userGroup, ticketId, message } = body; // Get userGroup from the body
     const senderConnectionId = event.requestContext.connectionId;
     const apiClient = new ApiGatewayManagementApiClient({
       endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
     });
-
+    console.log(
+      `Sender - ticketId: ${ticketId}, connectionId: ${senderConnectionId}`
+    );
 
     // Ensure proper parameter values for ticket id and message
     var errorMessage = "";
-    if ((command === undefined || command == null || command === "")) {
+    if (command === undefined || command == null || command === "") {
       errorMessage += `Command (command: ${command}) cannot be null or empty`;
     } else {
       command = command.toUpperCase();
     }
-    if ((userGroup == null || userGroup === "")) {
+    if (userGroup == null || userGroup === "") {
       if (errorMessage.length > 0) {
         errorMessage += ".\n";
       }
@@ -271,12 +310,15 @@ exports.handler = async function (event) {
 
     if (errorMessage) {
       try {
-        await apiClient.send(new PostToConnectionCommand({
-          ConnectionId: senderConnectionId,
-          Data: JSON.stringify({ message: `Unable to broadcast: ${errorMessage}}` }),
-        }));
-      }
-      catch (err) {
+        await apiClient.send(
+          new PostToConnectionCommand({
+            ConnectionId: senderConnectionId,
+            Data: JSON.stringify({
+              message: `Unable to broadcast: ${errorMessage}}`,
+            }),
+          })
+        );
+      } catch (err) {
         console.error("Error processing broadcast:", err);
         return {
           statusCode: 500,
@@ -286,28 +328,45 @@ exports.handler = async function (event) {
     } else {
       try {
         // Scan all connections from the table
-        const scanResult = await docClient.send(new ScanCommand({
-          TableName: process.env.TABLE_NAME,
-        }));
+        const scanResult = await docClient.send(
+          new ScanCommand({
+            TableName: process.env.TABLE_NAME,
+          })
+        );
 
         // Filter connections by userGroup and exclude the sender
-        const sendMessages = scanResult.Items
-          .filter(item => item.userGroup === userGroup && item.connectionId !== senderConnectionId)
-          .map(async (item) => {
-            const connectionId = item.connectionId;
+        const sendMessages = scanResult.Items.filter(
+          (item) =>
+            item.userGroup === userGroup &&
+            item.connectionId !== senderConnectionId
+        ).map(async (item) => {
+          const connectionId = item.connectionId;
+          const receiverTicketId = item.ticketId; // Assuming each item has a ticketId
 
-            // Broadcast the message to each connection in the same userGroup
-            return apiClient.send(new PostToConnectionCommand({
+          console.log(
+            `Receiver - ticketId: ${receiverTicketId}, connectionId: ${connectionId}`
+          );
+
+          // Broadcast the message to each connection in the same userGroup
+          return apiClient.send(
+            new PostToConnectionCommand({
               ConnectionId: connectionId,
-              Data: JSON.stringify({ command: command, message: message }),
-            }));
-          });
+              Data: JSON.stringify({
+                command: command,
+                message: message,
+                ticketId: ticketId,
+              }),
+            })
+          );
+        });
 
         await Promise.all(sendMessages); // Wait for all messages to be sent
 
         return {
           statusCode: 200,
-          body: JSON.stringify({ message: `Broadcast message sent to all connections in the same userGroup (${userGroup})` }),
+          body: JSON.stringify({
+            message: `Broadcast message sent to all connections in the same userGroup (${userGroup})`,
+          }),
         };
       } catch (err) {
         console.error("Error processing broadcast to userGroup:", err);
@@ -327,10 +386,12 @@ exports.handler = async function (event) {
 
     try {
       // Send the "pong" message back to the connection that called the action
-      await apiClient.send(new PostToConnectionCommand({
-        ConnectionId: senderConnectionId,
-        Data: JSON.stringify({ message: "pong" }),
-      }));
+      await apiClient.send(
+        new PostToConnectionCommand({
+          ConnectionId: senderConnectionId,
+          Data: JSON.stringify({ message: "pong" }),
+        })
+      );
 
       return {
         statusCode: 200,
