@@ -32,7 +32,7 @@ namespace OHMontageUWP
             this.InitializeComponent();
             this.DataContext = mainWindowVM;
 
-            ShowToastNotification("Hello World", "Some things are too good to be true");
+            //ShowToastNotification("Hello World", "Some things are too good to be true");
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)

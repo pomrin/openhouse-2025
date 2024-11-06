@@ -11,13 +11,13 @@
 
     <Grid >
         <Grid.Background>
-            <ImageBrush ImageSource="/Images/background.jpg" Stretch="Fill"/>
+            <ImageBrush ImageSource="/Images/OpenHouse_Background.png" Stretch="Fill"/>
         </Grid.Background>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="0.8*" />
             <RowDefinition Height="0.05*" />
-            <RowDefinition Height="0.05*" />
+            <RowDefinition Height="0.*" />
         </Grid.RowDefinitions>
         <mycustomusercontrols:Montage Grid.Row="0" DataContext="{Binding MontageViewModel}" 
                                       HorizontalAlignment="Stretch" 
@@ -26,9 +26,8 @@
         <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="White" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,3,0,3">
             <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <RelativePanel.Background>
-                    <ImageBrush ImageSource="/Images/RGB_SIT_1.png" Stretch="Uniform"/>
+                    <ImageBrush ImageSource="/Images/nyp_sit.png" Stretch="Uniform"/>
                 </RelativePanel.Background>
-
             </RelativePanel>
         </Grid>
         <Button Grid.Row="2"

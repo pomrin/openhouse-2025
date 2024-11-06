@@ -93,6 +93,8 @@ namespace OHMontageUWP.ViewModel
 
         private String animationImageUrl;
 
+        private String ticketId;
+
         public string ImageUrl
         {
             get
@@ -211,6 +213,30 @@ namespace OHMontageUWP.ViewModel
                 if (value != this.animationImageUrl)
                 {
                     this.animationImageUrl = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public string TicketId
+        {
+            get
+            {
+                if (!String.IsNullOrEmpty(this.ticketId))
+                {
+                    return this.ticketId;
+                }
+                else
+                {
+                    return "Empty";
+                }
+            }
+
+            set
+            {
+                if (value != this.ticketId)
+                {
+                    this.ticketId = value;
                     NotifyPropertyChanged();
                 }
             }
