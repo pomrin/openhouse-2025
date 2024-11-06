@@ -18,7 +18,8 @@ const profanityFilter = (inputText) => {
         "DLLM","hamgacan","Fkurmother","die",'jump','buto','fker','diefk',"kanina","knn",
         "knnccb","knncb","knnpcb","knnb","knnbcb","kpkb","dllm","diuleiloumou","diu","hamgacan",
         "hgc","ccb","fck","fker","fucker","fucking","fucked","fucking","ppys","yaosiew",
-        "motherfucker","motherfker","mtfucker","fk"
+        "motherfucker","motherfker","mtfucker","fk",'chibai','cbdog','cbfuck','yaosiewkia',
+        'SLK','SYH','369','108','18','32','108','apk','TWL','lanjiao','lanpah','yourmother',
       ];
     const patterns = [
       /f[\.]?u[\.]?c[\.]?k/i, /s[\.]?h[\.]?i[\.]?t/i, /b[\.]?i[\.]?t[\.]?c[\.]?h/i,
@@ -68,9 +69,11 @@ const profanityFilter = (inputText) => {
           return;
         }
 
-        const apiUrl = import.meta.env.VITE_QUEUE_API;
 
-        const response = await fetch(apiUrl, {
+
+        const response = await fetch(
+            `${import.meta.env.VITE_QUEUE_API}`, 
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
