@@ -4,7 +4,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 let socket = null; // WebSocket reference
 let pingInterval = null;
 let reconnectAttempts = 0; // Track reconnect attempts
-let isFirstConnection = true;
 
 const MAX_RECONNECT_ATTEMPTS = 5; // Optional limit on the number of attempts
 const RECONNECT_DELAY_BASE = 1000; // Initial delay in ms (1 second)
@@ -13,10 +12,19 @@ export const isWebSocketConnected = () => {
     return socket && socket.readyState === WebSocket.OPEN;
 };
 
+export const registerUser = ({ ticketId, userGroup }) => {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        console.error("WebSocket is not connected.");
+        return;
+    }
+    const registerMessage = { action: "register", ticketId: ticketId ?? null, userGroup: userGroup ?? null };
+    socket.send(JSON.stringify(registerMessage));
+};
+
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ ticketId, onMessageHandler }, { dispatch }) => {
+    async ({ ticketId, userGroup, onMessageHandler }, { dispatch }) => {
         const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
 
         const establishConnection = () => {
@@ -28,19 +36,18 @@ export const connectWebSocket = createAsyncThunk(
                 dispatch(setIsConnected(true));
 
                 if (ticketId) {
-                    const registerMessage = { action: "register", ticketId: ticketId, userGroup: "Visitor" };
-                    socket.send(JSON.stringify(registerMessage));
-                    console.log('Registered ticket_id:', ticketId);
+                    registerUser({ ticketId, userGroup });
+                    console.log(`Registered user: ${ticketId} as ${userGroup}`);
                 }
 
-                // Start ping interval
-                pingInterval = setInterval(() => {
-                    if (socket.readyState === WebSocket.OPEN) {
-                        const pingMessage = { action: "ping" };
-                        socket.send(JSON.stringify(pingMessage));
-                        console.log('Sent ping');
-                    }
-                }, 2 * 60 * 1000); // 2 minutes
+                // // Start ping interval
+                // pingInterval = setInterval(() => {
+                //     if (socket.readyState === WebSocket.OPEN) {
+                //         const pingMessage = { action: "ping" };
+                //         socket.send(JSON.stringify(pingMessage));
+                //         console.log('Sent ping');
+                //     }
+                // }, 2 * 60 * 1000); // 2 minutes
             };
 
             socket.onmessage = (event) => {

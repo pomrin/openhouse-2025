@@ -18,7 +18,7 @@ import axios from './http';
 import profile_picture from './../assets/images/cartoonifyPlaceholder.png';
 //redux
 import { useDispatch, useSelector } from 'react-redux';
-import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
+import { connectWebSocket, sendMessage, registerUser } from '../features/websocket/websocketslice';
 import { isWebSocketConnected } from '../features/websocket/websocketslice';
 // import axios from 'axios';
 
@@ -325,18 +325,21 @@ function UserLanding() {
         }
         generateQR();
         console.log('Establish active');
-        dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler }));
+        dispatch(connectWebSocket({ ticketId: ticket_id, userGroup: "Visitor", onMessageHandler }));
+        if (ticket_id) {
+            registerUser({ ticketId: ticket_id, userGroup: "Visitor" });
+        }
         
         // For active and inactive state
         const handleVisibilityChange = () => {
             console.log('Not active anymore');
             if (document.visibilityState === 'visible') {
                 console.log('Reactive');
-                if (document.visibilityState === 'visible' && !isWebSocketConnected()) {
-                    dispatch(connectWebSocket({ ticketId: ticket_id, onMessageHandler }));
-                    console.log('Reconnecting WebSocket...');
-                    refreshAll();
-                }
+                // if (document.visibilityState === 'visible' && !isWebSocketConnected()) {
+                //     dispatch(connectWebSocket({ onMessageHandler }));
+                //     console.log('Reconnecting WebSocket...');
+                //     refreshAll();
+                // }
             }
         };
         window.addEventListener('visibilitychange', handleVisibilityChange);
