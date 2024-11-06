@@ -280,6 +280,8 @@ function UserLanding() {
         }
     };
 
+    const initialTicketId = useRef(ticket_id);
+
     useEffect(() => {
         // if (!ticket_id && !hasFetchedDataRefTicket.current) {
         //     hasFetchedDataRefTicket.current = true; // Mark as fetched
@@ -302,7 +304,7 @@ function UserLanding() {
                 }
                 else {
                     console.log(`Get data here!`);
-                    LoadUserData(ticket_id);
+                    LoadUserData(initialTicketId.current);
                 }
 
                 if (!hasFetchedDataRefQueue.current && !hasFetchedDataRefRedemp.current && !hasFetchedDataRefBoothStatus.current) {
@@ -325,10 +327,7 @@ function UserLanding() {
         }
         generateQR();
         console.log('Establish active');
-        dispatch(connectWebSocket({ ticketId: ticket_id, userGroup: "Visitor", onMessageHandler }));
-        if (ticket_id) {
-            registerUser({ ticketId: ticket_id, userGroup: "Visitor" });
-        }
+        dispatch(connectWebSocket({ ticketId: initialTicketId.current, userGroup: "Visitor", onMessageHandler }));
         
         // For active and inactive state
         const handleVisibilityChange = () => {
@@ -347,7 +346,7 @@ function UserLanding() {
             window.removeEventListener('visibilitychange', handleVisibilityChange);
             // Optionally, you might want to disconnect the WebSocket here
         };
-    }, [ticket_id, dispatch]);
+    }, [dispatch]);
 
     const handleSendMessage = () => {
         if (input && recipientId && isConnected) {
