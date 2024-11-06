@@ -118,7 +118,7 @@ namespace OHMontageUWP.ViewModel
                         }
                     }
 
-                    MainPage.ShowToastNotification("Hello World", "Some things are too good to be true");
+                    //MainPage.ShowToastNotification("Hello World", "Some things are too good to be true");
                 }
                 else if (String.Compare(command, "UPDATE_PHOTO", true) == 0)
                 {

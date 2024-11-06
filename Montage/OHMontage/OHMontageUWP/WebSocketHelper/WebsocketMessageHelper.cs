@@ -36,7 +36,7 @@ namespace AWSServerless1.WebSocketHelper
 
         public async Task<ClientWebSocket> InitiateWebSocketClientAsync()
         {
-            if (websocketClient == null || websocketClient.State != WebSocketState.Open)
+            do
             {
                 try
                 {
@@ -80,11 +80,8 @@ namespace AWSServerless1.WebSocketHelper
                     websocketClient = null;
                     Trace.WriteLine($"Connection to Websocket Server failed - {ex.Message}");
                 }
-            }
-            else
-            {
-                // Send a Ping and Receive a Pong
-            }
+            } while (websocketClient == null || websocketClient.State != WebSocketState.Open);
+           
 
 
             return websocketClient;
