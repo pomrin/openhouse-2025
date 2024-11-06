@@ -418,7 +418,7 @@ function AdminQueue() {
                     paddingRight={"40px"}
                     spacing={2} // Optional, controls spacing between items
                     sx={{
-                        marginTop: '20px', // Adjust the value to your preference for more space
+                        marginTop: '6vh', // Adjust the value to your preference for more space
                     }}
                 >
                     {/* Search Icon + Search Bar */}
@@ -428,7 +428,11 @@ function AdminQueue() {
                         <IconButton 
                         onClick={handleToggleSearch}
                         sx={{
-                            paddingTop:"28px"
+                            paddingTop:"24px",
+                            paddingLeft:"24px",
+                            paddingBottom:"24px",
+                            paddingRight:"24px"
+
                         }}
                         >
                             <SearchIcon />
