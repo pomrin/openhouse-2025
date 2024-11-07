@@ -68,6 +68,10 @@ import AI from './pages/AI';
 import SE from './pages/SE';
 import RD from './pages/RD';
 import Museum from './pages/Museum';
+import Workshop from './pages/Workshop';
+import LE from './pages/LE';
+
+
 
 
 
@@ -93,6 +97,10 @@ function App() {
               <Route path={"/SEMap"} element={<SE />} />
               <Route path={"/RedemptionMap"} element={<RD />} />
               <Route path={"/MuseumMap"} element={<Museum />} />
+              <Route path={"/WorkshopMap"} element={<Workshop />} />
+              <Route path={"/LEMap"} element={<LE />} />
+
+
 
 
 
