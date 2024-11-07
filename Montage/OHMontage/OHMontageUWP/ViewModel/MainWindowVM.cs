@@ -120,8 +120,11 @@ namespace OHMontageUWP.ViewModel
 
                     //MainPage.ShowToastNotification("Hello World", "Some things are too good to be true");
                 }
-                else if (String.Compare(command, "UPDATE_PHOTO", true) == 0)
+                else if (String.Compare(command, "REFRESH_PHOTOS", true) == 0)
                 {
+                    this.MontageViewModel.Photos.Clear();
+                    this.LoadAllVisitorsFromDB();
+                    MainPage.ShowToastNotification("Refreshing all photos...", "Refreshing all photos in a short while...");
                 }
                 else if (String.Compare(command, "UPDATE_PHOTOS", true) == 0)
                 {
