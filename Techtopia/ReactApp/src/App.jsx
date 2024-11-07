@@ -84,11 +84,11 @@ function App() {
         <CombinedProvider>
 
           {/* NAV BAR */}
-          {/* {CURRENT_USER_TYPE && <CustomSidebar />} */}
+          {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
-              <Route path={"/"} element={<UserLandingDemo />} />
-              <Route path={"/Home"} element={<UserLandingDemo />} />
+              <Route path={"/"} element={<UserLanding />} />
+              <Route path={"/Home"} element={<UserLanding />} />
               <Route path={"/Demo"} element={<UserLandingDemo />} />
 
               <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
