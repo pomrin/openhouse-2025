@@ -9,6 +9,9 @@
         public static readonly String APP_SETTINGS_KEY_WEBSOCKET_AUTH_KEY = "WebSocket:AuthKey";
 
 
+        public static readonly String APP_SETTINGS_KEY_API_SETTINGS_API_KEY = "APISettings:API_KEY";
+
+
         public const String CLAIMS_KEY_STAFF = "Staff";
         public const String CLAIMS_KEY_SCHOOL = "School";
         public const String CLAIMS_KEY_TICKET_ID = "TICKET_ID";

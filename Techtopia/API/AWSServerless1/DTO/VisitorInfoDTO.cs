@@ -22,9 +22,6 @@ namespace AWSServerless1.DTO
 
         public string? ProfileImageUrl { get; set; }
 
-        public DateTime? DateCertificateSent { get; set; }
-
-
         public static VisitorInfoDTO FromVisitorEntity(Visitor visitorEntity)
         {
             var result = new VisitorInfoDTO()

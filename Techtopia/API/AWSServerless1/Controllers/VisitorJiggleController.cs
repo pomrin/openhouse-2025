@@ -21,10 +21,13 @@ namespace AWSServerless1.Controllers
         }
 
         /// <summary>
-        /// Sends a Jiggle Animation command to the OHMontage
+        /// Sends a Jiggle Animation command to the OHMontage.
+        /// This method will REQUIRE Authentication.
         /// </summary>
         /// <param name="option"></param>
         /// <returns></returns>
+        /// <response code="200">Command received!</response>
+        /// <response code="404">Ticket ID not found!</response>
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
            )]

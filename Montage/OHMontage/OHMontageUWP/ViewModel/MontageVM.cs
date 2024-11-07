@@ -28,12 +28,21 @@ namespace OHMontageUWP.ViewModel
             //}
         }
 
-        internal bool AddNewPhoto()
+        internal bool AddNewPhoto(String imageUrl = null, String ticketId = null)
         {
             bool result = false;
             if (this.Photos.Count() < DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY)
             {
-                this.Photos.Add(new PhotoControlVM());
+                var photoControlVM = new PhotoControlVM();
+                if (!String.IsNullOrEmpty(imageUrl))
+                {
+                    photoControlVM.ImageUrl = imageUrl;
+                }
+                if (!String.IsNullOrEmpty(ticketId))
+                {
+                    photoControlVM.TicketId = ticketId;
+                }
+                this.Photos.Add(photoControlVM);
                 result = true;
             }
             return result;

@@ -4,15 +4,27 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 let socket = null; // WebSocket reference
 let pingInterval = null;
 let reconnectAttempts = 0; // Track reconnect attempts
-let isFirstConnection = true;
 
 const MAX_RECONNECT_ATTEMPTS = 5; // Optional limit on the number of attempts
 const RECONNECT_DELAY_BASE = 1000; // Initial delay in ms (1 second)
 
+export const isWebSocketConnected = () => {
+    return socket && socket.readyState === WebSocket.OPEN;
+};
+
+export const registerUser = ({ ticketId, userGroup }) => {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        console.error("WebSocket is not connected.");
+        return;
+    }
+    const registerMessage = { action: "register", ticketId: ticketId ?? null, userGroup: userGroup ?? null };
+    socket.send(JSON.stringify(registerMessage));
+};
+
 // Thunks for connecting, sending messages, and handling WebSocket events
 export const connectWebSocket = createAsyncThunk(
     'websocket/connect',
-    async ({ ticketId, onMessageHandler, refreshAll }, { dispatch }) => {
+    async ({ ticketId, userGroup, onMessageHandler }, { dispatch }) => {
         const websocketUrl = import.meta.env.VITE_WEBSOCKET_API;
 
         const establishConnection = () => {
@@ -23,28 +35,19 @@ export const connectWebSocket = createAsyncThunk(
                 reconnectAttempts = 0; // Reset attempts on successful connection
                 dispatch(setIsConnected(true));
 
-                if (!isFirstConnection && refreshAll) {
-                    refreshAll();
-                    console.log("All components updated")
-                }
-
-                // Set to false after the first connection
-                isFirstConnection = false;
-
                 if (ticketId) {
-                    const registerMessage = { action: "register", ticketId: ticketId, userGroup: "Visitor" };
-                    socket.send(JSON.stringify(registerMessage));
-                    console.log('Registered ticket_id:', ticketId);
+                    registerUser({ ticketId, userGroup });
+                    console.log(`Registered user: ${ticketId} as ${userGroup}`);
                 }
 
-                // Start ping interval
-                pingInterval = setInterval(() => {
-                    if (socket.readyState === WebSocket.OPEN) {
-                        const pingMessage = { action: "ping" };
-                        socket.send(JSON.stringify(pingMessage));
-                        console.log('Sent ping');
-                    }
-                }, 2 * 60 * 1000); // 2 minutes
+                // // Start ping interval
+                // pingInterval = setInterval(() => {
+                //     if (socket.readyState === WebSocket.OPEN) {
+                //         const pingMessage = { action: "ping" };
+                //         socket.send(JSON.stringify(pingMessage));
+                //         console.log('Sent ping');
+                //     }
+                // }, 2 * 60 * 1000); // 2 minutes
             };
 
             socket.onmessage = (event) => {
@@ -61,17 +64,17 @@ export const connectWebSocket = createAsyncThunk(
 
             socket.onclose = () => {
                 clearInterval(pingInterval);
-                console.log('WebSocket connection closed');
                 dispatch(setIsConnected(false));
+                console.log('WebSocket connection closed. Attempting reconnection...');
 
-                // Attempt to reconnect with exponential backoff
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                    const delay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttempts);
+                    const reconnectDelay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttempts);
                     setTimeout(() => {
                         reconnectAttempts += 1;
-                        console.log(`Attempting to reconnect... (Attempt ${reconnectAttempts})`);
-                        establishConnection(); // Recursive attempt to reconnect
-                    }, delay);
+                        establishConnection();
+                    }, reconnectDelay);
+                } else {
+                    console.warn('Max reconnect attempts reached.');
                 }
             };
 
@@ -80,7 +83,6 @@ export const connectWebSocket = createAsyncThunk(
                 socket.close(); // Close socket on error to trigger reconnect in `onclose`
             };
         };
-
         establishConnection(); // Initial connection attempt
     }
 );

@@ -160,10 +160,10 @@ function CustomSidebar() {
                   <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
                   <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
                     {[
-                      { boothId: '1', boothName: 'AI' },
-                      { boothId: '2', boothName: 'Cyber Security' },
+                      { boothId: '1', boothName: 'Cyber Security' },
+                      { boothId: '2', boothName: 'Data Analytics' },
                       { boothId: '3', boothName: 'FinTech' },
-                      { boothId: '4', boothName: 'SWENG' },
+                      { boothId: '4', boothName: 'AI' },
                       { boothId: '5', boothName: 'Redemption' },
                       { boothId: '6', boothName: 'Engraving' }
                     ].map(booth => (

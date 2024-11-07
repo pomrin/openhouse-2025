@@ -119,5 +119,24 @@ namespace AWSServerless1.DAL
 
             return result;
         }
+
+        internal static List<Visitor> GetAllVisitors()
+        {
+            var result = new List<Visitor>();
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    result.AddRange(context.Visitors.ToList());
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in GetAllVisitors() - {ex.Message}");
+            }
+
+            return result;
+        }
     }
 }

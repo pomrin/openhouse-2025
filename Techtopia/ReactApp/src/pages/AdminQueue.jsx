@@ -1,14 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Grid, Modal, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Typography, Grid, Modal, Button, FormControl, InputLabel, Select, MenuItem, TextField, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTimes } from 'react-icons/fa';
 import QrReader from "../components/QrReader";
 import '../css/AdminQueue.css';
+import SearchIcon from '@mui/icons-material/Search'; // Import SearchIcon here
+import { BorderLeft } from '@mui/icons-material';
+//redux
+import { useDispatch, useSelector } from 'react-redux';
+import { connectWebSocket, sendMessage } from '../features/websocket/websocketslice';
+import axios from './http';
+
+
 
 function AdminQueue() {
     // QR code scanner state and logic
     const [openQr, setOpenQr] = useState(false);
     const [scannedResult, setScannedResult] = useState("");
+    const [searchQuery, setSearchQuery] = useState(''); // State for search input
+    const [isSearchVisible, setIsSearchVisible] = useState(false); // state to control visibility
+
+    // websocket in redux
+    const dispatch = useDispatch();
+    const [input, setInput] = useState('');
+    const [recipientId, setRecipientId] = useState('');
+
+
+    const isConnected = useSelector((state) => state.websocket.isConnected);
+    const messages = useSelector((state) => state.websocket.messages);
+
+
+    const filteredQueues = (queueItems) => {
+        return queueItems.filter(item =>
+            item.ticketId.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    };
+
+    const handleToggleSearch = () => {
+        setIsSearchVisible(prevState => !prevState); // toggle visibility
+    };
+
+
     const navigate = useNavigate();
 
     const handleScanResult = (result) => {
@@ -35,7 +67,9 @@ function AdminQueue() {
     const [selectedTicketId, setSelectedTicketId] = useState(null);
     const [formOpen, setFormOpen] = useState(false);
     const [selectedQueue, setSelectedQueue] = useState('');
-    
+    const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
+
+
     // New state for ticket details
     const [ticketDetails, setTicketDetails] = useState({
         ticketId: '',
@@ -50,10 +84,11 @@ function AdminQueue() {
         GREEN: '#008000',
         YELLOW: '#FFFF00',
         GRAY: '#808080',
+        PINK: '#DE65AD'
     };
 
     const QueueStatus = {
-        0: 'Delete',
+
         1: 'In Queue',
         2: 'Engraving',
         3: 'Pending Collection',
@@ -69,32 +104,37 @@ function AdminQueue() {
         return brightness > 155;
     };
 
-    const [showAllTickets, setShowAllTickets] = useState(false); // New state for toggling ticket view
-
     const isToday = (dateString) => {
         const today = new Date();
         const date = new Date(dateString);
         return date.getFullYear() === today.getFullYear() &&
-               date.getMonth() === today.getMonth() &&
-               date.getDate() === today.getDate();
+            date.getMonth() === today.getMonth() &&
+            date.getDate() === today.getDate();
     };
 
-    const filteredTickets = showAllTickets
-        ? queues.queue
-        : queues.queue.filter(ticket => isToday(ticket.dateJoined));
+    // New state for collected tab view
+    const [collectedTab, setCollectedTab] = useState('today');
 
-    const toggleTicketView = () => {
-        setShowAllTickets(!showAllTickets);
+    const toggleCollectedView = () => {
+        setCollectedTab((prevTab) => (prevTab === 'today' ? 'all' : 'today'));
     };
+
+    const getCollectedItems = () => {
+        if (collectedTab === 'today') {
+            return queues.queueCollected.filter(item => isToday(item.dateJoined));
+        }
+        return queues.queueCollected;
+    };
+
 
     const exportToCSV = () => {
         const csvRows = [];
         const headers = ['Ticket ID', 'Tag Color', 'Text to Engrave', 'Date Joined', 'Queue Status'];
         csvRows.push(headers.join(','));
-    
+
         // Assuming you want to export all queues
         const allTickets = [...queues.queue, ...queues.queueEngraving, ...queues.queuePendingCollection, ...queues.queueCollected];
-    
+
         allTickets.forEach(ticket => {
             const row = [
                 ticket.ticketId,
@@ -105,7 +145,7 @@ function AdminQueue() {
             ];
             csvRows.push(row.join(','));
         });
-    
+
         const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -115,52 +155,79 @@ function AdminQueue() {
         a.click();
         document.body.removeChild(a);
     };
-    
+
+
 
     useEffect(() => {
         const fetchQueueData = async () => {
+
             try {
+
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
                     console.error("No token found. Redirecting to login.");
-                } else {
-                    const response = await fetch(
-                        `${import.meta.env.VITE_QUEUE_API}?limit=4`, // Use the .env variable
-                        {
-                            method: 'GET',
-                            headers: { Authorization: `Bearer ${token}` },
-                        }
-                    );
-    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-    
-                    const data = await response.json();
-                    setQueues({
-                        queue: data.queue || [],
-                        queueEngraving: data.queueEngraving || [],
-                        queuePendingCollection: data.queuePendingCollection || [],
-                        queueCollected: data.queueCollected || [],
-                    });
-                    setLoading(false);
+                    return;
                 }
+                const response = await axios.get(
+                    `${import.meta.env.VITE_QUEUE_API}?limit=4`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+
+                if (response.status === 200) {
+                    console.log(`response: ${JSON.stringify(response.data)}`);
+                }
+
+                const data = response.data;
+
+
+                dispatch(connectWebSocket({ ticketId: ticket_id, userGroup: "BOOTHADMIN", onMessageHandler }));
+
+                setQueues({
+                    queue: data.queue || [],
+                    queueEngraving: data.queueEngraving || [],
+                    queuePendingCollection: data.queuePendingCollection || [],
+                    queueCollected: data.queueCollected || [],
+                });
+                setLoading(false);
             } catch (error) {
                 console.error("Failed to fetch data:", error);
                 setError('Failed to load queue data.');
                 setLoading(false);
             }
         };
-    
+
         fetchQueueData(); // Fetch initially
-    
-        const intervalId = setInterval(fetchQueueData, 5000); // Fetch every 5 seconds
-    
-        return () => clearInterval(intervalId); // Clear the interval on unmount
+
+        function onMessageHandler(messageData) {
+            // Call the functions if specific messages are received
+            if (messageData.command === 'UPDATE_QUEUES') {
+                fetchQueueData();
+            }
+        }
+
     }, []);
-    
+
+
+
+    const [showSearchBar, setShowSearchBar] = useState(false);
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const toggleSearchBar = () => {
+        setShowSearchBar((prev) => !prev);
+    };
+
     const handleTicketClick = (ticketId) => {
-        const ticketItem = queues.queue.find(item => item.ticketId === ticketId);
+        const ticketItem =
+            queues.queue.find(item => item.ticketId === ticketId) ||
+            queues.queueEngraving.find(item => item.ticketId === ticketId) ||
+            queues.queuePendingCollection.find(item => item.ticketId === ticketId) ||
+            queues.queueCollected.find(item => item.ticketId === ticketId);
+
         if (ticketItem) {
             setTicketDetails({
                 ticketId: ticketItem.ticketId,
@@ -168,19 +235,21 @@ function AdminQueue() {
                 textToEngrave: ticketItem.textToEngrave,
                 dateJoined: ticketItem.dateJoined, // Ensure date format handling
             });
+            setSelectedTicketId(ticketId);
+            setFormOpen(true);
         }
-        setSelectedTicketId(ticketId);
-        setFormOpen(true);
     };
-    
+
+
+
     const handleFormClose = () => {
         setFormOpen(false);
         setSelectedTicketId(null);
         setSelectedQueue('');
     };
 
-    const handleQueueChange = (event) => {
-        setSelectedQueue(event.target.value);
+    const handleQueueChange = (statusKey) => {
+        setSelectedQueue(statusKey);
     };
 
     const validateQueueStatus = (status) => {
@@ -189,12 +258,12 @@ function AdminQueue() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
+
         if (!validateQueueStatus(selectedQueue)) {
             setError('Invalid queue status.');
             return;
         }
-    
+
         try {
             const token = localStorage.getItem('accessToken');
             if (!token) {
@@ -217,19 +286,18 @@ function AdminQueue() {
                     }),
                 }
             );
-    
+
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-    
-            alert('Ticket updated successfully!');
+
+            alert(`Ticket ${selectedTicketId} updated successfully!`); // Include ticketId in the alert
             handleFormClose();
-            window.location.reload();
         } catch (error) {
             setError('Failed to update ticket.');
         }
     };
-    
+
     // Update the handleDelete function to set status to 0
     const handleDelete = async () => {
         try {
@@ -239,7 +307,7 @@ function AdminQueue() {
                 navigate('/adminlogin');
                 return;
             }
-    
+
             const response = await fetch(
                 `${import.meta.env.VITE_QUEUE_API}`,
                 {
@@ -254,27 +322,32 @@ function AdminQueue() {
                     }),
                 }
             );
-    
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error("Server Error:", errorText);
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-    
-            alert('Ticket moved to deleted queue successfully!');
+
+            alert(`Ticket ${selectedTicketId} deleted successfully!`);
             handleFormClose();
-            window.location.reload();
         } catch (error) {
-            console.error('Failed to move ticket to deleted queue:', error);
-            setError('Failed to move ticket to deleted queue.');
+            console.error('Failed to delete ticket :', error);
+            setError('Failed to delete ticket. Please ensure the Ticket you are deleting in the the IN QUEUE queue');
         }
     };
-    
-        const renderQueueItems = (queueItems) => (
+
+    const renderQueueItems = (queueItems) => (
         <Grid container spacing={1} justifyContent="center">
-            {queueItems.map((item, index) => {
+            {filteredQueues(queueItems).map((item, index) => {
                 const backgroundColor = colorMapping[item.tagColor.toUpperCase()] || 'gray';
                 const textColor = isBright(backgroundColor) ? 'black' : 'white';
+                const formattedDate = new Date(item.dateJoined).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+
+                });
 
                 return (
                     <Grid item key={index}>
@@ -297,6 +370,8 @@ function AdminQueue() {
                             }}
                         >
                             {item.ticketId}
+                            <br />
+                            {formattedDate}
                         </div>
                     </Grid>
                 );
@@ -319,7 +394,7 @@ function AdminQueue() {
             >
                 {openQr ? <FaTimes /> : <FaPlus />}
             </div>
-            
+
             <Grid
                 container
                 sx={{
@@ -330,40 +405,106 @@ function AdminQueue() {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    paddingTop: '80px',
+                    paddingTop: '30px',
                     overflowY: 'auto', // Allow vertical scrolling
+
                 }}
             >
-                <Typography variant="h4" textAlign="center" sx={{ mb: 2, fontSize: { xs: '1.5rem', md: '2rem' } }} paddingTop={'20px'}>
+               <Grid
+                    container
+                    alignItems="center"
+                    justifyContent="space-between" // Keeps the Show button on the right
+                    paddingLeft={"40px"}
+                    paddingRight={"40px"}
+                    spacing={2} // Optional, controls spacing between items
+                    sx={{
+                        marginTop: '6vh', // Adjust the value to your preference for more space
+                    }}
+                >
+                    {/* Search Icon + Search Bar */}
+                    <Grid item sx={{ display: 'flex', alignItems: 'center' ,
+                        }}>
+                        {/* Search Icon Button */}
+                        <IconButton 
+                        onClick={handleToggleSearch}
+                        sx={{
+                            paddingTop:"24px",
+                            paddingLeft:"24px",
+                            paddingBottom:"24px",
+                            paddingRight:"24px"
+
+                        }}
+                        >
+                            <SearchIcon />
+                        </IconButton>
+
+                        {/* Search Bar */}
+                        {isSearchVisible && (
+                            <TextField
+                                className="search-bar"
+                                variant="outlined"
+                                label="Search Ticket ID"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                InputProps={{
+                                    className: 'search-input',
+                                }}
+                                sx={{
+                                    width: '200px',  // Control the width of the search bar
+                                    marginLeft: '8px', // Small gap between icon and search bar
+                                }}
+                            />
+                        )}
+                    </Grid>
+
+                    {/* Show Button */}
+                    <Grid item>
+                        <Button
+                            onClick={toggleCollectedView}
+                            variant="contained"
+                            sx={{
+                                height: '100%', // Ensures button stays in line with the other elements
+                            }}
+                        >
+                            {collectedTab === 'today' ? 'Show All' : 'Show Today'}
+                        </Button>
+                    </Grid>
+                </Grid>
+                <Typography variant="h4" textAlign="center" sx={{ mb: 2, fontSize: { xs: '1.5rem', md: '2rem' } }} paddingTop={'30px'}>
                     Queue Management
                 </Typography>
                 <Button onClick={exportToCSV} variant="outlined" sx={{ mb: 2 }}>
-                 Export Queues to CSV
+                    Export Queues to CSV
                 </Button>
+
+
+
                 <Grid container spacing={2} justifyContent="center" sx={{ flexGrow: 1, padding: { xs: '8px', md: '16px' } }}>
-                    
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={3} sx={{ borderLeft: "3px solid", borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
                         <Typography variant="h6" textAlign="center">Queue</Typography>
                         {renderQueueItems(queues.queue)}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+
+                    <Grid item xs={12} sm={6} md={3} sx={{ borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
                         <Typography variant="h6" textAlign="center">Engraving</Typography>
                         {renderQueueItems(queues.queueEngraving)}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+
+                    <Grid item xs={12} sm={6} md={3} sx={{ borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
                         <Typography variant="h6" textAlign="center">Pending Collection</Typography>
                         {renderQueueItems(queues.queuePendingCollection)}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+
+                    <Grid item xs={12} sm={6} md={3} sx={{ borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
                         <Typography variant="h6" textAlign="center">Collected</Typography>
-                        {renderQueueItems(queues.queueCollected)}
+                        {renderQueueItems(getCollectedItems())}
                     </Grid>
                 </Grid>
 
                 <Modal open={formOpen} onClose={handleFormClose}>
                     <div className="modal-content" style={{ padding: '20px', borderRadius: '8px', backgroundColor: 'white', maxWidth: '400px', margin: 'auto' }}>
                         <Typography variant="h6" gutterBottom>Update Ticket</Typography>
-                        
+
                         {/* Display Ticket Details */}
                         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Date Joined:</Typography>
                         <Typography variant="body2" sx={{ mb: 2 }}>
@@ -378,14 +519,18 @@ function AdminQueue() {
 
                         {/* Queue Status Form */}
                         <FormControl fullWidth sx={{ mt: 2 }}>
-                            <InputLabel>Queue Status</InputLabel>
-                            <Select value={selectedQueue} onChange={handleQueueChange}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
                                 {Object.entries(QueueStatus).map(([statusKey, statusLabel]) => (
-                                    <MenuItem key={statusKey} value={statusKey}>
+                                    <Button
+                                        key={statusKey}
+                                        variant={selectedQueue === statusKey ? 'contained' : 'outlined'}
+                                        onClick={() => handleQueueChange(statusKey)} // Pass statusKey directly
+                                        sx={{ textTransform: 'none' }}
+                                    >
                                         {statusLabel}
-                                    </MenuItem>
+                                    </Button>
                                 ))}
-                            </Select>
+                            </div>
                         </FormControl>
 
                         {/* Action Buttons */}
@@ -393,6 +538,7 @@ function AdminQueue() {
                             <Button onClick={handleSubmit} variant="contained" sx={{ mt: 1 }}>
                                 Update
                             </Button>
+
                             <Button onClick={handleDelete} variant="contained" color="error">
                                 Move to Deleted Queue
                             </Button>

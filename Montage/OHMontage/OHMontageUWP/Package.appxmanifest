@@ -9,7 +9,7 @@
   <Identity
     Name="ffb6cc87-3c84-49a9-a53b-9692dec05a6c"
     Publisher="CN=CHANYL"
-    Version="1.0.3.0" />
+    Version="1.0.4.0" />
 
   <mp:PhoneIdentity PhoneProductId="ffb6cc87-3c84-49a9-a53b-9692dec05a6c" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
