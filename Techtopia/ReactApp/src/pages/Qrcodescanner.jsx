@@ -70,10 +70,10 @@ function Qrcodescanner() {
         // Handle the conflict error 409 gracefully
         // e.g. If the visitor's qr-code has already been scanned once, the 2nd scan at the same booth will show this message
         console.error('Stamp already exists for Visitor ticket and booth.');
-        setApiResponseMessage('Visitor ticket has been stamped for this booth.');
+        setApiResponseMessage('Visitor ticket has already been stamped for this booth.');
       } else {
         // Handle other errors
-        console.error('Error sending Stamp API request:', error);
+        console.error('Failed to Stamp API request:', error);
         setApiResponseMessage('Failed to add stamp. Please try again.');
       }
       setApiResponseError(true);
