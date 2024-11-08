@@ -1,9 +1,12 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Map from './../assets/images/Fintech.png';
 import '../css/Wayfinder.css'; // Import your CSS file
 import axios from './http';
+import { useDispatch, useSelector } from "react-redux";
+import { visitorLogin } from '../features/user/userslice';
 
 const Fintech = () => {
+    const dispatch = useDispatch();
     const [scale, setScale] = useState(1.1);
     const [ticket_id, setUniqueId] = useState(() => localStorage.getItem('ticket_id') || ''); // Load from local storage // State for ticket ID
     const [loadingfetch, setLoadingFetch] = useState(false);
@@ -33,7 +36,8 @@ const Fintech = () => {
 
             setUniqueId(newTicketId);
             localStorage.setItem('ticket_id', newTicketId);
-            localStorage.setItem('accessToken', token);
+            // localStorage.setItem("accessToken", token);
+            dispatch(visitorLogin({ ticketId: newTicketId, token }));
             location.reload();
 
 
@@ -84,7 +88,7 @@ const Fintech = () => {
         };
         window.addEventListener('visibilitychange', handleVisibilityChange);
     }, [ticket_id]);
-    
+
     const zoomIn = () => {
         setScale(prevScale => Math.min(prevScale * 1.2, 1.6)); // Max zoom level of 3
     };
@@ -94,20 +98,20 @@ const Fintech = () => {
     };
 
     return (
-        <div 
+        <div
             className="map-container"
         >
             <div className="button-container" >
-            <button onClick={zoomIn} className="zoom-button" >+</button>
+                <button onClick={zoomIn} className="zoom-button" >+</button>
                 <button onClick={zoomOut} className="zoom-button" >−</button>
             </div>
-            <div 
-                className="container" 
-                 style={{
-                     transform: `scale(${scale}) `
-                 }}
-                //  translate(${position.x}px, ${position.y}px)`,
-                //  ref={containerRef}
+            <div
+                className="container"
+                style={{
+                    transform: `scale(${scale}) `
+                }}
+            //  translate(${position.x}px, ${position.y}px)`,
+            //  ref={containerRef}
             >
                 <img src={Map} alt="Cybersecurity Map" className="map-image" />
             </div>

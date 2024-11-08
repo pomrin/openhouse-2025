@@ -22,14 +22,14 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 function MasterAdmin() {
     const navigate = useNavigate();
-    const [accessToken, setAccessToken] = useState(null); 
+    const [accessToken, setAccessToken] = useState(null);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [loading, setLoading] = useState(true);
 
     // Ensure user is an admin/booth helper
     useEffect(() => {
         // Retrieve accessToken from localStorage
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('adminAccessToken');
 
         if (!token) {
             // If no token, redirect to login page
@@ -43,15 +43,15 @@ function MasterAdmin() {
     const [tagColors, setTagColors] = useState([]);
     const [colorsFetched, setColorsFetched] = useState(false); // Track whether colors have been fetched
     const [selectedColor, setSelectedColor] = useState(null);
-    
+
     // Fetch luggage tag colors from database
     const fetchColors = async () => {
         try {
-            const colors = await getTagColors();  
-            setTagColors(colors);  
+            const colors = await getTagColors();
+            setTagColors(colors);
             setColorsFetched(true); // Set to true after fetching colors
         } catch (error) {
-            console.error('Error fetching colors:', error); 
+            console.error('Error fetching colors:', error);
         } finally {
             setLoading(false); // Set loading to false after fetching is complete
         }
@@ -63,7 +63,7 @@ function MasterAdmin() {
         if (accessToken && !colorsFetched) {
             fetchColors();
         }
-    
+
         // Load in overlay prompt when no ticket is selected
         if (!selectedTicket) {
             setSelectedTicket(null);
@@ -85,12 +85,12 @@ function MasterAdmin() {
             width: 80,
             sortable: false,
             renderCell: (params) => (
-              <IconButton
-                color="warning"
-                onClick={() => editTicket(params.row)}
-              >
-                <EditIcon />
-              </IconButton>
+                <IconButton
+                    color="warning"
+                    onClick={() => editTicket(params.row)}
+                >
+                    <EditIcon />
+                </IconButton>
             ),
         },
     ];
@@ -118,11 +118,11 @@ function MasterAdmin() {
         { ticketid: 'NYP0002M', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'yes' },
         { ticketid: 'NYP0003M', booth1: 'no', booth2: 'no', booth3: 'no', booth4: 'no', redemptionstatus: 'no' },
     ];
-    
+
     // Display 15 rows of data by default
-    const paginationModel = { 
-        page: 0, 
-        pageSize: 15 
+    const paginationModel = {
+        page: 0,
+        pageSize: 15
     };
 
     // Toast & Popup States
@@ -159,21 +159,21 @@ function MasterAdmin() {
 
     // Styles
     const pageBodyStyle = {
-        minHeight: '100vh', 
-        display: 'flex', 
+        minHeight: '100vh',
+        display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center'
     };
 
     const popupContentStyle = {
         width: '100%',
-        height: '100%', 
-        padding: '0', 
-        border: 'none', 
+        height: '100%',
+        padding: '0',
+        border: 'none',
         display: 'flex',
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        background: 'rgba(0, 0, 0, 0.7)' 
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0, 0, 0, 0.7)'
     };
 
     const mainContentStyle = {
@@ -227,7 +227,7 @@ function MasterAdmin() {
         flexDirection: 'column',
         padding: '2%'
     };
-    
+
     const redemptionInfoContainer = {
         textAlign: 'center',
         borderBottom: '2px solid grey',
@@ -237,7 +237,7 @@ function MasterAdmin() {
 
     const submitFormBtnStyle = {
         width: '60%',
-        padding: '5px', 
+        padding: '5px',
         backgroundColor: '#008080',
         color: 'white',
         border: '1px solid black',
@@ -245,9 +245,9 @@ function MasterAdmin() {
     };
 
     const returnBtnStyle = {
-        border: '1px solid grey', 
-        borderRadius: '5px', 
-        marginTop: '5%', 
+        border: '1px solid grey',
+        borderRadius: '5px',
+        marginTop: '5%',
         color: 'black'
     };
 
@@ -260,28 +260,28 @@ function MasterAdmin() {
 
     // Select ticket to edit
     const editTicket = (ticketData) => {
-        setSelectedTicket(ticketData); 
+        setSelectedTicket(ticketData);
     };
 
-    // Visitor's profile picture 
+    // Visitor's profile picture
     const VisitorProfilePhotoContent = ({ profilePhotoSrc }) => {
         return (
             <Box id="visitorPictureContent" style={ticketContentContainer}>
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>Visitor's Profile Picture</Typography>
                 <Grid container spacing={1} sx={{ padding: '5pz', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Grid item xy={10} sx={{ height: '145px', width: '145px' }}>
-                    <img
-                        src={profilePhotoSrc}
-                        alt="Profile Image"
-                        className="profileImage"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = noImageUploaded; // Fallback image on error
-                        }}
-                    />
+                        <img
+                            src={profilePhotoSrc}
+                            alt="Profile Image"
+                            className="profileImage"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = noImageUploaded; // Fallback image on error
+                            }}
+                        />
                     </Grid>
                     <Grid item xy={2}>
-                        <Button variant="outlined" color="error" onClick={removeProfilePicture} sx={{ my: '10px'}}>
+                        <Button variant="outlined" color="error" onClick={removeProfilePicture} sx={{ my: '10px' }}>
                             Remove Profile Picture
                         </Button>
                     </Grid>
@@ -302,7 +302,7 @@ function MasterAdmin() {
         }
     };
 
-    // Booth completion status 
+    // Booth completion status
     const BoothStatus = ({ boothName, status }) => {
         return status === 'yes' ? (
             <CompletedBooth boothName={boothName} />
@@ -310,22 +310,22 @@ function MasterAdmin() {
             <UnCompletedBooth boothName={boothName} />
         );
     };
-    
+
     const CompletedBooth = ({ boothName }) => {
         return (
-            <Grid item xs= {6} sx={{ textAlign: 'center', backgroundColor: 'rgb(80,225,100,0.3)'}}>
+            <Grid item xs={6} sx={{ textAlign: 'center', backgroundColor: 'rgb(80,225,100,0.3)' }}>
                 <Typography>{boothName}</Typography>
-                <Typography variant="body2" sx={{ marginBottom: '5%'}}>Completed</Typography>
+                <Typography variant="body2" sx={{ marginBottom: '5%' }}>Completed</Typography>
             </Grid>
         );
     };
 
     const UnCompletedBooth = ({ boothName }) => {
         return (
-            <Grid item xs= {6} sx={{ textAlign: 'center', backgroundColor: 'rgb(231,76,60,0.3)'}}>
+            <Grid item xs={6} sx={{ textAlign: 'center', backgroundColor: 'rgb(231,76,60,0.3)' }}>
                 <Typography>{boothName}</Typography>
                 <Typography variant="body2">Uncompleted</Typography>
-                <Button size="small" variant="outlined" color="success" sx={{ marginBottom: '5%'}}>
+                <Button size="small" variant="outlined" color="success" sx={{ marginBottom: '5%' }}>
                     Mark as completed
                 </Button>
             </Grid>
@@ -344,7 +344,7 @@ function MasterAdmin() {
                     </Grid>
 
                     {/* Redemption Status */}
-                    <Grid container id="redemptionInfo" style={redemptionInfoContainer}> 
+                    <Grid container id="redemptionInfo" style={redemptionInfoContainer}>
                         <Grid item xs={4} sx={{ textAlign: 'center' }}>
                             <Typography variant="body2" sx={{ fontWeight: 500 }}>Luggage Tag Color:</Typography>
                             <Typography variant="caption">{tagColor}</Typography>
@@ -377,17 +377,17 @@ function MasterAdmin() {
 
                     {/* Update Buttons Container [DISPLAY IF COLLECTION STATUS NOT COLLECTED] */}
                     <Box id="buttonsContainer" style={btnContainerStyle}>
-                        <Button variant="contained" onClick={displayRedemptionForm} sx={{ 
-                            backgroundColor: '#FFA24A' ,
-                            '&:hover': { backgroundColor: '#e59444' } 
-                            }}>
+                        <Button variant="contained" onClick={displayRedemptionForm} sx={{
+                            backgroundColor: '#FFA24A',
+                            '&:hover': { backgroundColor: '#e59444' }
+                        }}>
                             Update Redemption Info
                         </Button>
-                        <Button variant="contained" sx={{ 
-                            backgroundColor: 'white', 
+                        <Button variant="contained" sx={{
+                            backgroundColor: 'white',
                             color: 'black',
                             '&:hover': { backgroundColor: '#f2f2f2' }
-                            }}>
+                        }}>
                             Update Collection Status
                         </Button>
                     </Box>
@@ -402,7 +402,7 @@ function MasterAdmin() {
     const submitUpdatesToRedemption = async () => {
         try {
             const result = await updateVisitorTag(ticketId, selectedColor);
-            handleVisitorTagUpdate(result); 
+            handleVisitorTagUpdate(result);
         } catch (error) {
             console.log('Error updating redemption status:', error);
             showToast('An error occurred while updating the tag. Please try again.', 'error');
@@ -418,7 +418,7 @@ function MasterAdmin() {
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>Update Redemption Information</Typography>
                 <FormControl component='fieldset' id="updateRedemptionForm" sx={{ alignItems: 'flex-start' }}>
                     <Typography>Tag Color:</Typography>
-                    <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
+                    <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
                     {selectedColor && (
                         <Button style={submitFormBtnStyle} onClick={submitUpdatesToRedemption}>
                             Update
@@ -436,7 +436,7 @@ function MasterAdmin() {
         if (!Array.isArray(tagColors) || tagColors.length === 0) {
             return <div>Error loading colors, please refresh the page and try again</div>;
         }
-    
+
         // Utility function to determine if the color is light/dark
         const isColorLight = (color) => {
             const hex = color.replace('#', '');
@@ -454,7 +454,7 @@ function MasterAdmin() {
             const selectedColorObj = tagColors.find(color => color.luggageTagColorName === selectedColorName);
             setSelectedColor(selectedColorObj); // Update with the entire color object
         };
-    
+
         return (
             <RadioGroup
                 aria-label="tagColor"
@@ -465,9 +465,9 @@ function MasterAdmin() {
                     <Box key={color.luggageTagColorName} sx={{ display: 'inline-block' }}>
                         <FormControlLabel
                             value={color.luggageTagColorName}
-                            control={<div />} 
+                            control={<div />}
                             label={color.luggageTagColorName}
-                            onClick={() => setSelectedColor(color)} 
+                            onClick={() => setSelectedColor(color)}
                             sx={{
                                 backgroundColor: color.luggageTagColorCode,
                                 borderRadius: '20px',
@@ -487,7 +487,7 @@ function MasterAdmin() {
             </RadioGroup>
         );
     };
-    
+
     // (1) Retrieve tag colors [ name & color hex ]
     const getTagColors = async () => {
         try {
@@ -498,12 +498,12 @@ function MasterAdmin() {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
-    
+
             if (!response.ok) {
                 showToast('Error fetching colors. Please reload the page.', 'error');
                 throw new Error('Failed to fetch tag colors from API');
             }
-    
+
             const data = await response.json();
             return data; // Return the colors data
         } catch (error) {
@@ -519,22 +519,22 @@ function MasterAdmin() {
             ticketId: ticketId,
             luggageTagColor: selectedColor.luggageTagColorName
         };
-    
-    try {
-        const response = await fetch(`${apiUrl}/AdminRedemption`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}` 
-            },
-            body: JSON.stringify(requestBody)
-        });
-        return response
-    } catch (error) {
-        console.log('Error updating tag:', error);
-    } finally {
-        setScannerLoading(false);
-    }
+
+        try {
+            const response = await fetch(`${apiUrl}/AdminRedemption`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+            return response
+        } catch (error) {
+            console.log('Error updating tag:', error);
+        } finally {
+            setScannerLoading(false);
+        }
     };
 
     // (2b) Process API response and display content accordingly
@@ -543,7 +543,7 @@ function MasterAdmin() {
             case 200:
                 // Response 200: Successful update
                 showToast('Tag updated successfully!', 'success');
-                setIsPopupOpen(false);  
+                setIsPopupOpen(false);
                 break;
             case 400:
                 // Response 400: Missing parameter or invalid luggage color
@@ -572,7 +572,7 @@ function MasterAdmin() {
         <Box id="pageContentContainer" style={pageBodyStyle}>
             <Box id="mainContent" style={mainContentStyle}>
                 <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 700, marginY: '10px' }}>Master Admin</Typography>
-                <Box id="contentContainer" style={contentContainerStyle}> 
+                <Box id="contentContainer" style={contentContainerStyle}>
                     <Grid container spacing={1} sx={{ overflow: 'hidden' }}>
 
                         {/* Ticket Table */}
@@ -585,19 +585,19 @@ function MasterAdmin() {
                                     initialState={{ pagination: { paginationModel } }}
                                     pageSizeOptions={[10, 15, 30, 50]}
                                     stickyHeader
-                                    sx={{ 
-                                        border: 0, 
+                                    sx={{
+                                        border: 0,
                                         height: '100%'
                                     }}
                                 />
-                        </Paper>
+                            </Paper>
                         </Grid>
 
                         {/* Selected Ticket associated information */}
-                        <Grid item xs={4} id="selectedTicketContent" style={ticketContainerStyle}>     
+                        <Grid item xs={4} id="selectedTicketContent" style={ticketContainerStyle}>
                             {/* Redemption Form popup Content */}
                             <Popup open={isPopupOpen} onClose={closePopup} modal contentStyle={popupContentStyle}>
-                                {close => <RedemptionFormContent/>}
+                                {close => <RedemptionFormContent />}
                             </Popup>
 
                             {selectedTicket ? (
@@ -606,44 +606,44 @@ function MasterAdmin() {
                                 </Typography>
 
 
-                                {selectedTicket && (
-                                    <><Box id="actionPanel">
-                                        {/* Display associated profile picture  */}
-                                        <VisitorProfilePhotoContent profilePhotoSrc={noImageUploaded}/>
+                                    {selectedTicket && (
+                                        <><Box id="actionPanel">
+                                            {/* Display associated profile picture  */}
+                                            <VisitorProfilePhotoContent profilePhotoSrc={noImageUploaded} />
 
-                                        {/* Display ticket booths completion status */}
-                                        <Box id="boothStatusContent" style={ticketContentContainer}>
-                                            <Typography variant="body1" sx={{ fontWeight: 600 }}>Booth Status</Typography>
-                                            <Grid container spacing={1} sx={{ padding: '2%' }}>
-                                                <BoothStatus boothName="Cybersecurity Booth" status={selectedTicket.booth1} />
-                                                <BoothStatus boothName="Data Analytics Booth" status={selectedTicket.booth2} />
-                                                <BoothStatus boothName="Financial Technology Booth" status={selectedTicket.booth3} />
-                                                <BoothStatus boothName="Artificial Intelligence Booth" status={selectedTicket.booth4} />
-                                            </Grid>
-                                        </Box>
+                                            {/* Display ticket booths completion status */}
+                                            <Box id="boothStatusContent" style={ticketContentContainer}>
+                                                <Typography variant="body1" sx={{ fontWeight: 600 }}>Booth Status</Typography>
+                                                <Grid container spacing={1} sx={{ padding: '2%' }}>
+                                                    <BoothStatus boothName="Cybersecurity Booth" status={selectedTicket.booth1} />
+                                                    <BoothStatus boothName="Data Analytics Booth" status={selectedTicket.booth2} />
+                                                    <BoothStatus boothName="Financial Technology Booth" status={selectedTicket.booth3} />
+                                                    <BoothStatus boothName="Artificial Intelligence Booth" status={selectedTicket.booth4} />
+                                                </Grid>
+                                            </Box>
 
-                                        {/* Display ticket redemption & collection status */}
-                                        <RedemptionStatus                     
-                                            tagRedemptionStatus="REDEEMED" 
-                                            collectionStatus="COLLECTED" 
-                                            tagColor="BLUE"
-                                            engravingText="qwertyy"
-                                            dateRedeemed="2024-10-23 05:45:35"
-                                            datePendingCollection ="2024-10-23 06:29:11"
-                                            dateCollected="2024-10-23 06:59:48"
+                                            {/* Display ticket redemption & collection status */}
+                                            <RedemptionStatus
+                                                tagRedemptionStatus="REDEEMED"
+                                                collectionStatus="COLLECTED"
+                                                tagColor="BLUE"
+                                                engravingText="qwertyy"
+                                                dateRedeemed="2024-10-23 05:45:35"
+                                                datePendingCollection="2024-10-23 06:29:11"
+                                                dateCollected="2024-10-23 06:59:48"
                                             />
-                                    </Box></>
+                                        </Box></>
                                     )}
                                 </>
                             ) : (
                                 // Overlay prompt
                                 <Box sx={{
-                                    height: '100%', 
-                                    width: '100%', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center', 
-                                    backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+                                    height: '100%',
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
                                     color: 'white'
                                 }}>
                                     <Typography variant="h6">Select a ticket to edit</Typography>
@@ -656,7 +656,7 @@ function MasterAdmin() {
                     <Snackbar open={openToast} autoHideDuration={3000} onClose={closeToast}>
                         <Alert
                             onClose={closeToast}
-                            severity= {toastSeverity}
+                            severity={toastSeverity}
                             variant="filled"
                             sx={{ width: 'auto' }}>
                             {toastMessage}

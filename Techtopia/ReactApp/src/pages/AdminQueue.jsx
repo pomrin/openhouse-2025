@@ -163,7 +163,7 @@ function AdminQueue() {
 
             try {
 
-                const token = localStorage.getItem('accessToken');
+                const token = localStorage.getItem('adminAccessToken');
                 if (!token) {
                     console.error("No token found. Redirecting to login.");
                     return;
@@ -265,7 +265,7 @@ function AdminQueue() {
         }
 
         try {
-            const token = localStorage.getItem('accessToken');
+            const token = localStorage.getItem('adminAccessToken');
             if (!token) {
                 alert("You are not logged in. Please log in first.");
                 navigate('/adminlogin'); // Redirect to login page
@@ -301,7 +301,7 @@ function AdminQueue() {
     // Update the handleDelete function to set status to 0
     const handleDelete = async () => {
         try {
-            const token = localStorage.getItem('accessToken');
+            const token = localStorage.getItem('adminAccessToken');
             if (!token) {
                 alert("You are not logged in. Please log in first.");
                 navigate('/adminlogin');
@@ -410,7 +410,7 @@ function AdminQueue() {
 
                 }}
             >
-               <Grid
+                <Grid
                     container
                     alignItems="center"
                     justifyContent="space-between" // Keeps the Show button on the right
@@ -422,18 +422,19 @@ function AdminQueue() {
                     }}
                 >
                     {/* Search Icon + Search Bar */}
-                    <Grid item sx={{ display: 'flex', alignItems: 'center' ,
-                        }}>
+                    <Grid item sx={{
+                        display: 'flex', alignItems: 'center',
+                    }}>
                         {/* Search Icon Button */}
-                        <IconButton 
-                        onClick={handleToggleSearch}
-                        sx={{
-                            paddingTop:"24px",
-                            paddingLeft:"24px",
-                            paddingBottom:"24px",
-                            paddingRight:"24px"
+                        <IconButton
+                            onClick={handleToggleSearch}
+                            sx={{
+                                paddingTop: "24px",
+                                paddingLeft: "24px",
+                                paddingBottom: "24px",
+                                paddingRight: "24px"
 
-                        }}
+                            }}
                         >
                             <SearchIcon />
                         </IconButton>

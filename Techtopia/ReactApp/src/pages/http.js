@@ -1,4 +1,6 @@
 import axios from "axios";
+import { USER_TYPES_NAV } from '../constants';
+
 
 // Create an axios instance with a predefined base URL
 const instance = axios.create({
@@ -9,8 +11,21 @@ const instance = axios.create({
 instance.interceptors.request.use(
   function (config) {
     // Retrieve the access token from local storage
-    let accessToken = localStorage.getItem("accessToken");
-    console.log(`Access token: ${accessToken}`);
+
+    var accessToken;
+    let userRole = localStorage.getItem("userRole");
+    if (userRole === USER_TYPES_NAV.BOOTH_HELPER ||
+      userRole === USER_TYPES_NAV.ADMIN
+    ) {
+      console.log(`User is a Admin Or Booth Helper: ${userRole}`);
+      accessToken = localStorage.getItem("adminAccessToken");
+    } else {
+      console.log(`User is a ${userRole}`);
+      accessToken = localStorage.getItem("accessToken");
+    }
+
+    // let accessToken = localStorage.getItem("accessToken");
+    // console.log(`Access token: ${accessToken}`);
     // If the access token exists, add it to the Authorization header
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;

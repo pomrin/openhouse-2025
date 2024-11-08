@@ -9,30 +9,30 @@ const EngravingSelection = () => {
   const [engravingText, setEngravingText] = useState("");
   const maxCharacters = 20; // Define character limit
 
-// Profanity filter function
-const profanityFilter = (inputText) => {
+  // Profanity filter function
+  const profanityFilter = (inputText) => {
     const profanities = [
-        "fuck", "shit", "bitch", "ass", "crap", "damn", "hell", "prick",
-        "KNN", "CB", "cibai", "bodoh", "siao", "pukimak", "chao", "jialat",
-        "kau", "simi sai", "tua pui", "SMD", "GTH","kanina","KANINA","KPKB","kpkb",
-        "DLLM","hamgacan","Fkurmother","die",'jump','buto','fker','diefk',"kanina","knn",
-        "knnccb","knncb","knnpcb","knnb","knnbcb","kpkb","dllm","diuleiloumou","diu","hamgacan",
-        "hgc","ccb","fck","fker","fucker","fucking","fucked","fucking","ppys","yaosiew",
-        "motherfucker","motherfker","mtfucker","fk",'chibai','cbdog','cbfuck','yaosiewkia',
-        'SLK','SYH','369','108','18','32','108','apk','TWL','lanjiao','lanpah','yourmother',
-      ];
+      "fuck", "shit", "bitch", "ass", "crap", "damn", "hell", "prick",
+      "KNN", "CB", "cibai", "bodoh", "siao", "pukimak", "chao", "jialat",
+      "kau", "simi sai", "tua pui", "SMD", "GTH", "kanina", "KANINA", "KPKB", "kpkb",
+      "DLLM", "hamgacan", "Fkurmother", "die", 'jump', 'buto', 'fker', 'diefk', "kanina", "knn",
+      "knnccb", "knncb", "knnpcb", "knnb", "knnbcb", "kpkb", "dllm", "diuleiloumou", "diu", "hamgacan",
+      "hgc", "ccb", "fck", "fker", "fucker", "fucking", "fucked", "fucking", "ppys", "yaosiew",
+      "motherfucker", "motherfker", "mtfucker", "fk", 'chibai', 'cbdog', 'cbfuck', 'yaosiewkia',
+      'SLK', 'SYH', '369', '108', '18', '32', '108', 'apk', 'TWL', 'lanjiao', 'lanpah', 'yourmother',
+    ];
     const patterns = [
       /f[\.]?u[\.]?c[\.]?k/i, /s[\.]?h[\.]?i[\.]?t/i, /b[\.]?i[\.]?t[\.]?c[\.]?h/i,
       /k+n+n/i, /(c[\.]?b[\.]?|cibai)/i, /(p[\.]?u[\.]?k[\.]?i[\.]?m[\.]?a[\.]?k)/i,
       /(b[o0]d[o0]h)/i, /(jialat|jialart|jialatt)/i
     ];
-  
+
     return patterns.some(pattern => pattern.test(inputText));
   };
   useEffect(() => {
     // Token validation: check if JWT token exists
-    const token = localStorage.getItem('accessToken');
-    
+    const token = localStorage.getItem('adminAccessToken');
+
     // If no token, redirect to login
     if (!token) {
       navigate('/adminlogin');
@@ -42,12 +42,12 @@ const profanityFilter = (inputText) => {
   // Handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!selectedColor) {
       alert("Please select a color.");
       return;
     }
-  
+
     if (engravingText.length <= maxCharacters) {
       // Check for profanity
       if (profanityFilter(engravingText)) {
@@ -62,7 +62,7 @@ const profanityFilter = (inputText) => {
       };
 
       try {
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('adminAccessToken');
         if (!token) {
           alert("No token found. Please log in.");
           navigate('/adminlogin');
@@ -72,15 +72,15 @@ const profanityFilter = (inputText) => {
 
 
         const response = await fetch(
-            `${import.meta.env.VITE_QUEUE_API}`, 
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(ticketData),
-        });
+          `${import.meta.env.VITE_QUEUE_API}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(ticketData),
+          });
 
         if (!response.ok) {
           throw new Error(`Network response was not ok: ${await response.text()}`);
@@ -96,7 +96,7 @@ const profanityFilter = (inputText) => {
       alert(`Text exceeds the limit of ${maxCharacters} characters`);
     }
   };
-  
+
   return (
     <div className="engraving-container">
       <div className="user-id-section">

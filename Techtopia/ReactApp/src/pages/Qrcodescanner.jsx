@@ -4,8 +4,11 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import QrScanner from 'qr-scanner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { boothadminlogout } from '../features/user/userslice';
 
 function Qrcodescanner() {
+  const dispatch = useDispatch();
   const [qrCodeResult, setQrCodeResult] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const videoRef = useRef(null);
@@ -15,13 +18,18 @@ function Qrcodescanner() {
   const [apiResponseError, setApiResponseError] = useState(false);
   const apiUrl = import.meta.env.VITE_API_BASE_URL + "/AdminIssueStamp";
 
+  // const accessToken = useSelector((state) => state.user.userRole);
+
   useEffect(() => {
     // Check if accessToken exists
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem('adminAccessToken');
 
     // If no token, redirect to login
     if (!accessToken) {
+      dispatch(boothadminlogout());
       navigate('/adminlogin');
+    } else {
+      console.log(`Access Token have value!`);
     }
   }, [navigate]);
 
@@ -47,8 +55,8 @@ function Qrcodescanner() {
 
   const stampApiRequest = async (ticketId) => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
-
+      const accessToken = localStorage.getItem('adminAccessToken');
+      // console.log(`adminAccessToken - ${accessToken}`);
       // PUT request to the "Stamp" API
       const response = await axios.put(apiUrl, {
         ticketId,
@@ -61,7 +69,7 @@ function Qrcodescanner() {
       });
 
       if (response.status === 200) {
-          console.log('Stamp added successfully!');
+        console.log('Stamp added successfully!');
         setApiResponseMessage('Stamp added successfully!');
         setApiResponseError(false);
       }
@@ -90,7 +98,7 @@ function Qrcodescanner() {
 
   const handleLogout = () => {
     // Remove the accessToken from localStorage to log the user out
-    localStorage.removeItem('accessToken');
+    // localStorage.removeItem('accessToken');
     // Navigate back to admin login page
     navigate('/adminlogin');
   };

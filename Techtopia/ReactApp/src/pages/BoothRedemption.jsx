@@ -23,7 +23,7 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 function RedemptionPage() {
     const navigate = useNavigate();
-    const [accessToken, setAccessToken] = useState(null); 
+    const [accessToken, setAccessToken] = useState(null);
 
     const [tagColors, setTagColors] = useState([]);
     const [colorsFetched, setColorsFetched] = useState(false); // Track whether colors have been fetched
@@ -31,7 +31,7 @@ function RedemptionPage() {
     // Ensure user is an admin/booth helper
     useEffect(() => {
         // Retrieve accessToken from localStorage
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('adminAccessToken');
 
         if (!token) {
             // If no token, redirect to login page
@@ -57,11 +57,11 @@ function RedemptionPage() {
     // Fetch luggage tag colors from database
     const fetchColors = async () => {
         try {
-            const colors = await getTagColors();  
-            setTagColors(colors);  
+            const colors = await getTagColors();
+            setTagColors(colors);
             setColorsFetched(true); // Set to true after fetching colors
         } catch (error) {
-            console.error('Error fetching colors:', error); 
+            console.error('Error fetching colors:', error);
         } finally {
             setLoading(false); // Set loading to false after fetching is complete
         }
@@ -79,7 +79,7 @@ function RedemptionPage() {
         flexDirection: 'column',
         justifyContent: 'top',
         alignItems: 'center',
-        paddingTop: '64px', 
+        paddingTop: '64px',
         paddingBottom: '20px'
     };
 
@@ -132,15 +132,15 @@ function RedemptionPage() {
     };
 
     const returnBtnStyle = {
-        border: '1px solid grey', 
-        borderRadius: '5px', 
-        marginTop: '5%', 
+        border: '1px solid grey',
+        borderRadius: '5px',
+        marginTop: '5%',
         color: 'black'
     };
 
     const submitFormBtnStyle = {
-        width: '90%', 
-        padding: '5px', 
+        width: '90%',
+        padding: '5px',
         backgroundColor: '#008080',
         color: 'white',
         border: '1px solid black',
@@ -148,15 +148,15 @@ function RedemptionPage() {
     };
 
     const startQRscannerBtn = {
-    position: 'relative', 
-    bottom: '60%',
-    left: '23%',
-    borderRadius: '10px', 
-    padding: '10px', 
-    margin: '5px 15px', 
-    backgroundColor: 'rgba(211,211,211,0.6)', 
-    color: 'grey',
-    Transition: 'z-index 0.55'
+        position: 'relative',
+        bottom: '60%',
+        left: '23%',
+        borderRadius: '10px',
+        padding: '10px',
+        margin: '5px 15px',
+        backgroundColor: 'rgba(211,211,211,0.6)',
+        color: 'grey',
+        Transition: 'z-index 0.55'
     };
 
     // Tag Color buttons for redemption/update form
@@ -165,14 +165,14 @@ function RedemptionPage() {
         if (!Array.isArray(tagColors) || tagColors.length === 0) {
             return <div>Error loading colors, please refresh the page and try again</div>;
         }
-    
+
         // Handle selection change
         const handleColorChange = (event) => {
             const selectedColorName = event.target.value;
             const selectedColorObj = tagColors.find(color => color.luggageTagColorName === selectedColorName);
             setSelectedColor(selectedColorObj); // Update with the entire color object
         };
-    
+
         // Split tagColors array into smaller arrays (for each row)
         const chunkArray = (array, chunkSize) => {
             const result = [];
@@ -181,9 +181,9 @@ function RedemptionPage() {
             }
             return result;
         };
-    
+
         const colorRows = chunkArray(tagColors, 3); // Each row to contain only 3 colors
-    
+
         return (
             <>
                 {colorRows.map((row, rowIndex) => (
@@ -227,14 +227,14 @@ function RedemptionPage() {
             </>
         );
     };
-      
+
     // Handle tag color form submission
     const [ticketId, setTicketId] = useState(null);
 
     const submitUserRedemption = async () => {
         try {
             const result = await redeemVisitorTag(ticketId, selectedColor);
-            handleVisitorRedemption(result); 
+            handleVisitorRedemption(result);
         } catch (error) {
             console.log('Error submitting redemption:', error);
             showToast('An error occurred while redeeming the tag. Please try again.', 'error');
@@ -244,7 +244,7 @@ function RedemptionPage() {
     };
 
     const submitUpdatedTagColor = async () => {
-        try{
+        try {
             const result = await updateVisitorTag(ticketId, selectedColor);
             handleVisitorTagUpdate(result);
         } catch (error) {
@@ -270,12 +270,12 @@ function RedemptionPage() {
 
         // Reset scanner timeout when closing popup
         resetScannerTimeout();
-        
+
         setTimeout(() => {
             startScanner(); // Restart QR scanner after 1 sec delay
         }, 1000);
     };
-    
+
     // The 3 different popup contents -> eligible / already_redeemed / ineligible
     const EligibilityContent = ({ eligibility, selectedColor, setSelectedColor }) => {
         let content;
@@ -286,38 +286,38 @@ function RedemptionPage() {
                     <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginY: '10px' }}>
                         Visitor is eligible for luggage tag redemption 🎉
                     </Typography>
-                    <Typography variant='body2' sx={{ padding: '2%', textAlign: 'center' }}>
-                        Assist the visitor in their redemption process by selecting their preferred tag color below:
-                    </Typography>
+                        <Typography variant='body2' sx={{ padding: '2%', textAlign: 'center' }}>
+                            Assist the visitor in their redemption process by selecting their preferred tag color below:
+                        </Typography>
 
-                    <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '2%', borderRadius: '8px', marginTop: '2%' }}>
-                        {/* Color selection form */}
-                        <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5% 5% 1% 5%', margin: '2% 0 1% 4%' }}>
-                            <Typography variant="body1">Preferred Color: </Typography>
-                            <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
-                            <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                                <Typography variant="body1">Selected color:</Typography>
-                                <Box
-                                    sx={{
-                                        width: '30px',
-                                        height: '30px',
-                                        backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
-                                        borderRadius: '50%',
-                                        border: '1px solid black',
-                                        marginLeft: '3%'
-                                    }}
-                                />
-                                <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                    {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
-                                </Typography>
-                            </Box>
-                            {selectedColor && (
-                                <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
-                                    Proceed with Redemption
-                                </Button>
-                            )}
-                        </FormControl>
-                    </Box></>
+                        <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '2%', borderRadius: '8px', marginTop: '2%' }}>
+                            {/* Color selection form */}
+                            <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5% 5% 1% 5%', margin: '2% 0 1% 4%' }}>
+                                <Typography variant="body1">Preferred Color: </Typography>
+                                <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                                <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                                    <Typography variant="body1">Selected color:</Typography>
+                                    <Box
+                                        sx={{
+                                            width: '30px',
+                                            height: '30px',
+                                            backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent',
+                                            borderRadius: '50%',
+                                            border: '1px solid black',
+                                            marginLeft: '3%'
+                                        }}
+                                    />
+                                    <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                        {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
+                                    </Typography>
+                                </Box>
+                                {selectedColor && (
+                                    <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
+                                        Proceed with Redemption
+                                    </Button>
+                                )}
+                            </FormControl>
+                        </Box></>
                 );
                 break;
             case 'already_redeemed':
@@ -325,57 +325,57 @@ function RedemptionPage() {
                     <><Typography variant="h6" sx={{ fontWeight: 700, marginY: '10px', textAlign: 'center' }}>
                         Visitor has already redeemed their luggage tag 🏷️
                     </Typography>
-                    <Typography variant='body2' sx={{ textAlign: 'center' }}>
-                        If they would like a tag color change*, please select their new color choice below.
-                    </Typography>
-                    <Typography variant='caption' sx={{ color: '#ff0000' }}>
-                        *Color change applicable only for unengraved tags
-                    </Typography>
-                    <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '2%', borderRadius: '8px', marginTop: '2%' }}>
-                        {/* Display Current Color */}
-                        <Box sx={{ marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                            <Typography variant="body2">Current tag color:</Typography>
-                            <Box sx={{
-                                width: '30px',
-                                height: '30px',
-                                backgroundColor: currentColor ? currentColor.toLowerCase() : 'transparent',
-                                borderRadius: '50%',
-                                border: '1px solid black',
-                                marginLeft: '3%',
-                            }}
-                            />
-                            <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                {currentColor || '----'}  {/* Display current color name */}
-                            </Typography>
-                        </Box>
-        
-                        {/* Color selection form */}
-                        <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5% 6% 0 0', margin: '0 0 10px 3%' }}>
-                            <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
-                            <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-                            <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                            <Typography variant="body1">Selected color:</Typography>
-                            <Box
-                                sx={{
+                        <Typography variant='body2' sx={{ textAlign: 'center' }}>
+                            If they would like a tag color change*, please select their new color choice below.
+                        </Typography>
+                        <Typography variant='caption' sx={{ color: '#ff0000' }}>
+                            *Color change applicable only for unengraved tags
+                        </Typography>
+                        <Box sx={{ backgroundColor: 'rgb(200,200,200)', padding: '2%', borderRadius: '8px', marginTop: '2%' }}>
+                            {/* Display Current Color */}
+                            <Box sx={{ marginY: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                                <Typography variant="body2">Current tag color:</Typography>
+                                <Box sx={{
                                     width: '30px',
                                     height: '30px',
-                                    backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent', 
+                                    backgroundColor: currentColor ? currentColor.toLowerCase() : 'transparent',
                                     borderRadius: '50%',
                                     border: '1px solid black',
-                                    marginLeft: '3%'
+                                    marginLeft: '3%',
                                 }}
-                            />
-                            <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
-                            </Typography>
+                                />
+                                <Typography variant="body2" sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                    {currentColor || '----'}  {/* Display current color name */}
+                                </Typography>
                             </Box>
-                            {selectedColor && selectedColor.luggageTagColorName !== currentColor && (
-                                <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
-                                    Update Tag Color
-                                </Button>
-                            )}
-                        </FormControl>
-                    </Box></>
+
+                            {/* Color selection form */}
+                            <FormControl component="fieldset" id="updateColorForm" sx={{ alignItems: 'flex-start', padding: '5% 6% 0 0', margin: '0 0 10px 3%' }}>
+                                <Typography variant="body1" sx={{ textAlign: 'start' }}>Select New Tag Color</Typography>
+                                <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+                                <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                                    <Typography variant="body1">Selected color:</Typography>
+                                    <Box
+                                        sx={{
+                                            width: '30px',
+                                            height: '30px',
+                                            backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent',
+                                            borderRadius: '50%',
+                                            border: '1px solid black',
+                                            marginLeft: '3%'
+                                        }}
+                                    />
+                                    <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                        {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
+                                    </Typography>
+                                </Box>
+                                {selectedColor && selectedColor.luggageTagColorName !== currentColor && (
+                                    <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
+                                        Update Tag Color
+                                    </Button>
+                                )}
+                            </FormControl>
+                        </Box></>
                 );
                 break;
             case 'ineligible':
@@ -383,9 +383,9 @@ function RedemptionPage() {
                     <><Typography variant="h6" sx={{ fontWeight: 700, textAlign: 'center', marginY: '10px' }}>
                         Visitor is ineligible for luggage tag redemption ❌
                     </Typography>
-                    <Typography variant='body2' sx={{ textAlign: 'center', padding: '1%' }}>
-                        Visitor has not met redemption prerequisites by visiting and collecting stamps from all required booths.
-                    </Typography></>
+                        <Typography variant='body2' sx={{ textAlign: 'center', padding: '1%' }}>
+                            Visitor has not met redemption prerequisites by visiting and collecting stamps from all required booths.
+                        </Typography></>
                 );
                 break;
             default:
@@ -400,16 +400,16 @@ function RedemptionPage() {
 
         return content;
     };
-    
+
     const ModalContent = ({ eligibility }) => {
         return (
             <Box style={modalContentStyle}>
                 <Box style={overlayContentStyle}>
                     <Box id="eligibilityStatusContainer" style={eligibilityContentContainerStyle}>
-                        <EligibilityContent 
-                            eligibility={eligibility} 
-                            selectedColor={selectedColor} 
-                            setSelectedColor={setSelectedColor} 
+                        <EligibilityContent
+                            eligibility={eligibility}
+                            selectedColor={selectedColor}
+                            setSelectedColor={setSelectedColor}
                         />
                     </Box>
                     <Button onClick={closePopup} style={returnBtnStyle}>Close</Button>
@@ -417,7 +417,7 @@ function RedemptionPage() {
             </Box>
         );
     };
-    
+
     // Toast States
     const [openToast, setOpenToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -431,7 +431,7 @@ function RedemptionPage() {
 
     const closeToast = (event, reason) => {
         if (reason === 'clickaway') {
-          return;
+            return;
         }
         setOpenToast(false);
     };
@@ -443,7 +443,7 @@ function RedemptionPage() {
     const scannerTimeout = useRef(null);
     const [scannerActive, setScannerActive] = useState(false); // Tracks if the scanner is active
     const [hasValidated, setHasValidated] = useState(false); // Tracks whether qr code has been validated
-    
+
     // Track whether scanner is active
     const isScannerInitialized = useRef(false);
 
@@ -525,18 +525,18 @@ function RedemptionPage() {
     // Handle successful QR scan
     const onScanSuccess = async (result) => {
         if (hasValidated) return; // Prevent multiple validations
-    
+
         try {
             stopScanner(); // Stop QR scanner upon successful scan
             const ticketId = result.data;
             setTicketId(ticketId);
-    
+
             // (1) Check if ticket ID is valid
             const apiResponse = await eligibilityValidation(ticketId);
-    
+
             // (2) Display content according to visitor eligibility
             await handleEligibilityResponse(apiResponse, ticketId);
-            
+
             // Reset scanner timeout after processing
             resetScannerTimeout();
 
@@ -548,15 +548,15 @@ function RedemptionPage() {
 
     // API connections and response handling ( 4 API functions )
 
-    // (1a) API (GET) call to validate visitor's redemption eligibility 
-    const eligibilityValidation = async (ticketId) => {   
+    // (1a) API (GET) call to validate visitor's redemption eligibility
+    const eligibilityValidation = async (ticketId) => {
         setScannerLoading(true);
         try {
             const response = await fetch(`${apiUrl}/AdminVisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}` 
+                    'Authorization': `Bearer ${accessToken}`
                 }
             });
             return response;
@@ -611,21 +611,21 @@ function RedemptionPage() {
             luggageTagColor: selectedColor.luggageTagColorName
         };
 
-    try {
-        const response = await fetch(`${apiUrl}/AdminRedemption`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}` 
-            },
-            body: JSON.stringify(requestBody)
-        });
-        return response
-    } catch (error) {
-        console.log('Error redeeming tag:', error);
-    } finally {
-        setScannerLoading(false);
-    }
+        try {
+            const response = await fetch(`${apiUrl}/AdminRedemption`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+            return response
+        } catch (error) {
+            console.log('Error redeeming tag:', error);
+        } finally {
+            setScannerLoading(false);
+        }
     };
 
     // (2b) Process API response and display content accordingly
@@ -634,7 +634,7 @@ function RedemptionPage() {
             case 200:
                 // Response 200: Successful redemption
                 showToast('Tag redeemed successfully!', 'success');
-                setIsPopupOpen(false); 
+                setIsPopupOpen(false);
             case 400:
                 // Response 400: Missing parameter or invalid luggage color
                 showToast('Invalid color or missing parameter. Please try again.', 'error');
@@ -661,22 +661,22 @@ function RedemptionPage() {
             ticketId: ticketId,
             luggageTagColor: selectedColor.luggageTagColorName
         };
-    
-    try {
-        const response = await fetch(`${apiUrl}/AdminRedemption`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}` 
-            },
-            body: JSON.stringify(requestBody)
-        });
-        return response
-    } catch (error) {
-        console.log('Error updating tag:', error);
-    } finally {
-        setScannerLoading(false);
-    }
+
+        try {
+            const response = await fetch(`${apiUrl}/AdminRedemption`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+            return response
+        } catch (error) {
+            console.log('Error updating tag:', error);
+        } finally {
+            setScannerLoading(false);
+        }
     };
 
     // (3b) Process API response and display content accordingly
@@ -685,7 +685,7 @@ function RedemptionPage() {
             case 200:
                 // Response 200: Successful update
                 showToast('Tag updated successfully!', 'success');
-                setIsPopupOpen(false);  
+                setIsPopupOpen(false);
                 break;
             case 400:
                 // Response 400: Missing parameter or invalid luggage color
@@ -733,7 +733,8 @@ function RedemptionPage() {
                     setCurrentColor(color);
                     return color;
                 } else {
-                    console.error("Color not found in response.");               }
+                    console.error("Color not found in response.");
+                }
             } catch (error) {
                 console.error("Error fetching current color:", error);
             }
@@ -752,11 +753,11 @@ function RedemptionPage() {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to fetch tag colors from API');
             }
-    
+
             const data = await response.json();
             return data; // Return the colors data
         } catch (error) {
@@ -778,30 +779,30 @@ function RedemptionPage() {
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
             <Box id="pageContent" style={pageContentStyle}>
-            
-            {/* Back button */}
-            <Box display="flex" width="100%" justifyContent="flex-start">
-                <IconButton onClick={handleBack} aria-label="Go Back">
-                    <ArrowBackIcon />
-                    <Typography variant="h6" sx={{ my: 1 }}>
-                    Back
-                    </Typography>
-                </IconButton>
-            </Box>
-            
-            {/* Successful scan popup */}
-            <Popup open={isPopupOpen} onClose={closePopup} 
-                modal 
-                overlayStyle={overlayStyle} 
-                contentStyle={popupContentStyle}>
-                {close => <ModalContent eligibility={eligibilityStatus} />}
-            </Popup>
-            
+
+                {/* Back button */}
+                <Box display="flex" width="100%" justifyContent="flex-start">
+                    <IconButton onClick={handleBack} aria-label="Go Back">
+                        <ArrowBackIcon />
+                        <Typography variant="h6" sx={{ my: 1 }}>
+                            Back
+                        </Typography>
+                    </IconButton>
+                </Box>
+
+                {/* Successful scan popup */}
+                <Popup open={isPopupOpen} onClose={closePopup}
+                    modal
+                    overlayStyle={overlayStyle}
+                    contentStyle={popupContentStyle}>
+                    {close => <ModalContent eligibility={eligibilityStatus} />}
+                </Popup>
+
                 {/* Main Content */}
-                <Box id="contentContainer" sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    justifyContent: 'space-between',  
+                <Box id="contentContainer" sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     width: '100%',
                     height: '100vh'
@@ -832,14 +833,14 @@ function RedemptionPage() {
                                 {/* Show "Start scanner" button if the scanner is not active; else show loader if awaiting API response */}
                                 {!scannerLoading ? (
                                     !scannerActive && (
-                                        <Button onClick={startScanner} style={{...startQRscannerBtn,  zIndex: scannerActive ? -99 : 1 }}>
-                                        Start scanner
-                                    </Button>
+                                        <Button onClick={startScanner} style={{ ...startQRscannerBtn, zIndex: scannerActive ? -99 : 1 }}>
+                                            Start scanner
+                                        </Button>
                                     )
                                 ) : (
                                     <CustomCircularProgress />
                                 )}
-                                <div ref={qrBoxEl} className="qr-box"></div> 
+                                <div ref={qrBoxEl} className="qr-box"></div>
                             </Box>
                         </Grid>
                         <Grid item xs={12} className="botContainer" sx={{ flexDirection: 'column' }}>
@@ -855,7 +856,7 @@ function RedemptionPage() {
                     <Snackbar open={openToast} autoHideDuration={3000} onClose={closeToast}>
                         <Alert
                             onClose={closeToast}
-                            severity= {toastSeverity}
+                            severity={toastSeverity}
                             variant="filled"
                             sx={{ width: '80%' }}>
                             {toastMessage}

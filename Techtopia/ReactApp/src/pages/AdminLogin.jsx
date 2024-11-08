@@ -1,10 +1,21 @@
+import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, TextField, Snackbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import nyp_logo from "./../assets/nyp_logo.png";
 import axios from 'axios';
 
+import { useSelector, useDispatch } from 'react-redux'
+import { boothHelperLogin, adminLogin } from '../features/user/userslice'
+import { USER_TYPES_NAV } from '../constants';
+
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+
 function AdminLogin() {
+
+  const dispatch = useDispatch();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
@@ -14,43 +25,55 @@ function AdminLogin() {
 
   // Login process
   const handleLogin = () => {
-    axios.post('https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/AdminLogin', {
-      username: username, 
+    axios.post(`${apiUrl}/AdminLogin`, {
+      username: username,
       password: password
     })
-    .then(response => {
-      console.log('Response:', response);  
-  
-      const token = response.data; 
-      
-      if (token) {
-        setLoginSuccess(true);
-        setError(false);
-        // Store the token in localStorage
-        localStorage.setItem('accessToken', token);  
-        navigate('/selectbooth'); 
-      } else {
-        console.log('Login failed: No token returned');  // If no token is received - just in case
+      .then(response => {
+
+        console.log('Response:', response);
+
+        const token = response.data;
+
+        if (token) {
+
+          setLoginSuccess(true);
+          setError(false);
+          // Store the token in localStorage
+          // localStorage.setItem('accessToken', token);
+
+          const tokenDecoded = jwtDecode(token);
+          const role = tokenDecoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+          console.log(`user role: ${role}`);  // If no token is received - just in case
+          if (role === USER_TYPES_NAV.ADMIN) {
+            dispatch(adminLogin(token));
+            navigate('/selectbooth');
+          } else {
+            dispatch(boothHelperLogin(token));
+            navigate('/selectbooth');
+          }
+        } else {
+          console.log('Login failed: No token returned');  // If no token is received - just in case
+          setError(true);
+          setLoginSuccess(false);
+        }
+      })
+      .catch(error => {
+        console.error('API call failed:', error.response ? error.response.data : error.message);
         setError(true);
         setLoginSuccess(false);
-      }
-    })
-    .catch(error => {
-      console.error('API call failed:', error.response ? error.response.data : error.message); 
-      setError(true);
-      setLoginSuccess(false);
-    });
+      });
   };
 
   return (
     <Box>
       {/* Login Form */}
       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="70vh">
-        
+
         <Typography variant="h5" sx={{ mt: 2 }}>
           NYP Open House Admin Login
         </Typography>
-        <Box component="form"> 
+        <Box component="form">
           <TextField
             label="Username"
             variant="outlined"

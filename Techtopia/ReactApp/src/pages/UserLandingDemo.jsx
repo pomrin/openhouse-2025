@@ -37,6 +37,8 @@ import {
 } from "../features/websocket/websocketslice";
 // import axios from 'axios';
 
+import { visitorLogin } from '../features/user/userslice';
+
 function UserLanding() {
   // websocket in redux
   const dispatch = useDispatch();
@@ -107,7 +109,8 @@ function UserLanding() {
 
       setUniqueId(newTicketId);
       localStorage.setItem("ticket_id", newTicketId);
-      localStorage.setItem("accessToken", token);
+      // localStorage.setItem("accessToken", token);
+      dispatch(visitorLogin({ ticketId: newTicketId, token }));
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);

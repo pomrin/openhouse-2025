@@ -23,6 +23,7 @@ import { connectWebSocket, sendMessage, registerUser } from '../features/websock
 import { isWebSocketConnected } from '../features/websocket/websocketslice';
 // import axios from 'axios';
 
+import { visitorLogin } from '../features/user/userslice';
 
 function UserLanding() {
 
@@ -58,9 +59,9 @@ function UserLanding() {
     const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
     const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
-    const [aiStampSource, setAiStampSource] = useState({aiStamp});
-    const [csStampSource, setCsStampSource] = useState({csStamp});
-    const [ftStampSource, setFtStampSource] = useState({ftStamp});
+    const [aiStampSource, setAiStampSource] = useState({ aiStamp });
+    const [csStampSource, setCsStampSource] = useState({ csStamp });
+    const [ftStampSource, setFtStampSource] = useState({ ftStamp });
     const [itStampSource, setItStampSource] = useState(itStamp);
 
     const parseJwt = (token) => {
@@ -88,7 +89,8 @@ function UserLanding() {
 
             setUniqueId(newTicketId);
             localStorage.setItem('ticket_id', newTicketId);
-            localStorage.setItem('accessToken', token);
+            // localStorage.setItem('accessToken', token);
+            dispatch(visitorLogin({ ticketId: newTicketId, token }));
             location.reload();
 
 
@@ -257,7 +259,7 @@ function UserLanding() {
                     console.log("Ticket ID is not found");
                 } else if (error.response.status === 500) {
                     console.log("Server error. Please try again later.");
-                } 
+                }
             } else if (error.request) {
                 console.error("No response received:", error.request);
             } else {
@@ -363,7 +365,7 @@ function UserLanding() {
         generateQR();
         console.log('Establish active');
         dispatch(connectWebSocket({ ticketId: initialTicketId.current, userGroup: "Visitor", onMessageHandler }));
-        
+
         // For active and inactive state
         const handleVisibilityChange = () => {
             console.log('Not active anymore');
@@ -730,7 +732,7 @@ function UserLanding() {
     // const [csStampSource, setCsStampSource] = useState(`${csStamp}?t=${new Date().getTime()}`);
     // const [ftStampSource, setFtStampSource] = useState(`${ftStamp}?t=${new Date().getTime()}`);
     // const [itStampSource, setItStampSource] = useState(`${itStamp}?t=${new Date().getTime()}`);
-    
+
 
     // Function to refresh the stamps images
     const refreshStamps = () => {
@@ -748,7 +750,7 @@ function UserLanding() {
 
     const imageRepo = import.meta.env.VITE_IMAGE_REPO
 
-   
+
     const [imageSource, setImageSource] = useState('');
 
     // Function to refresh the profile picture
@@ -756,7 +758,7 @@ function UserLanding() {
         setTimeout(() => {
             console.log('Refresh pic: Iam first')
             const photoLink = `${imageRepo}${ticket_id}/${image}`;
-            console.log('second path',photoLink)
+            console.log('second path', photoLink)
             LoadUserData(ticket_id);
             setImageSource(`${photoLink}?t=${new Date().getTime()}`); // Append timestamp to force refresh
             console.log("photo updated");
@@ -836,32 +838,32 @@ function UserLanding() {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
-                
+
                 <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
                     <Box className="topdiv">
                         <Box>
-                        <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                            <Box className="profilePicture" sx={{ position: "relative" }}>
-                                <img
-                                    src={imageSource}
-                                    alt="Profile"
-                                    className="profileImage"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = noImageUploaded; // Fallback image on error
-                                    }}
-                                />
-                                <div className="uploadCircle">
-                                    <img src={uploadProfile} alt="Upload" className="uploadImage" />
-                                </div>
-                            </Box>
-                        </a>
-                        <Button
-                            className='jiggleButton'
+                            <a href={form_sg} target="_blank" rel="noopener noreferrer">
+                                <Box className="profilePicture" sx={{ position: "relative" }}>
+                                    <img
+                                        src={imageSource}
+                                        alt="Profile"
+                                        className="profileImage"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = noImageUploaded; // Fallback image on error
+                                        }}
+                                    />
+                                    <div className="uploadCircle">
+                                        <img src={uploadProfile} alt="Upload" className="uploadImage" />
+                                    </div>
+                                </Box>
+                            </a>
+                            <Button
+                                className='jiggleButton'
                                 variant="contained"
                                 color="primary"
                                 onClick={() => fetchJiggle()}
-                                sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto'}} style={{
+                                sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }} style={{
                                     ...displayJiggle,
                                     display: isJiggleVisible ? 'block' : 'none',
                                     marginTop: '20px'
@@ -871,7 +873,7 @@ function UserLanding() {
                                 <img src={jiggle} alt="Icon" />
 
                             </Button>
-                            </Box>
+                        </Box>
                         <Box className="QRBox">
                             <img src={qrImage} alt="QR Code" className="qrImage" />
                             <Typography className="ticketText">
@@ -960,7 +962,7 @@ function UserLanding() {
                             </Box>
                         </Box>
                     </Box>
-                    
+
                 </Paper>
 
 
