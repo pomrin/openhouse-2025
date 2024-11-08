@@ -143,13 +143,13 @@ function CustomSidebar() {
 
                   </SubMenu>
                   <SubMenu icon={<ReceiptLongIcon />} label="Level 3 Maps">
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Laser Engraving </MenuItem>
+                  <MenuItem active={location.pathname === "/Level3CA"} title="Course Advice @ Level 3" onClick={() => handleMenuItemClick("/Level3CA")}> Course Advice </MenuItem>
+                  <MenuItem active={location.pathname === "/LEMap"} title="Laser Engraving Map" onClick={() => handleMenuItemClick("/LEMap")}> Laser Engraving Map </MenuItem>
                     <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Projects </MenuItem>
                   </SubMenu>
                   <SubMenu icon={<ReceiptLongIcon />} label="Level 5 Maps">
-                    <MenuItem active={location.pathname === "/ReqLoan"} title="Request loan" component={<Link to="/ReqLoan" />}> Course Advise </MenuItem>
-                    <MenuItem active={location.pathname === "/MyLoanReq"} title="My loan requests" component={<Link to="/MyLoanReq" />}> Workshops </MenuItem>
+                  <MenuItem active={location.pathname === "/Level5CA"} title="Course Advice @ Level 5" onClick={() => handleMenuItemClick("/Level5CA")}> Course Advice </MenuItem>
+                  <MenuItem active={location.pathname === "/WorkshopMap"} title="Workshop Map" onClick={() => handleMenuItemClick("/WorkshopMap")}> Workshop Map </MenuItem>
                   </SubMenu>
                 </> : null
               }

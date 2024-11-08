@@ -61,12 +61,21 @@ function Qrcodescanner() {
       });
 
       if (response.status === 200) {
+          console.log('Stamp added successfully!');
         setApiResponseMessage('Stamp added successfully!');
         setApiResponseError(false);
       }
     } catch (error) {
-      console.error('Error sending Stamp API request:', error);
-      setApiResponseMessage('Failed to add stamp. Please try again.');
+      if (error.response && error.response.status === 409) {
+        // Handle the conflict error 409 gracefully
+        // e.g. If the visitor's qr-code has already been scanned once, the 2nd scan at the same booth will show this message
+        console.error('Stamp already exists for Visitor ticket and booth.');
+        setApiResponseMessage('Visitor ticket has already been stamped for this booth.');
+      } else {
+        // Handle other errors
+        console.error('Failed to Stamp API request:', error);
+        setApiResponseMessage('Failed to add stamp. Please try again.');
+      }
       setApiResponseError(true);
     }
   };

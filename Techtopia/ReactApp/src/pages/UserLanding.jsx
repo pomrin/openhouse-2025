@@ -232,6 +232,36 @@ function UserLanding() {
         }
     };
 
+    const visitorJiggle = apiUrl + '/VisitorJiggle';
+
+    const fetchJiggle = async () => {
+        try {
+            const response = await axios.get(visitorJiggle);
+            console.log("Jiggle Response: ", response.data);
+            console.log("Status code: ", response.status);
+            if (response.status === 200) {
+                // const dataString = response.data;
+                console.log('Command recieved')
+            }
+        } catch (error) {
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+
+                // Handle specific status codes
+                if (error.response.status === 404) {
+                    console.log("Ticket ID is not found");
+                } else if (error.response.status === 500) {
+                    console.log("Server error. Please try again later.");
+                } 
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
+        }
+    };
+
     //QR function
     const [qrImage, setQrImage] = useState('');
 
@@ -792,6 +822,7 @@ function UserLanding() {
                 {loading && <p>Loading...</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <h1 class="boardingpassHeader">SIT BOARDING PASS</h1>
+                
                 <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
                     <Box className="topdiv">
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
@@ -898,6 +929,14 @@ function UserLanding() {
                             </Box>
                         </Box>
                     </Box>
+                    <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => fetchJiggle()}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
+                    Jiggle
+                </Button>
                 </Paper>
 
 

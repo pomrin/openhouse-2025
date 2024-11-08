@@ -69,6 +69,14 @@ import AI from './pages/AI';
 import SE from './pages/SE';
 import RD from './pages/RD';
 import Museum from './pages/Museum';
+import Workshop from './pages/Workshop';
+import LE from './pages/LE';
+import Level3CA from './pages/Level3CA';
+import Level5CA from './pages/Level5CA';
+
+
+
+
 
 
 
@@ -81,11 +89,11 @@ function App() {
         <CombinedProvider>
 
           {/* NAV BAR */}
-          {/* {CURRENT_USER_TYPE && <CustomSidebar />} */}
+          {CURRENT_USER_TYPE && <CustomSidebar />}
           <Container style={{ flexGrow: 1, maxWidth: "100%" }}>
             <Routes>
-              <Route path={"/"} element={<UserLandingDemo />} />
-              <Route path={"/Home"} element={<UserLandingDemo />} />
+              <Route path={"/"} element={<UserLanding />} />
+              <Route path={"/Home"} element={<UserLanding />} />
               <Route path={"/Demo"} element={<UserLandingDemo />} />
 
               <Route path={"/CybersecurityMap"} element={<Cybersecurity />} />
@@ -94,6 +102,14 @@ function App() {
               <Route path={"/SEMap"} element={<SE />} />
               <Route path={"/RedemptionMap"} element={<RD />} />
               <Route path={"/MuseumMap"} element={<Museum />} />
+              <Route path={"/WorkshopMap"} element={<Workshop />} />
+              <Route path={"/LEMap"} element={<LE />} />
+              <Route path={"/Level3CA"} element={<Level3CA />} />
+              <Route path={"/Level5CA"} element={<Level5CA />} />
+
+
+
+
 
 
 
