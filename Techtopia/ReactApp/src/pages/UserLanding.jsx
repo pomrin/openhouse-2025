@@ -8,6 +8,7 @@ import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
+import jiggle from './../assets/images/jiggle.png';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import noImageUploaded from './../assets/images/noImageUploaded.png';
 import uploadProfile from './../assets/images/upload_profile.png';
@@ -41,6 +42,9 @@ function UserLanding() {
     const [isCsStampVisible, setCsStampVisible] = useState(false);
     const [isFtStampVisible, setFtStampVisible] = useState(false);
     const [isItStampVisible, setItStampVisible] = useState(false);
+
+    const [isJiggleVisible, setJiggleVisible] = useState(false);
+
 
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -303,6 +307,7 @@ function UserLanding() {
                     var fullPath = `${imageRepo}${ticket_id}/${image}?t=${new Date().getTime()}`;
                     console.log(`fullPath: ${fullPath}`);
                     setImageSource(fullPath);
+                    jiggleVisibility();
                 }
             }
         } catch (error) {
@@ -536,6 +541,11 @@ function UserLanding() {
         }
     };
 
+    // Function to toggle stamp visibility based on the stamp type
+    const jiggleVisibility = () => {
+        setJiggleVisible(true);
+    };
+
 
 
     // Styles
@@ -548,6 +558,10 @@ function UserLanding() {
 
 
     const displayStamp = {
+        display: 'none'
+    };
+
+    const displayJiggle = {
         display: 'none'
     };
 
@@ -825,6 +839,7 @@ function UserLanding() {
                 
                 <Paper elevation={12} sx={{ borderRadius: "20px", paddingBottom: "10px", paddingTop: "10px" }}>
                     <Box className="topdiv">
+                        <Box>
                         <a href={form_sg} target="_blank" rel="noopener noreferrer">
                             <Box className="profilePicture" sx={{ position: "relative" }}>
                                 <img
@@ -841,6 +856,22 @@ function UserLanding() {
                                 </div>
                             </Box>
                         </a>
+                        <Button
+                            className='jiggleButton'
+                                variant="contained"
+                                color="primary"
+                                onClick={() => fetchJiggle()}
+                                sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto'}} style={{
+                                    ...displayJiggle,
+                                    display: isJiggleVisible ? 'block' : 'none',
+                                    marginTop: '20px'
+                                }}
+                            >
+                                Jiggle
+                                <img src={jiggle} alt="Icon" />
+
+                            </Button>
+                            </Box>
                         <Box className="QRBox">
                             <img src={qrImage} alt="QR Code" className="qrImage" />
                             <Typography className="ticketText">
@@ -929,14 +960,7 @@ function UserLanding() {
                             </Box>
                         </Box>
                     </Box>
-                    <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => fetchJiggle()}
-                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
-                >
-                    Jiggle
-                </Button>
+                    
                 </Paper>
 
 
