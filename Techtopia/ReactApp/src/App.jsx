@@ -55,6 +55,7 @@ import LoanReceipt from './pages/loans/LoanReceipt';
 import UserLanding from './pages/UserLanding'
 import UserLandingDemo from './pages/UserLandingDemo'
 import BoothRedemptionPage from './pages/BoothRedemption'
+import MasterAdminPage from './pages/MasterAdmin'
 
 import AdminLogin from './pages/AdminLogin';
 import Selectbooth from './pages/Selectbooth';
@@ -125,6 +126,7 @@ function App() {
                   <Route path="/adminqueue" element={<AdminQueue />} />
                   <Route path="/engravingselection/:uuid" element={<EngravingSelection />} />
                   <Route path="/Redemption" element={<BoothRedemptionPage />} />
+                  <Route path="/masteradmin" element={<MasterAdminPage />} />
                 </>
               ) : (
                 <Route path="*" element={<Navigate to="/" />} /> // Redirect to Home for any unmatched route
