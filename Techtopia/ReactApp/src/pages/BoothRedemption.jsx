@@ -19,9 +19,6 @@ import CustomCircularProgress from './../components/customLoader.jsx';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-// RedemptionPage Component
-// This component handles the redemption process for visitors' luggage tags.
-
 // Ticket IDs for testing in order ( Eligible, Already redeemed, Missing stamps ): NYP0001THU | NYP0275TUE | NYP0002FRI
 
 function RedemptionPage() {
@@ -75,6 +72,17 @@ function RedemptionPage() {
     const [scannerLoading, setScannerLoading] = useState(false); // State used to manage loader display when awaiting API response
 
     //Styles
+    const pageContentStyle = {
+        height: '95vh',
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'top',
+        alignItems: 'center',
+        paddingTop: '64px', 
+        paddingBottom: '20px'
+    };
+
     const overlayStyle = {
         background: 'rgba(0, 0, 0, 0.7)' // Transparent black background
     };
@@ -211,7 +219,7 @@ function RedemptionPage() {
                                         }}
                                     />
                                 }
-                                label={color.luggageTagColorName} // Display the color name as label
+                                label={color.luggageTagColorName}
                             />
                         ))}
                     </RadioGroup>
@@ -769,16 +777,7 @@ function RedemptionPage() {
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
-            <Box sx={{
-                height: '95vh',
-                flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'top',
-                alignItems: 'center',
-                paddingTop: '64px', 
-                paddingBottom: '20px',
-            }}>
+            <Box id="pageContent" style={pageContentStyle}>
             
             {/* Back button */}
             <Box display="flex" width="100%" justifyContent="flex-start">
