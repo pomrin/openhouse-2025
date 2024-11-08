@@ -1,4 +1,6 @@
-﻿using ProjectEFEntities.OH25EntityModels;
+﻿using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
+using ProjectEFEntities.OH25EntityModels;
 
 namespace AWSServerless1.DAL
 {
@@ -134,6 +136,41 @@ namespace AWSServerless1.DAL
             catch (Exception ex)
             {
                 Console.WriteLine($"An Exception have occurred in GetAllVisitors() - {ex.Message}");
+            }
+
+            return result;
+        }
+
+
+
+        public static List<Visitor> GetAllVisitorsIncludeVisitorBooths(int limit = 0)
+        {
+            var result = new List<Visitor>();
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+
+                    var qVisitor = (from q in context.Visitors
+                                    select q).Include(qVisitor => qVisitor.VisitorBooths);
+                    if (qVisitor != null)
+                    {
+                        if (limit > 0)
+                        {
+                            result.AddRange(qVisitor.Take(limit).ToList());
+                        }
+                        else
+                        {
+                            result.AddRange(qVisitor.ToList());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result = null;
+                Console.WriteLine($"An Exception have occurred in GetAllVisitorsAndVisitorBooths() - {ex.Message}");
             }
 
             return result;
