@@ -17,6 +17,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import '../css/BoothRedemption.css';
 import CustomCircularProgress from './../components/customLoader.jsx';
 
+import http from './http.js';
+
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 // Ticket IDs for testing in order ( Eligible, Already redeemed, Missing stamps ): NYP0001THU | NYP0275TUE | NYP0002FRI
@@ -234,7 +236,7 @@ function RedemptionPage() {
     const submitUserRedemption = async () => {
         try {
             const result = await redeemVisitorTag(ticketId, selectedColor);
-            handleVisitorRedemption(result);
+            // handleVisitorRedemption(result);
         } catch (error) {
             console.log('Error submitting redemption:', error);
             showToast('An error occurred while redeeming the tag. Please try again.', 'error');
@@ -246,7 +248,7 @@ function RedemptionPage() {
     const submitUpdatedTagColor = async () => {
         try {
             const result = await updateVisitorTag(ticketId, selectedColor);
-            handleVisitorTagUpdate(result);
+            // handleVisitorTagUpdate(result);
         } catch (error) {
             console.log('Error submitting tag color update: ', error);
             showToast('An error occurred while updating the tag. Please try again.', 'error')
@@ -535,7 +537,7 @@ function RedemptionPage() {
             const apiResponse = await eligibilityValidation(ticketId);
 
             // (2) Display content according to visitor eligibility
-            await handleEligibilityResponse(apiResponse, ticketId);
+            // await handleEligibilityResponse(apiResponse, ticketId);
 
             // Reset scanner timeout after processing
             resetScannerTimeout();
@@ -552,17 +554,23 @@ function RedemptionPage() {
     const eligibilityValidation = async (ticketId) => {
         setScannerLoading(true);
         try {
-            const response = await fetch(`${apiUrl}/AdminVisitorBooth?ticketId=${encodeURIComponent(ticketId)}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+
+            const response = await http.get(`${apiUrl}/AdminVisitorBooth`, {
+                params: {
+                    ticketId: ticketId
                 }
             });
-            return response;
+
+            await handleEligibilityResponse(response, ticketId);
+            return;
         } catch (error) {
-            console.log("Error calling CheckRedemption API:", error);
-            throw error;
+
+            const errorCode = error.status;
+            if (errorCode == 400 || errorCode == 404 || errorCode == 409) {
+                await handleEligibilityResponse(error, ticketId);
+            } else {
+                throw error;
+            }
         } finally {
             setScannerLoading(false);
         }
@@ -612,17 +620,18 @@ function RedemptionPage() {
         };
 
         try {
-            const response = await fetch(`${apiUrl}/AdminRedemption`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: JSON.stringify(requestBody)
-            });
-            return response
+            const response = await http.post(`${apiUrl}/AdminRedemption`,
+
+                requestBody
+            );
+            // console.log(`redeemVisitorTag response: ${JSON.stringify(response.status)}`);
+            handleVisitorRedemption(response);
+            return response;
         } catch (error) {
+            // console.log(`redeemVisitorTag error response: ${JSON.stringify(error)}`);
+            handleVisitorRedemption(error);
             console.log('Error redeeming tag:', error);
+
         } finally {
             setScannerLoading(false);
         }
@@ -630,11 +639,13 @@ function RedemptionPage() {
 
     // (2b) Process API response and display content accordingly
     const handleVisitorRedemption = (response) => {
+        console.log(`handleVisitorRedemption response: ${JSON.stringify(response.status)}`);
         switch (response.status) {
             case 200:
                 // Response 200: Successful redemption
                 showToast('Tag redeemed successfully!', 'success');
                 setIsPopupOpen(false);
+                break;
             case 400:
                 // Response 400: Missing parameter or invalid luggage color
                 showToast('Invalid color or missing parameter. Please try again.', 'error');
@@ -663,16 +674,11 @@ function RedemptionPage() {
         };
 
         try {
-            const response = await fetch(`${apiUrl}/AdminRedemption`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: JSON.stringify(requestBody)
-            });
-            return response
+
+            const response = await http.put(`${apiUrl}/AdminRedemption`, requestBody);
+            handleVisitorTagUpdate(response);
         } catch (error) {
+            handleVisitorTagUpdate(error);
             console.log('Error updating tag:', error);
         } finally {
             setScannerLoading(false);
@@ -704,19 +710,20 @@ function RedemptionPage() {
     // (4a) API (GET) to retrieve associated tag color for update content
     const getTagCurrentColor = async (ticketId) => {
         try {
-            const response = await fetch(`${apiUrl}/AdminVisitor?ticketId=${encodeURIComponent(ticketId)}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
+
+            const response = await http.get(`${apiUrl}/AdminVisitor`, {
+                params: {
+                    ticketId: ticketId
                 }
             });
 
-            if (!response.ok) {
+            if (response.status != 200) {
                 throw new Error('Failed to fetch visitor data from API');
             }
 
-            const data = await response.json();
+            console.log(`getTagCurrentColor response : ${JSON.stringify(response.data)}`);
+
+            const data = response.data;
             return data.luggageTagColorName;  // Return the luggage tag color name
         } catch (error) {
             console.log("Error retrieving visitor's current tag color:", error);
@@ -746,19 +753,14 @@ function RedemptionPage() {
     // (5) Retrieve tag colors [ name & color hex ]
     const getTagColors = async () => {
         try {
-            const response = await fetch(`${apiUrl}/LuggageTagColors`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
 
-            if (!response.ok) {
+            const response = await http.get(`${apiUrl}/LuggageTagColors`, {
+            });
+            if (response.status != 200) {
                 throw new Error('Failed to fetch tag colors from API');
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data; // Return the colors data
         } catch (error) {
             console.log('Error retrieving luggage tag colors:', error);
