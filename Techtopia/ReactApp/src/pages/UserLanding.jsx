@@ -289,6 +289,7 @@ function UserLanding() {
     const hasFetchedDataRefRedemp = useRef(false);
     const hasFetchedDataRefBoothStatus = useRef(false);
     const hasFetchedDataRefAll = useRef(false);
+    const hasConnectedWebsocket = useRef(false);
 
     let image;
 
@@ -362,10 +363,12 @@ function UserLanding() {
             hasFetchedDataRefAll.current = true;
             fetchData();
         }
-        generateQR();
-        console.log('Establish active');
-        dispatch(connectWebSocket({ ticketId: initialTicketId.current, userGroup: "Visitor", onMessageHandler }));
 
+        if (!hasConnectedWebsocket.current) {
+            hasConnectedWebsocket.current = true; // Mark as fetched
+            dispatch(connectWebSocket({ ticketId: initialTicketId.current, userGroup: "Visitor", onMessageHandler })); // Fetch ticket ID if not found
+        }
+        generateQR();
         // For active and inactive state
         const handleVisibilityChange = () => {
             console.log('Not active anymore');
@@ -385,15 +388,15 @@ function UserLanding() {
         };
     }, [dispatch]);
 
-    const handleSendMessage = () => {
-        if (input && recipientId && isConnected) {
-            dispatch(sendMessage({ recipientId, input }));
-            setInput('');
-            setRecipientId('');
-        } else {
-            console.error('Message and recipient ID must not be empty');
-        }
-    };
+    // const handleSendMessage = () => {
+    //     if (input && recipientId && isConnected) {
+    //         dispatch(sendMessage({ recipientId, input }));
+    //         setInput('');
+    //         setRecipientId('');
+    //     } else {
+    //         console.error('Message and recipient ID must not be empty');
+    //     }
+    // };
 
     const toggleDropdownBooth = () => {
         setDropdownBoothOpen(prev => {
@@ -491,35 +494,35 @@ function UserLanding() {
     );
 
     // Function to toggle stamp visibility based on the stamp type
-    const toggleStampVisibility = (stampType) => {
-        let newValue;
+    // const toggleStampVisibility = (stampType) => {
+    //     let newValue;
 
-        switch (stampType) {
-            case 'AI':
-                newValue = !isAiStampVisible;
-                setAiStampVisible(newValue);
-                localStorage.setItem('aiStampVisible', newValue);
-                break;
-            case 'CS':
-                newValue = !isCsStampVisible;
-                setCsStampVisible(newValue);
-                localStorage.setItem('csStampVisible', newValue);
-                break;
-            case 'FT':
-                newValue = !isFtStampVisible;
-                setFtStampVisible(newValue);
-                localStorage.setItem('ftStampVisible', newValue);
-                break;
-            case 'IT':
-                newValue = !isItStampVisible;
-                setItStampVisible(newValue);
-                localStorage.setItem('itStampVisible', newValue);
-                break;
-            default:
-                console.warn(`Unknown stamp type: ${stampType}`);
-                return;
-        }
-    };
+    //     switch (stampType) {
+    //         case 'AI':
+    //             newValue = !isAiStampVisible;
+    //             setAiStampVisible(newValue);
+    //             localStorage.setItem('aiStampVisible', newValue);
+    //             break;
+    //         case 'CS':
+    //             newValue = !isCsStampVisible;
+    //             setCsStampVisible(newValue);
+    //             localStorage.setItem('csStampVisible', newValue);
+    //             break;
+    //         case 'FT':
+    //             newValue = !isFtStampVisible;
+    //             setFtStampVisible(newValue);
+    //             localStorage.setItem('ftStampVisible', newValue);
+    //             break;
+    //         case 'IT':
+    //             newValue = !isItStampVisible;
+    //             setItStampVisible(newValue);
+    //             localStorage.setItem('itStampVisible', newValue);
+    //             break;
+    //         default:
+    //             console.warn(`Unknown stamp type: ${stampType}`);
+    //             return;
+    //     }
+    // };
 
     // Function to toggle stamp visibility based on the stamp type
     const stampVisibility = (stampType) => {
@@ -802,6 +805,12 @@ function UserLanding() {
         localStorage.clear();
     }
 
+    const [view, setView] = useState('Stamps'); // State to toggle between 'Stamps' and 'Workshops'
+
+    const toggleView = (view) => {
+        setView(view);
+    };
+
     return (
         <Box className="bodyBox">
             <Box>
@@ -904,10 +913,79 @@ function UserLanding() {
                                 </Typography>
                             </Box>
                         </Box>
-                        <h1>Stamps:</h1>
+                        <Box className="buttonsBorder" style={{marginTop:'20px'}}>
+                            <Button className="toggleButtons" onClick={() => toggleView('Stamps')} style={{ fontWeight:'bold', color:'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Stamps' ? '#ccc' : 'transparent' }}>
+                                Stamps
+                            </Button>
+                            <Button className="toggleButtons" onClick={() => toggleView('Workshops')} style={{fontWeight:'bold', color:'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Workshops' ? '#ccc' : 'transparent' }}>
+                                Workshops
+                            </Button>
+                        </Box>
+                        {view === 'Stamps' && (
+                            <Box className="stampsWrap">
+                            <Box className="stampsBox">
+                                <Box className="stamps">
+                                    <Typography variant="subtitle1">AI Stamp</Typography>
+                                    <img
+                                        className="stampImage"
+                                        src={aiStampSource}
+                                        alt="aiStamp"
+                                        width="100%"
+                                        style={{
+                                            ...displayStamp,
+                                            display: isAiStampVisible ? 'block' : 'none',
+                                        }}
+                                    />
+                                </Box>
+                                <Box className="stamps">
+                                    <Typography variant="subtitle1">CS Stamp</Typography>
+                                    <img
+                                        className="stampImage"
+                                        src={csStampSource}
+                                        alt="csStamp"
+                                        width="100%"
+                                        style={{
+                                            ...displayStamp,
+                                            display: isCsStampVisible ? 'block' : 'none',
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                            <Box className="stampsBox">
+                                <Box className="stamps">
+                                    <Typography variant="subtitle1">FT Stamp</Typography>
+                                    <img
+                                        className="stampImage"
+                                        src={ftStampSource}
+                                        alt="ftStamp"
+                                        width="100%"
+                                        style={{
+                                            ...displayStamp,
+                                            display: isFtStampVisible ? 'block' : 'none',
+                                        }}
+                                    />
+                                </Box>
+                                <Box className="stamps">
+                                    <Typography variant="subtitle1">IT Stamp</Typography>
+                                    <img
+                                        className="stampImage"
+                                        src={itStampSource}
+                                        alt="itStamp"
+                                        width="100%"
+                                        style={{
+                                            ...displayStamp,
+                                            display: isItStampVisible ? 'block' : 'none',
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+                    )}
+                    {view === 'Workshops' && (
+                        <Box className="stampsWrap">
                         <Box className="stampsBox">
                             <Box className="stamps">
-                                <Typography variant="subtitle1">AI Stamp</Typography>
+                                <Typography variant="subtitle1">Workshop A</Typography>
                                 <img
                                     className="stampImage"
                                     src={aiStampSource}
@@ -920,7 +998,7 @@ function UserLanding() {
                                 />
                             </Box>
                             <Box className="stamps">
-                                <Typography variant="subtitle1">CS Stamp</Typography>
+                                <Typography variant="subtitle1">Workshop B</Typography>
                                 <img
                                     className="stampImage"
                                     src={csStampSource}
@@ -935,7 +1013,7 @@ function UserLanding() {
                         </Box>
                         <Box className="stampsBox">
                             <Box className="stamps">
-                                <Typography variant="subtitle1">FT Stamp</Typography>
+                                <Typography variant="subtitle1">Workshop C</Typography>
                                 <img
                                     className="stampImage"
                                     src={ftStampSource}
@@ -948,7 +1026,7 @@ function UserLanding() {
                                 />
                             </Box>
                             <Box className="stamps">
-                                <Typography variant="subtitle1">IT Stamp</Typography>
+                                <Typography variant="subtitle1">Workshop D</Typography>
                                 <img
                                     className="stampImage"
                                     src={itStampSource}
@@ -962,11 +1040,13 @@ function UserLanding() {
                             </Box>
                         </Box>
                     </Box>
+                    )};
+                    </Box>
 
                 </Paper>
 
 
-                <div>
+                {/* <div>
                     <h1>WebSocket Communication</h1>
                     <div class="messageDiv">
                         {messages.map((msg, index) => (
@@ -1036,7 +1116,7 @@ function UserLanding() {
                     sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
                 >
                     Completed Booth 4
-                </Button>
+                </Button> */}
                 <Button
                     variant="contained"
                     color="primary"
@@ -1045,8 +1125,6 @@ function UserLanding() {
                 >
                     Clear Local Storage
                 </Button>
-
-
             </Box>
         </Box>
     );

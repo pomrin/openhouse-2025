@@ -188,6 +188,10 @@ function broadcastMessage(message, userGroup, command) {
     }
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports.getRequest = async (event, context) => {
     console.log(`event: ${JSON.stringify(event)}`);
     console.log(`context:   ${JSON.stringify(context)}`);
@@ -276,6 +280,7 @@ module.exports.postRequest = async (event, context) => {
                     await visitorDAL.updateProfileImageUrlByTicketId(ticketId, "cartoonprofile." + photoExt);
                     sendDirectMessage("cartoonprofile." + photoExt, ticketId, "UPDATE_PHOTO");
                     broadcastMessage(ticketId, "MONTAGE", "UPDATE_PHOTOS");
+                    await delay(5000);
                 } else {
                     console.log(`Unable to read the Cutout Pro response`);
                 }

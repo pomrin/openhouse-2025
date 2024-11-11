@@ -63,18 +63,27 @@ export const connectWebSocket = createAsyncThunk(
             };
 
             socket.onclose = () => {
+                // Clear the ping interval to stop sending pings once the connection is closed
                 clearInterval(pingInterval);
+            
+                // Dispatch an action to update the connection status
                 dispatch(setIsConnected(false));
+            
+                // Log the WebSocket closure
                 console.log('WebSocket connection closed. Attempting reconnection...');
-
+            
+                // Handle reconnection logic
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    // Calculate exponential backoff delay for reconnection attempts
                     const reconnectDelay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttempts);
+            
+                    // Attempt to reconnect after the delay
                     setTimeout(() => {
                         reconnectAttempts += 1;
-                        establishConnection();
+                        establishConnection(); // Re-establish the WebSocket connection
                     }, reconnectDelay);
                 } else {
-                    console.warn('Max reconnect attempts reached.');
+                    console.warn('Max reconnect attempts reached. No further reconnection attempts.');
                 }
             };
 
