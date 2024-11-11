@@ -128,6 +128,14 @@ body {
     margin: 2px;
 }
 
+.stampImage{
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ensures the image scales without distortion */
+    display: block;
+    margin: auto; /* Centers the image */
+}
+
 .profileImage {
     height: 100%;
     width: 100%;

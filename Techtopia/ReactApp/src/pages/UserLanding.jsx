@@ -59,9 +59,9 @@ function UserLanding() {
     const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
     const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
-    const [aiStampSource, setAiStampSource] = useState({ aiStamp });
-    const [csStampSource, setCsStampSource] = useState({ csStamp });
-    const [ftStampSource, setFtStampSource] = useState({ ftStamp });
+    const [aiStampSource, setAiStampSource] = useState( aiStamp );
+    const [csStampSource, setCsStampSource] = useState( csStamp );
+    const [ftStampSource, setFtStampSource] = useState( ftStamp );
     const [itStampSource, setItStampSource] = useState(itStamp);
 
     const parseJwt = (token) => {
@@ -909,26 +909,26 @@ function UserLanding() {
                             <Box className="stamps">
                                 <Typography variant="subtitle1">AI Stamp</Typography>
                                 <img
+                                    className="stampImage"
                                     src={aiStampSource}
                                     alt="aiStamp"
                                     width="100%"
                                     style={{
                                         ...displayStamp,
                                         display: isAiStampVisible ? 'block' : 'none',
-                                        marginTop: '5px'
                                     }}
                                 />
                             </Box>
                             <Box className="stamps">
                                 <Typography variant="subtitle1">CS Stamp</Typography>
                                 <img
+                                    className="stampImage"
                                     src={csStampSource}
                                     alt="csStamp"
                                     width="100%"
                                     style={{
                                         ...displayStamp,
                                         display: isCsStampVisible ? 'block' : 'none',
-                                        marginTop: '5px'
                                     }}
                                 />
                             </Box>
@@ -937,26 +937,26 @@ function UserLanding() {
                             <Box className="stamps">
                                 <Typography variant="subtitle1">FT Stamp</Typography>
                                 <img
+                                    className="stampImage"
                                     src={ftStampSource}
                                     alt="ftStamp"
                                     width="100%"
                                     style={{
                                         ...displayStamp,
                                         display: isFtStampVisible ? 'block' : 'none',
-                                        marginTop: '5px'
                                     }}
                                 />
                             </Box>
                             <Box className="stamps">
                                 <Typography variant="subtitle1">IT Stamp</Typography>
                                 <img
+                                    className="stampImage"
                                     src={itStampSource}
                                     alt="itStamp"
                                     width="100%"
                                     style={{
                                         ...displayStamp,
                                         display: isItStampVisible ? 'block' : 'none',
-                                        marginTop: '5px'
                                     }}
                                 />
                             </Box>
