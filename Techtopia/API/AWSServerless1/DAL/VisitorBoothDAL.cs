@@ -116,6 +116,7 @@ namespace AWSServerless1.DAL
                             var boothIdVisited = result.Select(x => x.BoothId).ToList();
                             var qBoothNotVisited = from q in context.Booths
                                                    where !boothIdVisited.Contains(q.BoothId)
+                                                   orderby q.BoothId ascending
                                                    select new VisitorBooth()
                                                    {
                                                        BoothId = q.BoothId,
@@ -124,7 +125,7 @@ namespace AWSServerless1.DAL
                                                    };
                             if (qBoothNotVisited != null && qBoothNotVisited.Count() > 0)
                             {
-                                result.AddRange(qBoothNotVisited);
+                                result.AddRange(qBoothNotVisited.ToList());
                             }
                         }
                     }
