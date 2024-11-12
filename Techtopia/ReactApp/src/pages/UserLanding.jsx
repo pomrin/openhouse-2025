@@ -215,7 +215,9 @@ function UserLanding() {
                     // toggleStampVisibility('IT');
                     stampVisibility('IT');
                 }
-
+                if (values.includes(1) && values.includes(2) && values.includes(3) && values.includes(4)) {
+                    refreshRedemptionStatus();
+                }
             }
         } catch (error) {
             if (error.response) {
@@ -768,9 +770,6 @@ function UserLanding() {
         }, 5000); // 5000 milliseconds = 5 seconds
     };
 
-
-
-
     function onMessageHandler(messageData) {
         // Call the functions if specific messages are received
         if (messageData.command === 'UPDATE_STAMP') {
@@ -785,15 +784,6 @@ function UserLanding() {
             toast.error("WebSocket server down, please refresh manually");
         }
     };
-
-
-    function refreshAll() {
-        refreshProfilePicture();
-        refreshStamps();
-        refreshRedemptionStatus();
-        refreshQueueNumber();
-    }
-
 
     // const fallback_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.png`;
     //const fallback2_link = `https://openhouse2025-images-repo.s3.ap-southeast-1.amazonaws.com/user_profile/${ticket_id}/cartoonprofile.jpeg`;
@@ -1040,7 +1030,7 @@ function UserLanding() {
                             </Box>
                         </Box>
                     </Box>
-                    )};
+                    )}
                     </Box>
 
                 </Paper>
