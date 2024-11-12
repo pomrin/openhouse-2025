@@ -1,5 +1,4 @@
-﻿using AWSServerless1.Authentication;
-using AWSServerless1.Constants;
+﻿using AWSServerless1.Constants;
 using AWSServerless1.DAL;
 using AWSServerless1.ResponseObject;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,27 +12,28 @@ namespace AWSServerless1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VisitorBoothStatusController : ControllerBase
+    public class VisitorWorkshopStatusController : ControllerBase
     {
         private IConfiguration _config;
-        public VisitorBoothStatusController(IConfiguration config)
+        public VisitorWorkshopStatusController(IConfiguration config)
         {
             _config = config;
         }
 
+
         /// <summary>
-        /// Returns a list of Visitor's booth visit status.
+        /// Returns a list of Visitor's Workshop completion status. Set IncludeNotVisited to true in include Workshop(s) not completed in result.
         /// This method will REQUIRE Authentication.
         /// </summary>
         /// <returns></returns>
-        /// <response code="200">Queue Status include Engraving, Pending Collection and Collected. If in Queue, includes a Queue Number</response>
+        /// <response code="200">A list of Workshops and the visitor's completion status.</response>
         /// <response code="400">Bad Request</response>
-        /// <response code="404">User Not in any queue.</response>
+        /// <response code="404">No user with the TicketID.</response>
         /// <response code="500">Internal Server Error.</response>
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             )]
-        public IActionResult GetVisitorBoothStatus(bool includeNotVisited = false)
+        public IActionResult GetVisitorWorkshopCompletionStatus(bool includeNotVisited = false)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             if (identity.IsAuthenticated) // If user already have a valid jwt token, no need to do anything
@@ -49,19 +49,19 @@ namespace AWSServerless1.Controllers
                 else
                 {
 
-                    List<VisitorBooth> listVisitorBoothEntities = VisitorBoothDAL.GetVisitorBoothStatus(visitorEntity, includeNotVisited);
+                    List<VisitorWorkshop> listVisitorBoothEntities = VisitorWorkshopDAL.GetVisitorWorkshopCompletionStatus(visitorEntity.VisitorId, includeNotVisited);
                     if (listVisitorBoothEntities == null)
                     {
-                        return Problem($"An unexpected problem have occured in GetVisitorBoothStatus for Visitor (ticketId: {ticketId}.");
+                        return Problem($"An unexpected problem have occured in GetVisitorWorkshopCompletionStatus for Visitor (ticketId: {ticketId}, includeNotVisited: {includeNotVisited}).");
                     }
                     else
                     {
 
                         //var listVisitorBoothEntity = VisitorBoothDAL.GetVisitorBoothVisited(visitorEntity.VisitorId);
 
-                        List<VisitorBoothResObj> result = new List<VisitorBoothResObj>();
+                        var result = new List<VisitorWorkshopResObj>();
                         var qToVisitorResObj = from q in listVisitorBoothEntities
-                                               select VisitorBoothResObj.FromVisitorBoothEntity(q);
+                                               select VisitorWorkshopResObj.FromVisitorWorkShopEntity(q);
                         if (qToVisitorResObj != null && qToVisitorResObj.Count() > 0)
                         {
                             result.AddRange(qToVisitorResObj.ToList());
