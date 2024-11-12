@@ -13,7 +13,7 @@ namespace AWSServerless1.WebSocket
     {
         public enum WEBSOCKET_GROUP_TYPES { VISITOR, BOOTHADMIN, MONTAGE };
         public enum WEBSOCKET_ACTION_TYPES { ping, direct, broadcast, register };
-        public enum WEBSOCKET_COMMAND_TYPES { UPDATE_PHOTO, UPDATE_STAMP, UPDATE_REDEMPTION_STATUS, JIGGLE, UPDATE_PHOTOS, UPDATE_QUEUES };
+        public enum WEBSOCKET_COMMAND_TYPES { UPDATE_PHOTO, UPDATE_STAMP, UPDATE_WORKSHOP, UPDATE_REDEMPTION_STATUS, JIGGLE, UPDATE_PHOTOS, UPDATE_QUEUES };
 
         private static readonly String authKey;
         private static readonly String wsURL;
@@ -103,18 +103,38 @@ namespace AWSServerless1.WebSocket
         }
 
 
-        public static async Task<String> SendDirectMessage(String ticketId, WEBSOCKET_COMMAND_TYPES command)
+        public static async Task<String> SendDirectMessage(String ticketId, WEBSOCKET_COMMAND_TYPES command, String message = null)
         {
             String result = null;
 
             var action = WEBSOCKET_ACTION_TYPES.direct;
             dynamic tempMessage = null;
-            if (String.IsNullOrEmpty(ticketId))
+            if (String.IsNullOrEmpty(ticketId) && String.IsNullOrEmpty(message))
             {
                 tempMessage = new
                 {
                     action = action.ToString(),
                     command = command.ToString(),
+                    authKey = authKey,
+                };
+            }
+            else if (!String.IsNullOrEmpty(ticketId) && String.IsNullOrEmpty(message))
+            {
+                tempMessage = new
+                {
+                    action = action.ToString(),
+                    ticketId = ticketId,
+                    command = command.ToString(), // Message to the recipient
+                    authKey = authKey,
+                };
+            }
+            else if (String.IsNullOrEmpty(ticketId) && !String.IsNullOrEmpty(message))
+            {
+                tempMessage = new
+                {
+                    action = action.ToString(),
+                    message = message,
+                    command = command.ToString(), // Message to the recipient
                     authKey = authKey,
                 };
             }
@@ -126,6 +146,7 @@ namespace AWSServerless1.WebSocket
                     ticketId = ticketId,
                     command = command.ToString(), // Message to the recipient
                     authKey = authKey,
+                    message = message,
                 };
             }
             var serializedWebSocketMessage = JsonConvert.SerializeObject(tempMessage);

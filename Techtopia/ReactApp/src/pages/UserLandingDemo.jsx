@@ -37,7 +37,7 @@ import {
 } from "../features/websocket/websocketslice";
 // import axios from 'axios';
 
-import { visitorLogin } from '../features/user/userslice';
+import { visitorLogin } from "../features/user/userslice";
 
 function UserLanding() {
   // websocket in redux
@@ -585,13 +585,15 @@ function UserLanding() {
 
   // Function to refresh the profile picture
   function onMessageHandler(messageData) {
-    setTimeout(() => {
-      var imageURL = messageData.message;
-      setImageSource(
-        `${imageRepo}${ticket_id}/${imageURL}?t=${new Date().getTime()}`
-      ); // Append timestamp to force refresh
-      console.log(`photo updated - ${imageRepo}${ticket_id}/${imageURL}`);
-    }, 5000); // 5000 milliseconds = 5 seconds
+    if (messageData.command === "UPDATE_PHOTO") {
+      setTimeout(() => {
+        var imageURL = messageData.message;
+        setImageSource(
+          `${imageRepo}${ticket_id}/${imageURL}?t=${new Date().getTime()}`
+        ); // Append timestamp to force refresh
+        console.log(`photo updated - ${imageRepo}${ticket_id}/${imageURL}`);
+      }, 5000); // 5000 milliseconds = 5 seconds
+    }
   }
 
   function refreshAll() {
@@ -679,9 +681,11 @@ function UserLanding() {
                   {showOverlay && <div className="CircleAnimationDiv"></div>}
                 </Box>
               </a>
-              <Box className="QRBox">
-                <img src={qrImage} alt="QR Code" className="qrImage" />
-              </Box>
+              {false && (
+                <Box className="QRBox">
+                  <img src={qrImage} alt="QR Code" className="qrImage" />
+                </Box>
+              )}
               <Box>
                 <Typography class="bold">Ticket ID: {ticket_id}</Typography>
               </Box>

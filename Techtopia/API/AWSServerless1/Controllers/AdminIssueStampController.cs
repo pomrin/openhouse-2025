@@ -68,7 +68,7 @@ namespace AWSServerless1.Controllers
                         if (result != null)
                         {
                             //var responseMessage = await WebsocketMessageHelper.Ping();
-                            var responseMessage2 = await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_STAMP);
+                            var responseMessage2 = await WebsocketMessageHelper.SendDirectMessage(visitorEntity.TicketId, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_STAMP, $"{result.BoothId}");
 
                             var visitorBoothResObj = VisitorBoothResObj.FromVisitorBoothEntity(result);
                             return Ok(visitorBoothResObj);
