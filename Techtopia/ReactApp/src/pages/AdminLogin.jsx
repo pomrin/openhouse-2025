@@ -35,12 +35,12 @@ function AdminLogin() {
 
         const token = response.data;
 
+
         if (token) {
+          localStorage.clear();
 
           setLoginSuccess(true);
           setError(false);
-          // Store the token in localStorage
-          // localStorage.setItem('accessToken', token);
 
           const tokenDecoded = jwtDecode(token);
           const role = tokenDecoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
@@ -48,9 +48,11 @@ function AdminLogin() {
           if (role === USER_TYPES_NAV.ADMIN) {
             dispatch(adminLogin(token));
             navigate('/selectbooth');
+            location.reload();
           } else {
             dispatch(boothHelperLogin(token));
             navigate('/selectbooth');
+            location.reload();
           }
         } else {
           console.log('Login failed: No token returned');  // If no token is received - just in case

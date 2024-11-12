@@ -109,26 +109,29 @@ function CustomSidebar() {
                         <>
                           <div style={{ marginLeft: 'auto' }}>
                             <Typography sx={{ fontSize: "12px" }}>
-                              <button
-                                style={{
-                                  background: "none",
-                                  color: "inherit",
-                                  border: "none",
-                                  padding: "0",
-                                  font: "inherit",
-                                  cursor: "pointer",
-                                  outline: "inherit",
-                                }}
-                                onClick={() => {
-                                  setLoading(false);
-                                  // localStorage.removeItem('accessToken');
-                                  dispatch(boothadminlogout());
-                                  // removeToken();
-                                  navigate("/adminlogin");
-                                }}
-                              >
-                                <b>Logout </b>
-                              </button>
+                            <button
+                              style={{
+                                background: "none",
+                                color: "inherit",
+                                border: "none",
+                                padding: "0",
+                                font: "inherit",
+                                cursor: "pointer",
+                                outline: "inherit",
+                              }}
+                              onClick={() => {
+                                setLoading(false);
+                                // localStorage.removeItem('accessToken');
+                                dispatch(boothadminlogout());
+                                // removeToken();
+                                navigate("/adminlogin");
+
+                                // Reload the page after performing the above actions
+                                window.location.reload();
+                              }}
+                            >
+                              <b>Logout</b>
+                            </button>
                             </Typography>
                           </div>
                         </> : null
@@ -159,13 +162,16 @@ function CustomSidebar() {
                         <MenuItem active={location.pathname === "/Level5CA"} title="Course Advice @ Level 5" onClick={() => handleMenuItemClick("/Level5CA")}> Course Advice </MenuItem>
                         <MenuItem active={location.pathname === "/WorkshopMap"} title="Workshop Map" onClick={() => handleMenuItemClick("/WorkshopMap")}> Workshop Map </MenuItem>
                       </SubMenu>
+                      <hr style={{ width: '80%' }} />
+
+                      <MenuItem active={location.pathname === "/adminlogin"} title="Admin Login" onClick={() => handleMenuItemClick("/adminlogin")}> Admin Login </MenuItem>
                     </> : null
                   }
 
 
                   {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
                     <>
-                      <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
+                      <MenuItem active={location.pathname === "/selectbooth"} title="Overview" onClick={() => handleMenuItemClick("/selectbooth")}> Overview </MenuItem>
                       <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
                         {[
                           { boothId: '1', boothName: 'Cyber Security' },

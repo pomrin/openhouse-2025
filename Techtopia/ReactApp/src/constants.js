@@ -16,6 +16,9 @@ const USER_TYPES_NAV = {
 };
 
 let token = localStorage.getItem("accessToken");
+let tokenadmin = localStorage.getItem("adminAccessToken");
+
+
 let tokenDecoded = null;
 let role = null;
 let CURRENT_USER_TYPE = USER_TYPES_NAV.UNDEFINED;
@@ -52,6 +55,15 @@ const roleChecker = () => {
 if (token) {
     console.log('token:', token);
     tokenDecoded = jwtDecode(token);
+    role = tokenDecoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+    console.log('role:',role)
+    //role = 'ADMIN'
+    CURRENT_USER_TYPE = roleChecker();
+}
+
+if (tokenadmin) {
+    console.log('token:', tokenadmin);
+    tokenDecoded = jwtDecode(tokenadmin);
     role = tokenDecoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
     console.log('role:',role)
     //role = 'ADMIN'
