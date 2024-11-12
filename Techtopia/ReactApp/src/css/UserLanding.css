@@ -369,7 +369,6 @@ body {
     outline: none !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
     transition: all 0.3s ease-in-out !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 10px 35px !important;  /* Smaller padding for compact size */

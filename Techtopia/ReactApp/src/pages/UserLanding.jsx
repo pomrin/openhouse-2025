@@ -882,9 +882,9 @@ function UserLanding() {
                                 variant="contained"
                                 color="primary"
                                 onClick={() => fetchJiggle()}
-                                sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }} style={{
+                                sx={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }} style={{
                                     ...displayJiggle,
-                                    display: isJiggleVisible ? 'block' : 'none'
+                                    display: isJiggleVisible ? 'inline-flex' : 'none'
                                 }}
                             >
                                 Jiggle 
