@@ -248,6 +248,7 @@ function UserLanding() {
             if (response.status === 200) {
                 // const dataString = response.data;
                 console.log('Command recieved')
+                toggleHighlight();
             }
         } catch (error) {
             if (error.response) {
@@ -319,6 +320,15 @@ function UserLanding() {
     };
 
     const initialTicketId = useRef(ticket_id);
+
+    const [isHighlighted, setIsHighlighted] = useState(false);
+
+  const toggleHighlight = () => {
+    setIsHighlighted(true);
+    setTimeout(() => {
+      setIsHighlighted(false); // Reset after animation finishes
+    }, 1000); // The duration of the animation in ms
+  };
 
     useEffect(() => {
         // if (!ticket_id && !hasFetchedDataRefTicket.current) {
@@ -852,7 +862,7 @@ function UserLanding() {
                     <Box className="topdiv">
                         <Box>
                             <a href={form_sg} target="_blank" rel="noopener noreferrer">
-                                <Box className="profilePicture" sx={{ position: "relative" }}>
+                                <Box className={`profilePicture ${isHighlighted ? "rainbow-border" : ""}`} sx={{ position: "relative" }}>
                                     <img
                                         src={imageSource}
                                         alt="Profile"
@@ -874,11 +884,10 @@ function UserLanding() {
                                 onClick={() => fetchJiggle()}
                                 sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }} style={{
                                     ...displayJiggle,
-                                    display: isJiggleVisible ? 'block' : 'none',
-                                    marginTop: '20px'
+                                    display: isJiggleVisible ? 'block' : 'none'
                                 }}
                             >
-                                Jiggle
+                                Jiggle 
                                 <img src={jiggle} alt="Icon" />
 
                             </Button>
@@ -1040,7 +1049,7 @@ function UserLanding() {
                             </Box>
                         </Box>
                     </Box>
-                    )};
+                    )}
                     </Box>
 
                 </Paper>
