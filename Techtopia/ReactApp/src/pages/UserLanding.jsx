@@ -8,6 +8,7 @@ import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
+import commonStamp from './../assets/images/common_stamp.svg'
 import jiggle from './../assets/images/jiggle.png';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import noImageUploaded from './../assets/images/noImageUploaded.png';
@@ -59,6 +60,7 @@ function UserLanding() {
     const [workshopButtonColor, setWorkshopButtonColor] = useState('#4CAF50'); // Original color
     const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
+    const [commonStampSource, setCommonStampSource] = useState( commonStamp );
     const [aiStampSource, setAiStampSource] = useState( aiStamp );
     const [csStampSource, setCsStampSource] = useState( csStamp );
     const [ftStampSource, setFtStampSource] = useState( ftStamp );
@@ -927,26 +929,18 @@ function UserLanding() {
                                     <Typography variant="subtitle1">AI Stamp</Typography>
                                     <img
                                         className="stampImage"
-                                        src={aiStampSource}
+                                        src={isAiStampVisible ? aiStampSource : commonStampSource}
                                         alt="aiStamp"
                                         width="100%"
-                                        style={{
-                                            ...displayStamp,
-                                            display: isAiStampVisible ? 'block' : 'none',
-                                        }}
                                     />
                                 </Box>
                                 <Box className="stamps">
                                     <Typography variant="subtitle1">CS Stamp</Typography>
                                     <img
                                         className="stampImage"
-                                        src={csStampSource}
+                                        src={isCsStampVisible ? csStampSource : commonStampSource}
                                         alt="csStamp"
                                         width="100%"
-                                        style={{
-                                            ...displayStamp,
-                                            display: isCsStampVisible ? 'block' : 'none',
-                                        }}
                                     />
                                 </Box>
                             </Box>
@@ -955,26 +949,18 @@ function UserLanding() {
                                     <Typography variant="subtitle1">FT Stamp</Typography>
                                     <img
                                         className="stampImage"
-                                        src={ftStampSource}
+                                        src={isFtStampVisible ? ftStampSource : commonStampSource}
                                         alt="ftStamp"
                                         width="100%"
-                                        style={{
-                                            ...displayStamp,
-                                            display: isFtStampVisible ? 'block' : 'none',
-                                        }}
                                     />
                                 </Box>
                                 <Box className="stamps">
                                     <Typography variant="subtitle1">IT Stamp</Typography>
                                     <img
                                         className="stampImage"
-                                        src={itStampSource}
+                                        src={isItStampVisible ? itStampSource : commonStampSource}
                                         alt="itStamp"
                                         width="100%"
-                                        style={{
-                                            ...displayStamp,
-                                            display: isItStampVisible ? 'block' : 'none',
-                                        }}
                                     />
                                 </Box>
                             </Box>
@@ -987,26 +973,18 @@ function UserLanding() {
                                 <Typography variant="subtitle1">Workshop A</Typography>
                                 <img
                                     className="stampImage"
-                                    src={aiStampSource}
+                                    src={isAiStampVisible ? aiStampSource : commonStampSource}
                                     alt="aiStamp"
                                     width="100%"
-                                    style={{
-                                        ...displayStamp,
-                                        display: isAiStampVisible ? 'block' : 'none',
-                                    }}
                                 />
                             </Box>
                             <Box className="stamps">
                                 <Typography variant="subtitle1">Workshop B</Typography>
                                 <img
                                     className="stampImage"
-                                    src={csStampSource}
+                                    src={isCsStampVisible ? csStampSource : commonStampSource}
                                     alt="csStamp"
                                     width="100%"
-                                    style={{
-                                        ...displayStamp,
-                                        display: isCsStampVisible ? 'block' : 'none',
-                                    }}
                                 />
                             </Box>
                         </Box>
@@ -1015,26 +993,18 @@ function UserLanding() {
                                 <Typography variant="subtitle1">Workshop C</Typography>
                                 <img
                                     className="stampImage"
-                                    src={ftStampSource}
+                                    src={isFtStampVisible ? ftStampSource : commonStampSource}
                                     alt="ftStamp"
                                     width="100%"
-                                    style={{
-                                        ...displayStamp,
-                                        display: isFtStampVisible ? 'block' : 'none',
-                                    }}
                                 />
                             </Box>
                             <Box className="stamps">
                                 <Typography variant="subtitle1">Workshop D</Typography>
                                 <img
                                     className="stampImage"
-                                    src={itStampSource}
+                                    src={isItStampVisible ? itStampSource : commonStampSource}
                                     alt="itStamp"
                                     width="100%"
-                                    style={{
-                                        ...displayStamp,
-                                        display: isItStampVisible ? 'block' : 'none',
-                                    }}
                                 />
                             </Box>
                         </Box>
