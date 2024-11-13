@@ -55,6 +55,7 @@ function CustomSidebar() {
   };
 
   const handleBoothClick = (boothId, boothName) => {
+    setIsExpanded(false); // Close the navbar after selection
     console.log(`${boothName} clicked`);
     // Separate Engraving and Redemption booths from other booths via if else statement
     if (boothName === 'Engraving') {
@@ -65,7 +66,6 @@ function CustomSidebar() {
       navigate('/redemption');
     } else {
       navigate('/qrcodescanner', { state: { boothId, boothName } });
-      setIsExpanded(false); // Close the navbar after selection
     }
   };
 
@@ -141,33 +141,6 @@ function CustomSidebar() {
                   </div>
                   <MenuItem icon={<MenuIcon />} title="hide/un-hide" onClick={() => { handleToggle(); }}>Hide Navbar</MenuItem>
                   <hr style={{ width: '80%' }} />
-                  {(CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR) ?
-                    <>
-                      <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
-                      <SubMenu icon={<ReceiptLongIcon />} label="Level 2 Maps">
-                        <MenuItem active={location.pathname === "/CybersecurityMap"} title="Cybersecurity Map" onClick={() => handleMenuItemClick("/CybersecurityMap")}> Cybersecurity </MenuItem>
-                        <MenuItem active={location.pathname === "/AIMap"} title="AI Map" onClick={() => handleMenuItemClick("/AIMap")}> AI </MenuItem>
-                        <MenuItem active={location.pathname === "/SEMap"} title="Software Engineering Map" onClick={() => handleMenuItemClick("/SEMap")}> Software Engineering </MenuItem>
-                        <MenuItem active={location.pathname === "/FintechMap"} title="Fintech Map" onClick={() => handleMenuItemClick("/FintechMap")}> FinTech/BlockChain </MenuItem>
-                        <MenuItem active={location.pathname === "/RedemptionMap"} title="Redemption Map" onClick={() => handleMenuItemClick("/RedemptionMap")}> Redemption Counter </MenuItem>
-                        <MenuItem active={location.pathname === "/MuseumMap"} title="Museum Map" onClick={() => handleMenuItemClick("/MuseumMap")}> Museum </MenuItem>
-
-                      </SubMenu>
-                      <SubMenu icon={<ReceiptLongIcon />} label="Level 3 Maps">
-                        <MenuItem active={location.pathname === "/Level3CA"} title="Course Advice @ Level 3" onClick={() => handleMenuItemClick("/Level3CA")}> Course Advice </MenuItem>
-                        <MenuItem active={location.pathname === "/LEMap"} title="Laser Engraving Map" onClick={() => handleMenuItemClick("/LEMap")}> Laser Engraving Map </MenuItem>
-                        <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Projects </MenuItem>
-                      </SubMenu>
-                      <SubMenu icon={<ReceiptLongIcon />} label="Level 5 Maps">
-                        <MenuItem active={location.pathname === "/Level5CA"} title="Course Advice @ Level 5" onClick={() => handleMenuItemClick("/Level5CA")}> Course Advice </MenuItem>
-                        <MenuItem active={location.pathname === "/WorkshopMap"} title="Workshop Map" onClick={() => handleMenuItemClick("/WorkshopMap")}> Workshop Map </MenuItem>
-                      </SubMenu>
-                      <hr style={{ width: '80%' }} />
-
-                      <MenuItem active={location.pathname === "/adminlogin"} title="Admin Login" onClick={() => handleMenuItemClick("/adminlogin")}> Admin Login </MenuItem>
-                    </> : null
-                  }
-
 
                   {(CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
                     <>
@@ -205,6 +178,38 @@ function CustomSidebar() {
                           </MenuItem>
                         ))}
                       </SubMenu>
+                      <SubMenu icon={<ReceiptLongIcon />} label="Engraving">
+                      <MenuItem active={location.pathname === "/AdminQueue"} title="Admin Queue Management" onClick={() => handleMenuItemClick("/AdminQueue")}> Queue Management </MenuItem>
+                      </SubMenu>
+                    </> : null
+                  }
+
+                  {(CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR || CURRENT_USER_TYPE === USER_TYPES_NAV.ADMIN || CURRENT_USER_TYPE === USER_TYPES_NAV.BOOTH_HELPER) ?
+                    <>
+                      <MenuItem active={location.pathname === "/"} title="Home" onClick={() => handleMenuItemClick("/")}> Home </MenuItem>
+                      <SubMenu icon={<ReceiptLongIcon />} label="Level 2 Maps">
+                        <MenuItem active={location.pathname === "/CybersecurityMap"} title="Cybersecurity Map" onClick={() => handleMenuItemClick("/CybersecurityMap")}> Cybersecurity </MenuItem>
+                        <MenuItem active={location.pathname === "/AIMap"} title="AI Map" onClick={() => handleMenuItemClick("/AIMap")}> AI </MenuItem>
+                        <MenuItem active={location.pathname === "/SEMap"} title="Software Engineering Map" onClick={() => handleMenuItemClick("/SEMap")}> Software Engineering </MenuItem>
+                        <MenuItem active={location.pathname === "/FintechMap"} title="Fintech Map" onClick={() => handleMenuItemClick("/FintechMap")}> FinTech/BlockChain </MenuItem>
+                        <MenuItem active={location.pathname === "/RedemptionMap"} title="Redemption Map" onClick={() => handleMenuItemClick("/RedemptionMap")}> Redemption Counter </MenuItem>
+                        <MenuItem active={location.pathname === "/MuseumMap"} title="Museum Map" onClick={() => handleMenuItemClick("/MuseumMap")}> Museum </MenuItem>
+
+                      </SubMenu>
+                      <SubMenu icon={<ReceiptLongIcon />} label="Level 3 Maps">
+                        <MenuItem active={location.pathname === "/Level3CA"} title="Course Advice @ Level 3" onClick={() => handleMenuItemClick("/Level3CA")}> Course Advice </MenuItem>
+                        <MenuItem active={location.pathname === "/LEMap"} title="Laser Engraving Map" onClick={() => handleMenuItemClick("/LEMap")}> Laser Engraving Map </MenuItem>
+                        <MenuItem active={location.pathname === "/MyLoanReqExt"} title="My loan request extensions" component={<Link to="/MyLoanReqExt" />}> Projects </MenuItem>
+                      </SubMenu>
+                      <SubMenu icon={<ReceiptLongIcon />} label="Level 5 Maps">
+                        <MenuItem active={location.pathname === "/Level5CA"} title="Course Advice @ Level 5" onClick={() => handleMenuItemClick("/Level5CA")}> Course Advice </MenuItem>
+                        <MenuItem active={location.pathname === "/WorkshopMap"} title="Workshop Map" onClick={() => handleMenuItemClick("/WorkshopMap")}> Workshop Map </MenuItem>
+                      </SubMenu>
+                      <hr style={{ width: '80%' }} />
+
+                      {CURRENT_USER_TYPE === USER_TYPES_NAV.VISITOR &&
+                        <MenuItem active={location.pathname === "/adminlogin"} title="Admin Login" onClick={() => handleMenuItemClick("/adminlogin")}> Admin Login </MenuItem>
+                      }
                     </> : null
                   }
                 </Menu>

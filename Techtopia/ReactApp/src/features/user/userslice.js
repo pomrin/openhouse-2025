@@ -7,7 +7,7 @@ const DEFAULT_USER_ROLE = USER_TYPES_NAV.VISITOR;
 const initialState = {
   ticketId: localStorage.getItem("ticket_id")
     ? localStorage.getItem("ticket_id")
-    : -1,
+    : "-1",
   userRole: localStorage.getItem("userRole")
     ? localStorage.getItem("userRole")
     : DEFAULT_USER_ROLE,
@@ -24,7 +24,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     visitorLogin: (state, action) => {
-      console.log(`Visitor Login Payload - ${JSON.stringify(action.payload)}`);
+      // console.log(`Visitor Login Payload - ${JSON.stringify(action.payload)}`);
       state.ticketId = action.payload["ticketId"];
       state.userRole = USER_TYPES_NAV.VISITOR;
       state.visitorJWT = action.payload["token"];
@@ -34,44 +34,50 @@ export const userSlice = createSlice({
       localStorage.setItem("accessToken", state.visitorJWT);
     },
     boothHelperLogin: (state, action) => {
-    //   console.log(
-    //     `boothHelperLogin Login Payload - ${JSON.stringify(action.payload)}`
-    //   );
+      //   console.log(
+      //     `boothHelperLogin Login Payload - ${JSON.stringify(action.payload)}`
+      //   );
       state.userRole = USER_TYPES_NAV.BOOTH_HELPER;
       state.adminJWT = action.payload;
 
       localStorage.setItem("userRole", state.userRole);
       localStorage.setItem("adminAccessToken", state.adminJWT);
 
-      if (action.payload) {
-        // console.log(`Setting TicketId`);
+      // If the Visitor JWT token is not set, use the Admin JWT token as the Visitor
+      if (!state.visitorJWT) {
+        console.log(
+          `No Visitor JWT detected - ${JSON.stringify(state.visitorJWT)}`
+        );
         var decodedToken = jwtDecode(action.payload);
         const staffData = JSON.parse(decodedToken.Staff);
-        // console.log(`staffData: ${staffData}`);
         const newTicketId = staffData.TicketId;
-        // console.log(`newTicketId: ${newTicketId}`);
         state.ticketId = newTicketId;
+        state.visitorJWT = action.payload; // Using the admin token as the visitor token
+
         localStorage.setItem("ticket_id", state.ticketId);
+        localStorage.setItem("accessToken", state.visitorJWT);
       }
     },
     adminLogin: (state, action) => {
-    //   console.log(
-    //     `adminLogin Login Payload - ${JSON.stringify(action.payload)}`
-    //   );
+      //   console.log(
+      //     `adminLogin Login Payload - ${JSON.stringify(action.payload)}`
+      //   );
       state.userRole = USER_TYPES_NAV.ADMIN;
       state.adminJWT = action.payload;
 
       localStorage.setItem("userRole", state.userRole);
       localStorage.setItem("adminAccessToken", state.adminJWT);
 
-      if (action.payload) {
-        // console.log(`Setting TicketId`);
+      // If the Visitor JWT token is not set, use the Admin JWT token as the Visitor
+      if (!state.visitorJWT) {
         var decodedToken = jwtDecode(action.payload);
         const staffData = JSON.parse(decodedToken.Staff);
-        // console.log(`staffData: ${staffData}`);
         const newTicketId = staffData.TicketId;
         state.ticketId = newTicketId;
+        state.visitorJWT = action.payload; // Using the admin token as the visitor token
+
         localStorage.setItem("ticket_id", state.ticketId);
+        localStorage.setItem("accessToken", state.visitorJWT);
       }
     },
     boothadminlogout: (state) => {
