@@ -19,6 +19,7 @@ function AdminQueue() {
     const [scannedResult, setScannedResult] = useState("");
     const [searchQuery, setSearchQuery] = useState(''); // State for search input
     const [isSearchVisible, setIsSearchVisible] = useState(false); // state to control visibility
+    const [currentQueueStatus, setCurrentQueueStatus] = useState(null);
 
     // websocket in redux
     const dispatch = useDispatch();
@@ -28,6 +29,11 @@ function AdminQueue() {
 
     const isConnected = useSelector((state) => state.websocket.isConnected);
     const messages = useSelector((state) => state.websocket.messages);
+    const [errorMessageUpdate, setErrorMessage] = useState('');
+    const [errorMessageDelete, setErrorMessageDelete] = useState('');
+    const [selectedError, setSelectedError] = useState('');
+
+
 
 
     const filteredQueues = (queueItems) => {
@@ -77,15 +83,8 @@ function AdminQueue() {
         textToEngrave: '',
     });
 
-    const colorMapping = {
-        BLUE: '#0000FF',
-        BLACK: '#000000',
-        RED: '#FF0000',
-        GREEN: '#008000',
-        YELLOW: '#FFFF00',
-        GRAY: '#808080',
-        PINK: '#DE65AD'
-    };
+    const [colorMapping, setColorMapping] = useState({});
+
 
     const QueueStatus = {
 
@@ -100,9 +99,14 @@ function AdminQueue() {
         const r = (bigint >> 16) & 255;
         const g = (bigint >> 8) & 255;
         const b = bigint & 255;
+
+        // Calculate brightness using the luminance formula
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        return brightness > 155;
+
+        // Lower the threshold to account for colors like GREEN (#008000) that are visually bright
+        return brightness > 130;  // Adjusted threshold
     };
+
 
     const isToday = (dateString) => {
         const today = new Date();
@@ -156,20 +160,39 @@ function AdminQueue() {
         document.body.removeChild(a);
     };
 
+    useEffect(() => {
+        const fetchColorData = async () => {
+            try {
+                const response = await axios.get('https://nfiyg2peub.execute-api.ap-southeast-1.amazonaws.com/Prod/api/LuggageTagColors'); // Replace with your color API
+                const colors = response.data; // Assuming this is an array of color objects
 
+                // Build the dynamic color mapping based on API response
+                const colorMap = {};
+                colors.forEach(color => {
+                    colorMap[color.luggageTagColorName.toUpperCase()] = color.luggageTagColorCode; // Ensure keys are uppercase
+                });
+
+                setColorMapping(colorMap);
+            } catch (error) {
+                console.error("Error fetching color data:", error);
+            }
+        };
+
+        fetchColorData();
+    }, []);
 
     useEffect(() => {
         const fetchQueueData = async () => {
 
             try {
 
-                const token = localStorage.getItem('adminAccessToken');
+                const token = localStorage.getItem('accessToken');
                 if (!token) {
                     console.error("No token found. Redirecting to login.");
                     return;
                 }
                 const response = await axios.get(
-                    `${import.meta.env.VITE_QUEUE_API}?limit=4`,
+                    `${import.meta.env.VITE_QUEUE_API}`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -235,17 +258,24 @@ function AdminQueue() {
                 textToEngrave: ticketItem.textToEngrave,
                 dateJoined: ticketItem.dateJoined, // Ensure date format handling
             });
+
+            // Determine the current queue status
+            if (queues.queue.find(item => item.ticketId === ticketId)) setCurrentQueueStatus(1); // In Queue
+            else if (queues.queueEngraving.find(item => item.ticketId === ticketId)) setCurrentQueueStatus(2); // Engraving
+            else if (queues.queuePendingCollection.find(item => item.ticketId === ticketId)) setCurrentQueueStatus(3); // Pending Collection
+            else if (queues.queueCollected.find(item => item.ticketId === ticketId)) setCurrentQueueStatus(4); // Collected
+
             setSelectedTicketId(ticketId);
             setFormOpen(true);
         }
     };
 
 
-
     const handleFormClose = () => {
         setFormOpen(false);
         setSelectedTicketId(null);
         setSelectedQueue('');
+        setCurrentQueueStatus(null); // Reset on modal close
     };
 
     const handleQueueChange = (statusKey) => {
@@ -265,7 +295,7 @@ function AdminQueue() {
         }
 
         try {
-            const token = localStorage.getItem('adminAccessToken');
+            const token = localStorage.getItem('accessToken');
             if (!token) {
                 alert("You are not logged in. Please log in first.");
                 navigate('/adminlogin'); // Redirect to login page
@@ -293,15 +323,18 @@ function AdminQueue() {
 
             alert(`Ticket ${selectedTicketId} updated successfully!`); // Include ticketId in the alert
             handleFormClose();
+            setErrorMessage('');  // Reset error if successful
         } catch (error) {
-            setError('Failed to update ticket.');
+            console.error('Submission error:', error);
+            setErrorMessage('An error occurred while updating. Please ensure that you are moving from one queue to another <br> Examples: InQueue -> Engraving');
+            setSelectedError('update');
         }
     };
 
     // Update the handleDelete function to set status to 0
     const handleDelete = async () => {
         try {
-            const token = localStorage.getItem('adminAccessToken');
+            const token = localStorage.getItem('accessToken');
             if (!token) {
                 alert("You are not logged in. Please log in first.");
                 navigate('/adminlogin');
@@ -333,7 +366,8 @@ function AdminQueue() {
             handleFormClose();
         } catch (error) {
             console.error('Failed to delete ticket :', error);
-            setError('Failed to delete ticket. Please ensure the Ticket you are deleting in the the IN QUEUE queue');
+            setErrorMessageDelete('Failed to delete ticket. Please ensure the Ticket you are deleting in the the IN QUEUE queue');
+            setSelectedError('delete');
         }
     };
 
@@ -346,17 +380,15 @@ function AdminQueue() {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
-
                 });
 
                 return (
-                    <Grid item key={index}>
+                    <Grid item key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
                         <div
                             onClick={() => handleTicketClick(item.ticketId)}
                             style={{
                                 backgroundColor,
                                 color: textColor,
-                                textAlign: 'center',
                                 padding: '8px',
                                 borderRadius: '8px',
                                 fontSize: '1rem',
@@ -364,7 +396,9 @@ function AdminQueue() {
                                 height: '80px',
                                 display: 'flex',
                                 justifyContent: 'center',
-                                alignItems: 'center',
+                                alignItems: 'center', // Centers content vertically
+                                flexDirection: 'column', // Allows text to stack vertically
+                                textAlign: 'center', // Centers text horizontally
                                 boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                                 cursor: 'pointer',
                             }}
@@ -378,6 +412,7 @@ function AdminQueue() {
             })}
         </Grid>
     );
+
 
     return (
         <div>
@@ -413,29 +448,26 @@ function AdminQueue() {
                 <Grid
                     container
                     alignItems="center"
-                    justifyContent="space-between" // Keeps the Show button on the right
+                    justifyContent="space-between"
                     paddingLeft={"40px"}
                     paddingRight={"40px"}
-                    spacing={2} // Optional, controls spacing between items
+                    spacing={2}
                     sx={{
-                        marginTop: '6vh', // Adjust the value to your preference for more space
+                        marginTop: '6vh', // Use viewport height to adjust based on device height
                     }}
                 >
                     {/* Search Icon + Search Bar */}
-                    <Grid item sx={{
-                        display: 'flex', alignItems: 'center',
-                    }}>
+                    <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
                         {/* Search Icon Button */}
-                        <IconButton
-                            onClick={handleToggleSearch}
+                        <IconButton onClick={handleToggleSearch}
                             sx={{
-                                paddingTop: "24px",
-                                paddingLeft: "24px",
-                                paddingBottom: "24px",
-                                paddingRight: "24px"
+                                paddingLeft: '24px',
+                                paddingRight: '24px',
+                                paddingTop: '24px',
+                                paddingBottom: '24px'
 
-                            }}
-                        >
+                            }}>
+
                             <SearchIcon />
                         </IconButton>
 
@@ -451,8 +483,8 @@ function AdminQueue() {
                                     className: 'search-input',
                                 }}
                                 sx={{
-                                    width: '200px',  // Control the width of the search bar
-                                    marginLeft: '8px', // Small gap between icon and search bar
+                                    width: '200px',
+                                    marginLeft: '8px',
                                 }}
                             />
                         )}
@@ -464,13 +496,14 @@ function AdminQueue() {
                             onClick={toggleCollectedView}
                             variant="contained"
                             sx={{
-                                height: '100%', // Ensures button stays in line with the other elements
+                                height: '100%',
                             }}
                         >
                             {collectedTab === 'today' ? 'Show All' : 'Show Today'}
                         </Button>
                     </Grid>
                 </Grid>
+
                 <Typography variant="h4" textAlign="center" sx={{ mb: 2, fontSize: { xs: '1.5rem', md: '2rem' } }} paddingTop={'30px'}>
                     Queue Management
                 </Typography>
@@ -478,27 +511,41 @@ function AdminQueue() {
                     Export Queues to CSV
                 </Button>
 
-
-
-                <Grid container spacing={2} justifyContent="center" sx={{ flexGrow: 1, padding: { xs: '8px', md: '16px' } }}>
-                    <Grid item xs={12} sm={6} md={3} sx={{ borderLeft: "3px solid", borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
-                        <Typography variant="h6" textAlign="center">Queue</Typography>
-                        {renderQueueItems(queues.queue)}
+                <Grid container spacing={2} justifyContent="center" sx={{ flexGrow: 1, padding: { xs: '8px', md: '16px' }, alignItems: 'stretch' }}>
+                    <Grid item xs={12} sm={6} md={3} sx={{ padding: 1 }}>
+                        <div style={{ height: '100%', borderLeft: "3px solid black", display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="h6" textAlign="center">
+                                Queue ({queues.queue.length})
+                            </Typography>
+                            {renderQueueItems(queues.queue)} {/* Apply to the "Queue" category */}
+                        </div>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={3} sx={{ borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
-                        <Typography variant="h6" textAlign="center">Engraving</Typography>
-                        {renderQueueItems(queues.queueEngraving)}
+                    <Grid item xs={12} sm={6} md={3} sx={{ padding: 1 }}>
+                        <div style={{ height: '100%', borderLeft: "3px solid black", display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="h6" textAlign="center">
+                                Engraving ({queues.queueEngraving.length})
+                            </Typography>
+                            {renderQueueItems(queues.queueEngraving)} {/* Apply to the "Engraving" category */}
+                        </div>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={3} sx={{ borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
-                        <Typography variant="h6" textAlign="center">Pending Collection</Typography>
-                        {renderQueueItems(queues.queuePendingCollection)}
+                    <Grid item xs={12} sm={6} md={3} sx={{ padding: 1 }}>
+                        <div style={{ height: '100%', borderLeft: "3px solid black", display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="h6" textAlign="center">
+                                Pending Collection ({queues.queuePendingCollection.length})
+                            </Typography>
+                            {renderQueueItems(queues.queuePendingCollection)} {/* Apply to the "Pending Collection" category */}
+                        </div>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={3} sx={{ borderRight: "3px solid", borderColor: "black", height: "100vh" }}>
-                        <Typography variant="h6" textAlign="center">Collected</Typography>
-                        {renderQueueItems(getCollectedItems())}
+                    <Grid item xs={12} sm={6} md={3} sx={{ padding: 1 }}>
+                        <div style={{ height: '100%', borderLeft: "3px solid black", borderRight: "3px solid black", display: 'flex', flexDirection: 'column' }}>
+                            <Typography variant="h6" textAlign="center">
+                                Collected ({getCollectedItems().length})
+                            </Typography>
+                            {renderQueueItems(getCollectedItems())} {/* Apply "Today" vs "All" logic */}
+                        </div>
                     </Grid>
                 </Grid>
 
@@ -517,6 +564,12 @@ function AdminQueue() {
 
                         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Engraving Text:</Typography>
                         <Typography variant="body2" sx={{ mb: 2 }}>{ticketDetails.textToEngrave}</Typography>
+
+                        {/* Queue Status Display */}
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Current Status:</Typography>
+                        <Typography variant="body2" sx={{ mb: 2 }}>
+                            {QueueStatus[currentQueueStatus] || "N/A"}  {/* Display the status label */}
+                        </Typography>
 
                         {/* Queue Status Form */}
                         <FormControl fullWidth sx={{ mt: 2 }}>
@@ -543,11 +596,32 @@ function AdminQueue() {
                             <Button onClick={handleDelete} variant="contained" color="error">
                                 Move to Deleted Queue
                             </Button>
+                            <div style={{ marginTop: '16px' }}>
+                                {(selectedError && (selectedError === 'update' ? errorMessageUpdate : errorMessageDelete)) && (
+                                    <div style={{ color: 'red' }}>
+                                        {selectedError === 'update' && (
+                                            <div
+                                                style={{ marginTop: '8px' }}
+                                                dangerouslySetInnerHTML={{ __html: errorMessageUpdate }}
+                                            />
+                                        )}
+
+                                        {selectedError === 'delete' && (
+                                            <div style={{ marginTop: '8px' }}>
+                                                {errorMessageDelete}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
                         </div>
+
                     </div>
                 </Modal>
+
             </Grid>
-        </div>
+        </div >
     );
 }
 

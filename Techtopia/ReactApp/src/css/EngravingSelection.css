@@ -69,3 +69,44 @@
     background-color: #003399;
   }
   
+  .engraving-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 75vh;
+    padding-top: 130px;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    margin-bottom: 20px;
+  }
+  
+  .back-arrow {
+    position: absolute;
+    left: 0; /* Extreme left */
+    font-size: 24px;
+    color: #333;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .user-id-section {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    margin-left: 30px; /* Space from the back-arrow */
+  }
+  
+  .color-selection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  
+  
