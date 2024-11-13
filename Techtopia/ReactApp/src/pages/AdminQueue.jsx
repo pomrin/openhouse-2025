@@ -186,7 +186,7 @@ function AdminQueue() {
 
             try {
 
-                const token = localStorage.getItem('accessToken');
+                const token = localStorage.getItem('adminAccessToken');
                 if (!token) {
                     console.error("No token found. Redirecting to login.");
                     return;
@@ -295,7 +295,7 @@ function AdminQueue() {
         }
 
         try {
-            const token = localStorage.getItem('accessToken');
+            const token = localStorage.getItem('adminAccessToken');
             if (!token) {
                 alert("You are not logged in. Please log in first.");
                 navigate('/adminlogin'); // Redirect to login page
@@ -334,7 +334,7 @@ function AdminQueue() {
     // Update the handleDelete function to set status to 0
     const handleDelete = async () => {
         try {
-            const token = localStorage.getItem('accessToken');
+            const token = localStorage.getItem('adminAccessToken');
             if (!token) {
                 alert("You are not logged in. Please log in first.");
                 navigate('/adminlogin');

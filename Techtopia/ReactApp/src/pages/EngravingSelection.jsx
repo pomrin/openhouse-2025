@@ -28,7 +28,7 @@ const EngravingSelection = () => {
   const messages = useSelector((state) => state.websocket.messages);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('adminAccessToken');
     if (!token) {
       navigate('/adminlogin');
       return;
