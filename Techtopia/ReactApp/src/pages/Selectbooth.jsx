@@ -24,18 +24,18 @@ function Selectbooth() {
   // Updated booth based on Database - Refer to booth table
   const booths = [
     { boothId: '1', boothName: 'Cyber Security' },
-    { boothId: '2', boothName: 'Data Analytics' },
+    { boothId: '2', boothName: 'IT' },
     { boothId: '3', boothName: 'FinTech' },
     { boothId: '4', boothName: 'AI' },
     { boothId: '5', boothName: 'Redemption' },
     { boothId: '6', boothName: 'Engraving' },
-    { boothId: '7', boothName: 'Workshop A' },
-    { boothId: '8', boothName: 'Workshop B' },
-    { boothId: '9', boothName: 'Workshop C' },
-    { boothId: '10', boothName: 'Workshop D' },
+    { workshopId: '1', boothName: 'Software Engineering' },
+    { workshopId: '2', boothName: 'Data Analytics' },
+    { workshopId: '3', boothName: 'Cloud' },
+    { workshopId: '4', boothName: 'Artificial Intelligence' },
   ];
 
-  const handleBoothClick = (boothId, boothName) => {
+  const handleBoothClick = (boothId, boothName, workshopId) => {
     console.log(`${boothName} clicked`);
     // Separate Engraving and Redemption booths from other booths via if else statement
     if (boothName === 'Engraving') {
@@ -44,7 +44,10 @@ function Selectbooth() {
     } else if (boothName === 'Redemption') {
       // Redirect to the redemption page
       navigate('/redemption');
-    } else {
+    } else if (workshopId) {
+      navigate('/qrcodescanner', { state: { workshopId, boothName } });
+    }
+    else {
       navigate('/qrcodescanner', { state: { boothId, boothName } });
     }
   };
@@ -93,11 +96,11 @@ function Selectbooth() {
             {booths.map((booth, index) => (
               <Grid item xs={12} sm={6} key={index}>
                 <Button
-                  key={booth.boothId}
+                  key={booth.boothId || booth.workshopId}
                   variant="contained"
                   fullWidth
                   sx={{ padding: 2 }}
-                  onClick={() => handleBoothClick(booth.boothId, booth.boothName)}
+                  onClick={() => handleBoothClick(booth.boothId || booth.workshopId, booth.boothName, booth.workshopId)}
                 >
                   {booth.boothName}
                 </Button>

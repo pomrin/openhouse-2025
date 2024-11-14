@@ -53,7 +53,7 @@ function Qrcodescanner() {
     };
   }, []);
 
-  const handleScanSuccess = (result) => {
+  const handleScanSuccess = async (result) => {
     if (scanningInProgress) return;  // Prevent scanning while the dialog box is open
     setScanningInProgress(true);  // prevent multiple scans  
     setQrCodeResult(result);
@@ -61,6 +61,9 @@ function Qrcodescanner() {
 
     // Send the "Stamp" API request
     stampApiRequest(result);
+
+     // Wait for the API request to finish and then open the dialog
+     await stampApiRequest(result);
 
     // After stamping, open the dialog box
     setDialogOpen(true);
@@ -94,7 +97,7 @@ function Qrcodescanner() {
       // boothId 1 to 4
       apiUrlBoothorWorkshop = apiUrlStamp;
       requestPayload = { ticketId, boothId };
-    } else if (boothId >= 7 && boothId <= 10) {
+    } else if (workshopId >= 1 && workshopId <= 4) {
       // workshopId 7 to 10
       apiUrlBoothorWorkshop = apiUrlWorkshop;
       requestPayload = { ticketId, workshopId }; 
