@@ -89,6 +89,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    margin-bottom: 44px !important;
 }
 
 .qrImage {
@@ -102,6 +103,9 @@ body {
     text-align: center;
     padding: 5px 0;
     font-size: 0.8em; /* Adjust font size as needed */
+    font-weight: bold !important;
+    margin-top: 4px !important;
+    font-family: 'Roboto', sans-serif !important;
 }
 
 .uploadCircle {
@@ -362,7 +366,7 @@ body {
     color: #fff !important;
     border: none !important;
     border-radius: 50px !important;
-    font-size: 12px !important;  /* Smaller font size */
+    font-size: 13px !important;  /* Smaller font size */
     font-weight: bold !important ;
     text-transform: uppercase !important;
     cursor: pointer !important;
@@ -371,12 +375,14 @@ body {
     transition: all 0.3s ease-in-out !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 10px 35px !important;  /* Smaller padding for compact size */
+    padding: 6px 40px !important;  /* Smaller padding for compact size */
     min-width: 50px !important;  /* Minimum width for a tighter button */
     max-width: 100px !important;  /* Maximum width for a more compact appearance */
-    margin-top: 10px !important;
+    margin-top: 9px !important;
     margin-right: 20px !important;
     margin-left: 20px !important;
+    margin-bottom: 2px !important;
+    display: inline-flex !important;
 }
 
 /* Optional image style if needed */
@@ -411,7 +417,7 @@ body {
   }
   
   .jiggleButton:active {
-    animation: jiggle 0.4s ease-out;
+    animation: jiggle 0.3s ease-in-out;
   }
   
   /* Add a subtle glow effect */
