@@ -1,2 +1,2 @@
-MainPackage=D:\Projects\OpenHouse\2025\Montage\OHMontage\OHMontageUWP\bin\x64\Debug\OHMontageUWP_1.0.9.0_x64_Debug.msix
-SymbolPackage=D:\Projects\OpenHouse\2025\Montage\OHMontage\OHMontageUWP\obj\x64\Debug\Symbols\OHMontageUWP_1.0.9.0_x64_Debug.appxsym
+MainPackage=D:\Projects\OpenHouse\2025\Montage\OHMontage\OHMontageUWP\bin\x64\Debug\OHMontageUWP_1.0.10.0_x64_Debug.msix
+SymbolPackage=D:\Projects\OpenHouse\2025\Montage\OHMontage\OHMontageUWP\obj\x64\Debug\Symbols\OHMontageUWP_1.0.10.0_x64_Debug.appxsym

@@ -248,5 +248,30 @@ namespace AWSServerless1.DAL
             }
             return result;
         }
+
+        internal static EngravingQueue? UpdateEngravingText(int visitorId, string engravingText)
+        {
+            EngravingQueue queue = null;
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var qVisitor = from q in context.EngravingQueues
+                                   where q.VisitorId == visitorId
+                                   select q;
+                    if (qVisitor != null && qVisitor.Count() > 0)
+                    {
+                        queue = qVisitor.First();
+                        queue.EngravingText = engravingText;
+                        context.SaveChanges();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in UpdateEngravingText(visitorId: {visitorId}, engravingText: {engravingText}) - {ex.Message}");
+            }
+            return queue;
+        }
     }
 }

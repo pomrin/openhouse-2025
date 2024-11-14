@@ -26,6 +26,8 @@ namespace AWSServerless1.Controllers
         /// </summary>
         /// <param name="updateDto"></param>
         /// <returns></returns>
+        /// <response code="200">Photo removed</response>
+        /// <response code="404">Ticket ID not found!</response>
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme
             , Roles = UserRolesProperties.CONTROLLER_USER_ROLES_BOOTH_HELPER_AND_ADMIN
