@@ -60,20 +60,29 @@ namespace OHMontageUWP.ViewModel
 
             if (visitorContent != null)
             {
+                this.MontageViewModel.Photos.Clear();
                 var visitors = ApiHelper.DeserializeJson<List<VisitorInfoDTO>>(visitorContent);
 
                 var qVisitorWithImage = from q in visitors
                                         where (!String.IsNullOrEmpty(q.ProfileImageUrl))
+                                        orderby q.VisitorId descending
                                         select q;
-                var visitorList = qVisitorWithImage.ToList();
+                var visitorList = qVisitorWithImage.Take(MontageVM.DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY).ToList();
 
                 foreach (VisitorInfoDTO visitor in visitorList)
                 {
-                    if (!String.IsNullOrEmpty(visitor.ProfileImageUrl))
+                    if (this.MontageViewModel.Photos.Count < MontageVM.DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY)
                     {
-                        var fullImagePath = Path.Combine(s3BucketConfig.URL, visitor.TicketId, visitor.ProfileImageUrl);
+                        if (!String.IsNullOrEmpty(visitor.ProfileImageUrl))
+                        {
+                            var fullImagePath = Path.Combine(s3BucketConfig.URL, visitor.TicketId, visitor.ProfileImageUrl);
 
-                        this.MontageViewModel.AddNewPhoto(fullImagePath, visitor.TicketId);
+                            this.MontageViewModel.AddNewPhoto(fullImagePath, visitor.TicketId);
+                        }
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 // Populate the remaining of the grid with a default photo
@@ -133,19 +142,18 @@ namespace OHMontageUWP.ViewModel
                     {
                         var ticketId = ticketIdNode.AsValue().ToString();
                         PhotoControlVM vmToUpdate = null;
-                        // TODO: Check if ticketId already exist in the current Montage. If exist, update the photo. If don't exist, replace any emtpy one
+                        // TODO: Check if ticketId already exist in the current Montage. If exist, update the photo. If don't exist, replace any empty one
                         var qExistingPhotoVM = from q in this.MontageViewModel.Photos
                                                where String.Compare(ticketId, q.TicketId, true) == 0
                                                select q;
                         if (qExistingPhotoVM != null && qExistingPhotoVM.Count() > 0)
                         {
                             vmToUpdate = qExistingPhotoVM.First();
-
                         }
                         else
                         {
                             var qFirstEmptyVM = from q in this.MontageViewModel.Photos
-                                                where String.Compare(q.TicketId, "Empty", true) == 0
+                                                where String.Compare(q.TicketId, PhotoControlVM.DEFAULT_TICKET_ID, true) == 0
                                                 select q;
                             if (qFirstEmptyVM != null && qFirstEmptyVM.Count() > 0)
                             {
@@ -153,8 +161,11 @@ namespace OHMontageUWP.ViewModel
                             }
                             else
                             {
-                                vmToUpdate = qExistingPhotoVM.First();
+                                vmToUpdate = this.MontageViewModel.Photos.Last(); // if no photo to update, replace the last visitor
                             }
+                            // Shifting the VM to the first in the list
+                            this.MontageViewModel.Photos.Remove(vmToUpdate);
+                            this.MontageViewModel.Photos.Insert(0, vmToUpdate);
                         }
 
                         if (vmToUpdate != null)
@@ -184,10 +195,88 @@ namespace OHMontageUWP.ViewModel
 
                     }
                 }
+                else if (String.Compare(command, "REMOVE_PHOTO", true) == 0)
+                {
+                    var ticketIdNode = payload["ticketId"];
+                    if (ticketIdNode != null)
+                    {
+                        var ticketId = ticketIdNode.AsValue().ToString();
+                        PhotoControlVM vmToUpdate = null;
+                        // TODO: Check if ticketId already exist in the current Montage. If exist, update the photo. If don't exist, replace any emtpy one
+                        var qExistingPhotoVM = from q in this.MontageViewModel.Photos
+                                               where String.Compare(ticketId, q.TicketId, true) == 0
+                                               select q;
+                        if (qExistingPhotoVM != null && qExistingPhotoVM.Count() > 0)
+                        {
+                            vmToUpdate = qExistingPhotoVM.First();
+                        }
+                        if (vmToUpdate != null)
+                        {
+                            this.MontageViewModel.Photos.Remove(vmToUpdate);
+                            VisitorInfoDTO nextVisitor = await this.LoadNextVisitor();
+                            if (nextVisitor != null)
+                            {
+                                if (!String.IsNullOrEmpty(nextVisitor.ProfileImageUrl))
+                                {
+                                    var fullImagePath = Path.Combine(s3BucketConfig.URL, nextVisitor.TicketId, nextVisitor.ProfileImageUrl);
+
+                                    this.MontageViewModel.AddNewPhoto(fullImagePath, nextVisitor.TicketId);
+                                }
+                            }
+                            else
+                            {
+                                this.MontageViewModel.AddNewPhoto();
+                            }
+                            //this.MontageViewModel.Photos.Clear();
+                            //this.LoadAllVisitorsFromDB(); // To replace with the next photo
+                        }
+                    }
+                }
             }
             var temp = "ticketId";
             return false;
         }
+
+        private async Task<VisitorInfoDTO> LoadNextVisitor()
+        {
+            VisitorInfoDTO result = null;
+            var currentPhotoList = this.MontageViewModel.Photos;
+            var qLastVisitor = from q in currentPhotoList
+                               where String.Compare(q.TicketId, PhotoControlVM.DEFAULT_TICKET_ID, true) != 0
+                               orderby q.TicketId descending
+                               select q;
+            String ticketId = qLastVisitor.Last().TicketId;
+
+            var appConfig = new AppConfig();
+            var apiSettings = appConfig.GetAPISettingsConfig();
+            String visitorContent = null;
+            using (var httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri(apiSettings.Url)
+            })
+            {
+                var response = await httpClient.GetAsync($"{ApiHelper.API_MONTAGE_VISITORS}?apiKey={apiSettings.API_KEY}");
+                visitorContent = await response.Content.ReadAsStringAsync();
+            }
+
+            if (visitorContent != null)
+            {
+                var visitors = ApiHelper.DeserializeJson<List<VisitorInfoDTO>>(visitorContent);
+
+                var qVisitorWithImage = from q in visitors
+                                        where (!String.IsNullOrEmpty(q.ProfileImageUrl))
+                                        && String.Compare(q.TicketId, ticketId, true) < 0
+                                        orderby q.VisitorId descending
+                                        select q;
+                if (qVisitorWithImage != null && qVisitorWithImage.Count() > 0)
+                {
+                    result = qVisitorWithImage.First();
+                }
+            }
+
+            return result;
+        }
+
 
         private void Timer_Tick1(object sender, object e)
         {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Link } from '@mui/material';
+import { Box, Typography, Button, Link, Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import '../css/UserLanding.css';
 import Popup from 'reactjs-popup';
@@ -8,6 +8,11 @@ import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
+// import workshopAstamp from './../assets/images/workshopstamp.png'
+// import workshopBstamp from './../assets/images/workshopstamp.png'
+// import workshopCstamp from './../assets/images/workshopstamp.png'
+// import workshopDstamp from './../assets/images/workshopstamp.png'
+
 import commonStamp from './../assets/images/common_stamp.svg'
 import jiggle from './../assets/images/jiggle.png';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
@@ -45,6 +50,11 @@ function UserLanding() {
     const [isFtStampVisible, setFtStampVisible] = useState(false);
     const [isItStampVisible, setItStampVisible] = useState(false);
 
+    const [isWorkshopAStampVisible, setWorkshopAStampVisible] = useState(false);
+    const [isWorkshopBStampVisible, setWorkshopBStampVisible] = useState(false);
+    const [isWorkshopCStampVisible, setWorkshopCStampVisible] = useState(false);
+    const [isWorkshopDStampVisible, setWorkshopDStampVisible] = useState(false);
+
     const [isJiggleVisible, setJiggleVisible] = useState(false);
 
 
@@ -65,6 +75,11 @@ function UserLanding() {
     const [csStampSource, setCsStampSource] = useState( csStamp );
     const [ftStampSource, setFtStampSource] = useState( ftStamp );
     const [itStampSource, setItStampSource] = useState(itStamp);
+
+    const [workshopAStampSource, setWorkshopAStampSource] = useState( null ); //workshopAstamp
+    const [workshopBStampSource, setWorkshopBStampSource] = useState( null );//workshopBstamp
+    const [workshopCStampSource, setWorkshopCStampSource] = useState( null );//workshopCstamp
+    const [workshopDStampSource, setWorkshopDStampSource] = useState( null );//workshopDstamp
 
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
@@ -242,6 +257,57 @@ function UserLanding() {
         }
     };
 
+    const visitorWorkshopStatusLink = apiUrl + '/VisitorWorkshopStatus'; //?includeNotVisited=true
+
+    const fetchWorkshopStatus = async () => {
+        try {
+            const response = await axios.get(visitorWorkshopStatusLink);
+            console.log("Workshop Status: ", response.data);
+            console.log("Status code: ", response.status);
+            
+
+
+             if (response.status === 200) {
+                 const values = response.data.map(item => item.workshopId);
+                    console.log('Values', values);
+                 if (values.includes(4)) {
+                     stampVisibility('W_AI');
+                 }
+                 if (values.includes(1)) {
+                     stampVisibility('W_SE');
+                 }
+                 if (values.includes(3)) {
+                     stampVisibility('W_Cloud');
+                 }
+                 if (values.includes(2)) {
+                     stampVisibility('W_DA');
+                 }
+                 if (values.includes(1) && values.includes(2) && values.includes(3) && values.includes(4)) {
+                     refreshRedemptionStatus();
+                 }
+             }
+        } catch (error) {
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                console.error("Error status:", error.response.status);
+
+                // Handle specific status codes
+                if (error.response.status === 404) {
+                    console.log("User Not in any queue");
+                } else if (error.response.status === 500) {
+                    console.log("Server error. Please try again later.");
+                } else if (error.response.status === 400) {
+                    console.log("Bad Request:", error.response.status);
+                }
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Axios error:", error.message);
+            }
+        }
+    };
+
+
     const visitorJiggle = apiUrl + '/VisitorJiggle';
 
     const fetchJiggle = async () => {
@@ -360,10 +426,12 @@ function UserLanding() {
                 }
 
                 if (!hasFetchedDataRefQueue.current && !hasFetchedDataRefRedemp.current && !hasFetchedDataRefBoothStatus.current) {
+                    hasFetchedDataRefQueue.current = true;
                     // Now that we have the ticket ID, fetch other data
                     await fetchQueue();
                     await fetchRedemption();
                     await fetchBoothStatus();
+                    await fetchWorkshopStatus();
                 }
 
             } catch (error) {
@@ -553,6 +621,19 @@ function UserLanding() {
                 break;
             case 'IT':
                 setItStampVisible(true);
+                break;
+
+            case 'W_SE':
+                setWorkshopAStampVisible(true);
+                break;
+            case 'W_DA':
+                setWorkshopBStampVisible(true);
+                break;
+            case 'W_Cloud':
+                setWorkshopCStampVisible(true);
+                break;
+            case 'W_AI':
+                setWorkshopDStampVisible(true);
                 break;
             default:
                 console.warn(`Unknown stamp type: ${stampType}`);
@@ -757,10 +838,15 @@ function UserLanding() {
             const timestamp = new Date().getTime();
             console.log(`${aiStamp}?t=${timestamp}`)
             fetchBoothStatus();
+            fetchWorkshopStatus();
             setAiStampSource(`${aiStamp}?t=${timestamp}`);
             setCsStampSource(`${csStamp}?t=${timestamp}`);
             setFtStampSource(`${ftStamp}?t=${timestamp}`);
             setItStampSource(`${itStamp}?t=${timestamp}`);
+            setWorkshopAStampSource(`${workshopAstamp}?t=${timestamp}`);
+             setWorkshopBStampSource(`${workshopBstamp}?t=${timestamp}`);
+             setWorkshopCStampSource(`${workshopCstamp}?t=${timestamp}`);
+             setWorkshopDStampSource(`${workshopDstamp}?t=${timestamp}`);
             console.log("Stamps updated");
         }, 2000); // 2000 milliseconds = 2 seconds
     };
@@ -887,7 +973,7 @@ function UserLanding() {
                         <Box className="QRBox">
                             <img src={qrImage} alt="QR Code" className="qrImage" />
                             <Typography className="ticketText">
-                                {ticket_id}
+                               Ticket ID: {ticket_id}
                             </Typography>
                         </Box>
                     </Box>
@@ -915,10 +1001,10 @@ function UserLanding() {
                             </Box>
                         </Box>
                         <Box className="buttonsBorder" style={{marginTop:'20px'}}>
-                            <Button className="toggleButtons" onClick={() => toggleView('Stamps')} style={{ fontWeight:'bold', color:'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Stamps' ? '#ccc' : 'transparent' }}>
+                            <Button className="toggleButtons" onClick={() => toggleView('Stamps')} style={{ fontWeight:'bold', color: view === 'Stamps' ? 'white': 'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Stamps' ? '#0c4ca3' : 'transparent' }}>
                                 Stamps
                             </Button>
-                            <Button className="toggleButtons" onClick={() => toggleView('Workshops')} style={{fontWeight:'bold', color:'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Workshops' ? '#ccc' : 'transparent' }}>
+                            <Button className="toggleButtons" onClick={() => toggleView('Workshops')} style={{fontWeight:'bold', color: view === 'Workshops' ? 'white': 'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Workshops' ? '#0c4ca3   ' : 'transparent' }}>
                                 Workshops
                             </Button>
                         </Box>
@@ -973,8 +1059,8 @@ function UserLanding() {
                                 <Typography variant="subtitle1">Workshop A</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isAiStampVisible ? aiStampSource : commonStampSource}
-                                    alt="aiStamp"
+                                    src={isWorkshopAStampVisible ? workshopAStampSource : commonStampSource}
+                                    alt="Astamps"
                                     width="100%"
                                 />
                             </Box>
@@ -982,8 +1068,8 @@ function UserLanding() {
                                 <Typography variant="subtitle1">Workshop B</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isCsStampVisible ? csStampSource : commonStampSource}
-                                    alt="csStamp"
+                                    src={isWorkshopBStampVisible ? workshopBStampSource : commonStampSource}
+                                    alt="Bstamps"
                                     width="100%"
                                 />
                             </Box>
@@ -993,8 +1079,8 @@ function UserLanding() {
                                 <Typography variant="subtitle1">Workshop C</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isFtStampVisible ? ftStampSource : commonStampSource}
-                                    alt="ftStamp"
+                                    src={isWorkshopCStampVisible ? workshopCStampSource : commonStampSource}
+                                    alt="Cstamps"
                                     width="100%"
                                 />
                             </Box>
@@ -1002,8 +1088,8 @@ function UserLanding() {
                                 <Typography variant="subtitle1">Workshop D</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isItStampVisible ? itStampSource : commonStampSource}
-                                    alt="itStamp"
+                                    src={isWorkshopDStampVisible ? workshopDStampSource : commonStampSource}
+                                    alt="Dstamps"
                                     width="100%"
                                 />
                             </Box>

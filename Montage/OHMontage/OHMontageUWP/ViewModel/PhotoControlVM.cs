@@ -17,7 +17,7 @@ namespace OHMontageUWP.ViewModel
 {
     internal class PhotoControlVM : INotifyPropertyChanged
     {
-
+        public static readonly String DEFAULT_TICKET_ID = "Empty";
 
         DispatcherTimer timer = new DispatcherTimer()
         {
@@ -228,7 +228,7 @@ namespace OHMontageUWP.ViewModel
                 }
                 else
                 {
-                    return "Empty";
+                    return DEFAULT_TICKET_ID;
                 }
             }
 
