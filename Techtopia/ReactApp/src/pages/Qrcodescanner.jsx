@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Button, Snackbar, IconButton, AppBar, Toolbar } from '@mui/material';
+import { Box, Typography, Button, Snackbar, IconButton, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import QrScanner from 'qr-scanner';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -11,12 +11,19 @@ function Qrcodescanner() {
   const dispatch = useDispatch();
   const [qrCodeResult, setQrCodeResult] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const videoRef = useRef(null);
+  const qrScannerRef = useRef(null); 
   const navigate = useNavigate();
 
   const [apiResponseMessage, setApiResponseMessage] = useState('');
   const [apiResponseError, setApiResponseError] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_BASE_URL + "/AdminIssueStamp";
+  const [scanningInProgress, setScanningInProgress] = useState(false); //block multiple qr-code scans
+
+  
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const apiUrlStamp = apiUrl + "/AdminIssueStamp";
+  const apiUrlWorkshop = apiUrl + "/AdminIssueWorkshop";
 
   // const accessToken = useSelector((state) => state.user.userRole);
 
@@ -34,34 +41,72 @@ function Qrcodescanner() {
   }, [navigate]);
 
   const location = useLocation();
-  const { boothId, boothName } = location.state || {}; // Retrieve booth name from location.state
+  const { boothId, boothName, workshopId } = location.state || {}; // Retrieve booth name from location.state
 
   useEffect(() => {
-    const qrScanner = new QrScanner(videoRef.current, result => handleScanSuccess(result));
-    qrScanner.start();
+    // Initialize qrScanner with useRef
+    qrScannerRef.current = new QrScanner(videoRef.current, (result) => handleScanSuccess(result));
+    qrScannerRef.current.start();
 
     return () => {
-      qrScanner.stop();
+      qrScannerRef.current.stop();
     };
   }, []);
 
   const handleScanSuccess = (result) => {
+    if (scanningInProgress) return;  // Prevent scanning while the dialog box is open
+    setScanningInProgress(true);  // prevent multiple scans  
     setQrCodeResult(result);
     setSnackbarOpen(true);
 
     // Send the "Stamp" API request
     stampApiRequest(result);
+
+    // After stamping, open the dialog box
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setScanningInProgress(false); 
+    
+    // Reset scanner to allow scanning at the another booth
+    setQrCodeResult('');
+    setApiResponseMessage('');
+    
+    // Reset the scanner
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop();
+      qrScannerRef.current.start();
+    }
   };
 
   const stampApiRequest = async (ticketId) => {
     try {
       const accessToken = localStorage.getItem('adminAccessToken');
       // console.log(`adminAccessToken - ${accessToken}`);
+
+       // Choose API based on boothId
+      let apiUrlBoothorWorkshop = '';
+      let requestPayload = { }; // Default payload for booth
+
+    if (boothId >= 1 && boothId <= 4) {
+      // boothId 1 to 4
+      apiUrlBoothorWorkshop = apiUrlStamp;
+      requestPayload = { ticketId, boothId };
+    } else if (boothId >= 7 && boothId <= 10) {
+      // workshopId 7 to 10
+      apiUrlBoothorWorkshop = apiUrlWorkshop;
+      requestPayload = { ticketId, workshopId }; 
+    } else {
+      console.error("Invalid boothId or workshop ID");
+      setApiResponseMessage('Invalid booth ID or workshop ID!');
+      setApiResponseError(true);
+      setDialogOpen(true)
+      return; // Exit early if boothId is invalid
+    }
       // PUT request to the "Stamp" API
-      const response = await axios.put(apiUrl, {
-        ticketId,
-        boothId: boothId
-      }, {
+      const response = await axios.put(apiUrlBoothorWorkshop, requestPayload, {
         headers: {
           Authorization: `Bearer ${accessToken}`,  // Attach JWT token
           'Content-Type': 'application/json'
@@ -71,7 +116,9 @@ function Qrcodescanner() {
       if (response.status === 200) {
         console.log('Stamp added successfully!');
         setApiResponseMessage('Stamp added successfully!');
-        setApiResponseError(false);
+        setScanningInProgress(false);
+        setDialogOpen(true)
+
       }
     } catch (error) {
       if (error.response && error.response.status === 409) {
@@ -85,6 +132,8 @@ function Qrcodescanner() {
         setApiResponseMessage('Failed to add stamp. Please try again.');
       }
       setApiResponseError(true);
+      setDialogOpen(true)
+
     }
   };
 
@@ -188,14 +237,29 @@ function Qrcodescanner() {
           </Box>
         )}
 
-        {/* Display API response message */}
-        {apiResponseMessage && (
+        {/* Display API response message - moved to dialog box */}
+        {/* {apiResponseMessage && (
           <Box mt={2} textAlign="center">
             <Typography variant={apiResponseError ? 'body1' : 'h6'} color={apiResponseError ? 'error' : 'success'}>
               {apiResponseMessage}
             </Typography>
           </Box>
-        )}
+        )} */}
+
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        {/* <DialogTitle>Message</DialogTitle> */}
+          <DialogContent>
+            <Typography variant="h6">
+                {/* Backup */}
+                {/* {boothName} Booth Stamp Added for Ticket ID {qrCodeResult} */}
+                {/* Message from API */}
+                <Typography variant="h6">{apiResponseMessage}</Typography>
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary" variant="contained"  style={{ width: '100%' }}>OK</Button>
+          </DialogActions>
+        </Dialog>
 
 
         <Snackbar
