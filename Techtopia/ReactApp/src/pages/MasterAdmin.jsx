@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Popup from 'reactjs-popup';
+import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { Box, IconButton, Typography, Grid, Button, RadioGroup, Modal } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { Box, IconButton, Typography, Grid, Button, RadioGroup } from '@mui/material';
+import { DataGrid, selectedGridRowsSelector } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -13,27 +12,31 @@ import FormControl from '@mui/material/FormControl';
 import Backdrop from '@mui/material/Backdrop';
 
 import EditIcon from '@mui/icons-material/Edit';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Completed Booth Icon
+import CancelIcon from '@mui/icons-material/Cancel'; // Uncompleted Booth Icon
 
 import noImageUploaded from './../assets/images/noImageUploaded.png';
 
+import http from './http.js';
+
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-// Redemption Form is WIP
+// Not ready > Remove profile img | Update/Display collection status
 
 function MasterAdmin() {
     const navigate = useNavigate();
-    const [accessToken, setAccessToken] = useState(null);
+    const [accessToken, setAccessToken] = useState(null); 
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Ensure user is an admin/booth helper
+    // Ensure user is an admin
     useEffect(() => {
         // Retrieve accessToken from localStorage
         const token = localStorage.getItem('adminAccessToken');
 
         if (!token) {
             // If no token, redirect to login page
-            navigate('/adminlogin');
+            navigate('/adminlogin'); 
         } else {
             // Set the accessToken
             setAccessToken(token);
@@ -43,93 +46,113 @@ function MasterAdmin() {
     const [tagColors, setTagColors] = useState([]);
     const [colorsFetched, setColorsFetched] = useState(false); // Track whether colors have been fetched
     const [selectedColor, setSelectedColor] = useState(null);
-
+    
     // Fetch luggage tag colors from database
     const fetchColors = async () => {
         try {
-            const colors = await getTagColors();
-            setTagColors(colors);
+            const colors = await getTagColors();  
+            setTagColors(colors);  
             setColorsFetched(true); // Set to true after fetching colors
         } catch (error) {
-            console.error('Error fetching colors:', error);
+            console.error('Error fetching colors:', error); 
         } finally {
             setLoading(false); // Set loading to false after fetching is complete
         }
     };
 
     // Fetch tag colors / Display prompt if no ticket selected
-    useEffect(() => {
-        // Fetch tag colors once access token is available
-        if (accessToken && !colorsFetched) {
-            fetchColors();
-        }
-
+    useEffect(() => {   
         // Load in overlay prompt when no ticket is selected
         if (!selectedTicket) {
             setSelectedTicket(null);
         }
+
+        // Fetch tag colors once access token is available
+        if (accessToken && !colorsFetched) {
+            fetchColors();
+        }
     }, [accessToken, colorsFetched, selectedTicket]);
 
     // DataGrid Table
+    const noOfRows = 15; // default number of rows to retrieve
+    const [tableRows, setTableRows] = useState([]); // Table rows
+
+    // Load table data after accessToken is obtained
+    useEffect(() => {
+        if (accessToken) {
+            retrieveVisitorTickets();
+        }
+    }, [accessToken]);
+
+    // Refresh Table rows
+    const refreshTableData = async () => {
+        try {
+            await retrieveVisitorTickets();
+    
+            // Refresh `selectedTicket` based on the updated `tableRows` data
+            const updatedTicket = tableRows.find(row => row.ticketId === selectedTicket.ticketId);
+            if (updatedTicket) {
+                setSelectedTicket(updatedTicket);
+            }
+        } catch (error) {
+            console.log("Error refreshing table data:", error);
+        }
+    };
+
+    // Custom alignment of booth status icon cell
+    const PaddedCell = ({ value }) => (
+        <div style={{ marginTop: '8px' }}>
+            {value?.icon && <span>{value.icon}</span>}   
+        </div>
+    );
+
     // Table Columns
     const columns = [
-        { field: 'ticketid', headerName: 'TicketID', width: 190, headerAlign: 'center', align: 'center' },
-        { field: 'booth1', headerName: 'Cybersecurity', width: 180, headerAlign: 'center', align: 'center' },
-        { field: 'booth2', headerName: 'Data Analytics', width: 180, headerAlign: 'center', align: 'center' },
-        { field: 'booth3', headerName: 'Fintech', width: 180, headerAlign: 'center', align: 'center' },
-        { field: 'booth4', headerName: 'Artificial Intelligence (AI)', width: 180, headerAlign: 'center', align: 'center' },
-        { field: 'redemptionstatus', headerName: 'Redemption Status', width: 200, headerAlign: 'center', align: 'center' },
+        { field: 'ticketId', headerName: 'TicketID', width: 190, headerAlign: 'center', align: 'center' },
+        { field: 'CsBooth', headerName: 'Cybersecurity', width: 180, headerAlign: 'center', align: 'center', renderCell: (params) => <PaddedCell value={params.value} /> },
+        { field: 'ItBooth', headerName: 'Information Technology', width: 180, headerAlign: 'center', align: 'center', renderCell: (params) => <PaddedCell value={params.value} /> },
+        { field: 'FtBooth', headerName: 'Fintech', width: 180, headerAlign: 'center', align: 'center', renderCell: (params) => <PaddedCell value={params.value} /> },
+        { field: 'AiBooth', headerName: 'Artificial Intelligence (AI)', width: 180, headerAlign: 'center', align: 'center', renderCell: (params) => <PaddedCell value={params.value} /> },
+        { field: 'redemptionStatus', headerName: 'Redemption Status', width: 200, headerAlign: 'center', align: 'center' },
         {
             field: 'edit',
             headerName: 'Edit',
             width: 80,
             sortable: false,
             renderCell: (params) => (
-                <IconButton
-                    color="warning"
-                    onClick={() => editTicket(params.row)}
-                >
-                    <EditIcon />
-                </IconButton>
+              <IconButton
+                color="warning"
+                onClick={() => editTicket(params.row)}
+              >
+                <EditIcon />
+              </IconButton>
             ),
         },
     ];
-
-    // Table Rows with fake data [HARDCODED TEMPORARILY]
-    const rows = [
-        { ticketid: 'NYP0001MON', booth1: 'yes', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' }, //1
-        { ticketid: 'NYP0002MON', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'yes' },
-        { ticketid: 'NYP0003MON', booth1: 'no', booth2: 'no', booth3: 'no', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0004MON', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'no' },
-        { ticketid: 'NYP0005MON', booth1: 'no', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0006MON', booth1: 'yes', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' }, //6
-        { ticketid: 'NYP0001TUE', booth1: 'no', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'no' }, //7
-        { ticketid: 'NYP0001MO', booth1: 'yes', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0002FRI', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'yes' },
-        { ticketid: 'NYP0003FRI', booth1: 'no', booth2: 'no', booth3: 'no', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0001FRI', booth1: 'yes', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' }, //11
-        { ticketid: 'NYP0002MO', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'yes' },
-        { ticketid: 'NYP0003MO', booth1: 'no', booth2: 'no', booth3: 'no', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0004MO', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'no' },
-        { ticketid: 'NYP0005MO', booth1: 'no', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0006MO', booth1: 'yes', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0001TU', booth1: 'no', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'no' },
-        { ticketid: 'NYP0001M', booth1: 'yes', booth2: 'no', booth3: 'yes', booth4: 'no', redemptionstatus: 'no' },
-        { ticketid: 'NYP0002M', booth1: 'yes', booth2: 'yes', booth3: 'yes', booth4: 'yes', redemptionstatus: 'yes' },
-        { ticketid: 'NYP0003M', booth1: 'no', booth2: 'no', booth3: 'no', booth4: 'no', redemptionstatus: 'no' },
-    ];
-
+    
     // Display 15 rows of data by default
-    const paginationModel = {
-        page: 0,
-        pageSize: 15
+    const [paginationModel, setPaginationModel] = useState({ 
+        page: 0, 
+        pageSize: 15 
+    });
+
+    // Retrieve rows when accessToken changes or pagination model updates
+    useEffect(() => {
+        if (accessToken) {
+            retrieveVisitorTickets(); 
+        }
+    }, [accessToken, paginationModel]);
+
+    // Handle pagination changes
+    const handlePaginationModelChange = (newModel) => {
+        setPaginationModel(newModel); 
     };
 
-    // Toast & Popup States
+    // Toast States
     const [openToast, setOpenToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastSeverity, setToastSeverity] = useState('info');
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
 
     const showToast = (message, severity) => {
         setToastMessage(message);
@@ -144,36 +167,14 @@ function MasterAdmin() {
         setOpenToast(false);
     };
 
-    const closePopup = () => {
-        setIsPopupOpen(false);
-        setSelectedColor(null);
-    };
-
-    // Display Redemption Form Popup
-    const displayRedemptionForm = () => {
-        if (selectedTicket) {
-            setIsPopupOpen(true); // Open the popup if a ticket is selected
-        }
-    };
-
 
     // Styles
     const pageBodyStyle = {
-        minHeight: '100vh',
-        display: 'flex',
+        minHeight: '100vh', 
+        marginTop: '4%',
+        display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center'
-    };
-
-    const popupContentStyle = {
-        width: '100%',
-        height: '100%',
-        padding: '0',
-        border: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(0, 0, 0, 0.7)'
     };
 
     const mainContentStyle = {
@@ -181,9 +182,8 @@ function MasterAdmin() {
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'top',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        paddingBottom: '10px',
     };
 
     const contentContainerStyle = {
@@ -206,9 +206,10 @@ function MasterAdmin() {
     const ticketContainerStyle = {
         height: '100%',
         display: 'flex',
+        overflowY: 'scroll',
         flexDirection: 'column',
-        overflowY: 'hidden',
-        borderLeft: '2px solid gray'
+        borderLeft: '2px solid gray',
+        paddingTop: '20px'
     };
 
     const ticketContentContainer = {
@@ -222,12 +223,13 @@ function MasterAdmin() {
     };
 
     const redemptionFormContainer = {
-        backgroundColor: 'rgb(250,250,250,0.9)',
+        backgroundColor: 'rgb(235,235,235,0.9)',
         display: 'flex',
         flexDirection: 'column',
-        padding: '2%'
+        padding: '2%',
+        margin: '10px'
     };
-
+    
     const redemptionInfoContainer = {
         textAlign: 'center',
         borderBottom: '2px solid grey',
@@ -236,19 +238,27 @@ function MasterAdmin() {
     };
 
     const submitFormBtnStyle = {
-        width: '60%',
-        padding: '5px',
+        width: '30%',
+        padding: '5px', 
         backgroundColor: '#008080',
         color: 'white',
         border: '1px solid black',
-        margin: '20px 1% 20px 18%'
     };
 
     const returnBtnStyle = {
-        border: '1px solid grey',
-        borderRadius: '5px',
-        marginTop: '5%',
-        color: 'black'
+        border: '1px solid grey', 
+        borderRadius: '5px', 
+        color: 'black',
+        width: '30%'
+    };
+
+    const disabledButtonStyle = {
+        ...submitFormBtnStyle,
+        backgroundColor: '#008080', 
+        color: 'black', 
+        border: '1px solid #ccc', 
+        cursor: 'not-allowed', 
+        opacity: 0.29
     };
 
     const btnContainerStyle = {
@@ -258,30 +268,56 @@ function MasterAdmin() {
         flexDirection: 'row'
     };
 
-    // Select ticket to edit
-    const editTicket = (ticketData) => {
-        setSelectedTicket(ticketData);
+
+    // Helper function to get the corresponding booth status name
+    const getBoothStatusFieldById = (boothId) => {
+        switch (boothId) {
+            case 1: return 'CsBooth';
+            case 2: return 'ItBooth';
+            case 3: return 'FtBooth';
+            case 4: return 'AiBooth';
+            default: return '';
+        }
     };
 
-    // Visitor's profile picture
+    // Helper function to format date
+    const formatDate = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0'); 
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    };
+
+
+    // Select ticket to edit
+    const editTicket = (ticketData) => {
+        setSelectedTicket(ticketData); 
+    };
+
+    // Visitor's profile picture 
     const VisitorProfilePhotoContent = ({ profilePhotoSrc }) => {
         return (
             <Box id="visitorPictureContent" style={ticketContentContainer}>
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>Visitor's Profile Picture</Typography>
                 <Grid container spacing={1} sx={{ padding: '5pz', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Grid item xy={10} sx={{ height: '145px', width: '145px' }}>
-                        <img
-                            src={profilePhotoSrc}
-                            alt="Profile Image"
-                            className="profileImage"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = noImageUploaded; // Fallback image on error
-                            }}
-                        />
+                    <img
+                        src={profilePhotoSrc}
+                        alt="Profile Image"
+                        className="profileImage"
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = noImageUploaded; // Fallback image on error
+                        }}
+                    />
                     </Grid>
                     <Grid item xy={2}>
-                        <Button variant="outlined" color="error" onClick={removeProfilePicture} sx={{ my: '10px' }}>
+                        <Button variant="outlined" color="error" onClick={removeProfilePicture} sx={{ my: '10px'}}>
                             Remove Profile Picture
                         </Button>
                     </Grid>
@@ -302,37 +338,86 @@ function MasterAdmin() {
         }
     };
 
-    // Booth completion status
-    const BoothStatus = ({ boothName, status }) => {
-        return status === 'yes' ? (
+    // Booth Statuses display on right panel
+    const [boothStatuses, setBoothStatuses] = useState(selectedTicket?.boothStatuses || {});
+
+    // Button onclick event to trigger addBoothStamp and refresh display
+    const adminAddBoothStamp = async (boothId) => {
+        try {
+            setLoading(true);
+    
+            // API call to issue the booth stamp
+            const result = await addBoothStamp(boothId);
+    
+            // Update UI design upon successful issuance of stamp (1s delay)
+            setTimeout(() => {
+                const updatedTicket = { ...selectedTicket }; 
+                const boothStatusField = getBoothStatusFieldById(boothId);  
+                updatedTicket[boothStatusField].status = 'Completed'; 
+    
+                // Update selectedTicket and boothStatuses
+                setSelectedTicket(updatedTicket);
+                setBoothStatuses(updatedTicket.boothStatuses || {});  
+    
+            }, 1000); 
+        } catch (error) {
+            console.log('Error sending add stamp request:', error);
+            showToast('An error occurred while issuing a booth stamp', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // BoothStatus display container
+    const BoothStatus = ({ status, boothName, boothId }) => {
+        return status === 'Completed' ? (
             <CompletedBooth boothName={boothName} />
         ) : (
-            <UnCompletedBooth boothName={boothName} />
+            <UnCompletedBooth
+                boothName={boothName}
+                boothId={boothId}
+                onAddBoothStamp={() => adminAddBoothStamp(boothId)} 
+            />
         );
     };
 
-    const CompletedBooth = ({ boothName }) => {
-        return (
-            <Grid item xs={6} sx={{ textAlign: 'center', backgroundColor: 'rgb(80,225,100,0.3)' }}>
-                <Typography>{boothName}</Typography>
-                <Typography variant="body2" sx={{ marginBottom: '5%' }}>Completed</Typography>
-            </Grid>
-        );
-    };
-
-    const UnCompletedBooth = ({ boothName }) => {
+    const CompletedBooth = ({ boothName }) => (
+        <Grid item xs={6} sx={{ textAlign: 'center', backgroundColor: 'rgb(80,225,100,0.3)' }}>
+            <Typography>{boothName}</Typography>
+            <Typography variant="body2" sx={{ marginBottom: '5%' }}>Completed</Typography>
+        </Grid>
+    );
+    
+    const UnCompletedBooth = ({ boothName, boothId, onAddBoothStamp }) => {
         return (
             <Grid item xs={6} sx={{ textAlign: 'center', backgroundColor: 'rgb(231,76,60,0.3)' }}>
                 <Typography>{boothName}</Typography>
                 <Typography variant="body2">Uncompleted</Typography>
-                <Button size="small" variant="outlined" color="success" sx={{ marginBottom: '5%' }}>
+                <Button
+                    size="small"
+                    variant="outlined"
+                    color="success"
+                    onClick={onAddBoothStamp}  // Use the onAddBoothStamp prop here
+                    sx={{ marginBottom: '5%' }}
+                >
                     Mark as completed
                 </Button>
             </Grid>
         );
     };
 
-    // Ticket Redemption & COllection status [HARDCODED TEMPORARILY]
+    // Redemption Form
+    const [isRedemptionFormVisible, setRedemptionFormVisible] = useState(false);
+
+    const displayRedemptionForm = () => {
+        setRedemptionFormVisible(true);
+    };
+
+    const closeRedemptionForm = () => {
+        setRedemptionFormVisible(false);
+    };
+
+    // Ticket Redemption & Collection status [COLLECTION HARDCODED TEMPORARILY]
     const RedemptionStatus = ({ tagRedemptionStatus, collectionStatus, tagColor, engravingText, dateRedeemed, datePendingCollection, dateCollected }) => {
         return (
             <Box id="redemptionStatusContent" style={ticketContentContainer}>
@@ -344,7 +429,7 @@ function MasterAdmin() {
                     </Grid>
 
                     {/* Redemption Status */}
-                    <Grid container id="redemptionInfo" style={redemptionInfoContainer}>
+                    <Grid container id="redemptionInfo" style={redemptionInfoContainer}> 
                         <Grid item xs={4} sx={{ textAlign: 'center' }}>
                             <Typography variant="body2" sx={{ fontWeight: 500 }}>Luggage Tag Color:</Typography>
                             <Typography variant="caption">{tagColor}</Typography>
@@ -377,18 +462,18 @@ function MasterAdmin() {
 
                     {/* Update Buttons Container [DISPLAY IF COLLECTION STATUS NOT COLLECTED] */}
                     <Box id="buttonsContainer" style={btnContainerStyle}>
-                        <Button variant="contained" onClick={displayRedemptionForm} sx={{
-                            backgroundColor: '#FFA24A',
-                            '&:hover': { backgroundColor: '#e59444' }
-                        }}>
-                            Update Redemption Info
+                        <Button variant="contained" onClick={displayRedemptionForm} sx={{ 
+                            backgroundColor: '#FFA24A' ,
+                            '&:hover': { backgroundColor: '#e59444' } 
+                            }}>
+                            Update Redemption Info 
                         </Button>
-                        <Button variant="contained" sx={{
-                            backgroundColor: 'white',
+                        <Button variant="contained" sx={{ 
+                            backgroundColor: 'white', 
                             color: 'black',
                             '&:hover': { backgroundColor: '#f2f2f2' }
-                        }}>
-                            Update Collection Status
+                            }}>
+                            Update Collection Status 
                         </Button>
                     </Box>
                 </Grid>
@@ -397,12 +482,10 @@ function MasterAdmin() {
     };
 
     // Handle tag color form submission
-    const [ticketId, setTicketId] = useState(null);
-
     const submitUpdatesToRedemption = async () => {
         try {
-            const result = await updateVisitorTag(ticketId, selectedColor);
-            handleVisitorTagUpdate(result);
+            const result = await updateVisitorTag(selectedTicket.ticketId, selectedColor);
+
         } catch (error) {
             console.log('Error updating redemption status:', error);
             showToast('An error occurred while updating the tag. Please try again.', 'error');
@@ -411,24 +494,32 @@ function MasterAdmin() {
         }
     };
 
-    // Redemption form content
-    const RedemptionFormContent = () => {
-        return (
-            <Box id="updateRedemptionFormContainer" style={redemptionFormContainer}>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>Update Redemption Information</Typography>
-                <FormControl component='fieldset' id="updateRedemptionForm" sx={{ alignItems: 'flex-start' }}>
-                    <Typography>Tag Color:</Typography>
-                    <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-                    {selectedColor && (
-                        <Button style={submitFormBtnStyle} onClick={submitUpdatesToRedemption}>
-                            Update
-                        </Button>
-                    )}
-                </FormControl>
-                <Button onClick={closePopup} style={returnBtnStyle}>Close</Button>
-            </Box>
-        );
-    };
+    // RedemptionFormContent updates with close button
+    const RedemptionFormContent = ({ closeForm }) => (
+        <Box id="updateRedemptionFormContent" style={redemptionFormContainer}>
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>Update Redemption Information</Typography>
+            <Typography variant="body2">TicketID: {selectedTicket.ticketId}</Typography>
+            <FormControl component='fieldset' id="updateRedemptionForm" sx={{ alignItems: 'flex-start' }}>
+                <Typography variant="body2">Tag Color:</Typography>
+                <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+
+                {/* Form buttons container */}
+                <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center', alignContent: 'center' }}>
+                    <Button 
+                        style={selectedColor ? submitFormBtnStyle : disabledButtonStyle} 
+                        onClick={submitUpdatesToRedemption} 
+                        disabled={!selectedColor}
+                    >
+                        Update
+                    </Button>
+
+                    <Button onClick={closeRedemptionForm} style={returnBtnStyle}>
+                        Cancel
+                    </Button>
+                </Box>
+            </FormControl>
+        </Box>
+    );
 
     // Tag Color buttons for redemption/update form
     const TagColorsRadioBtns = ({ tagColors, selectedColor, setSelectedColor }) => {
@@ -436,7 +527,7 @@ function MasterAdmin() {
         if (!Array.isArray(tagColors) || tagColors.length === 0) {
             return <div>Error loading colors, please refresh the page and try again</div>;
         }
-
+    
         // Utility function to determine if the color is light/dark
         const isColorLight = (color) => {
             const hex = color.replace('#', '');
@@ -454,7 +545,7 @@ function MasterAdmin() {
             const selectedColorObj = tagColors.find(color => color.luggageTagColorName === selectedColorName);
             setSelectedColor(selectedColorObj); // Update with the entire color object
         };
-
+    
         return (
             <RadioGroup
                 aria-label="tagColor"
@@ -465,9 +556,9 @@ function MasterAdmin() {
                     <Box key={color.luggageTagColorName} sx={{ display: 'inline-block' }}>
                         <FormControlLabel
                             value={color.luggageTagColorName}
-                            control={<div />}
+                            control={<div />} 
                             label={color.luggageTagColorName}
-                            onClick={() => setSelectedColor(color)}
+                            onClick={() => setSelectedColor(color)} 
                             sx={{
                                 backgroundColor: color.luggageTagColorCode,
                                 borderRadius: '20px',
@@ -487,24 +578,91 @@ function MasterAdmin() {
             </RadioGroup>
         );
     };
-
-    // (1) Retrieve tag colors [ name & color hex ]
-    const getTagColors = async () => {
+    
+    // (1a) Retrieve tickets from API [ ticketID, booth statuses, redemption status ]
+    const getVisitorTickets = async (offset, noOfRows) => {
+        setLoading(true);
+    
         try {
-            const response = await fetch(`${apiUrl}/LuggageTagColors`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+            const response = await http.get(`${apiUrl}/AdminVisitorWithBooths`, {
+                params: {
+                    offset, offset,
+                    limit: noOfRows
                 }
             });
+    
+            return response.data;
+        } catch (error) {
+            console.log('Error fetching visitor tickets:', error);
+            showToast('Error fetching visitor tickets.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            if (!response.ok) {
-                showToast('Error fetching colors. Please reload the page.', 'error');
+    // (1b) Handle Transformation of relevant data to display in table
+    const retrieveVisitorTickets = async (noOfRows) => {
+        setLoading(true);
+    
+        try {
+            // Calculate offset for the current page
+            const offset = paginationModel.page * paginationModel.pageSize;
+    
+            const listOfTickets = await getVisitorTickets(offset, noOfRows);
+            if (listOfTickets) {
+                const transformedRows = listOfTickets.map(visitor => {
+                    const redemptionStatus = visitor.luggageRedeemedDate ? 'Redeemed' : 'Unredeemed';
+    
+                    const boothStatuses = {
+                        CsBooth: {
+                            status: visitor.visitorBooths.some(booth => booth.boothId === 1) ? 'Completed' : 'Uncompleted',
+                            icon: visitor.visitorBooths.some(booth => booth.boothId === 1) ? <CheckCircleOutlineIcon /> : <CancelIcon />
+                        },
+                        ItBooth: {
+                            status: visitor.visitorBooths.some(booth => booth.boothId === 2) ? 'Completed' : 'Uncompleted',
+                            icon: visitor.visitorBooths.some(booth => booth.boothId === 2) ? <CheckCircleOutlineIcon /> : <CancelIcon />
+                        },
+                        FtBooth: {
+                            status: visitor.visitorBooths.some(booth => booth.boothId === 3) ? 'Completed' : 'Uncompleted',
+                            icon: visitor.visitorBooths.some(booth => booth.boothId === 3) ? <CheckCircleOutlineIcon /> : <CancelIcon />
+                        },
+                        AiBooth: {
+                            status: visitor.visitorBooths.some(booth => booth.boothId === 4) ? 'Completed' : 'Uncompleted',
+                            icon: visitor.visitorBooths.some(booth => booth.boothId === 4) ? <CheckCircleOutlineIcon /> : <CancelIcon />
+                        }
+                    };
+    
+                    return {
+                        id: visitor.visitorId,
+                        ticketId: visitor.ticketId,
+                        profileImageUrl: visitor.profileImageUrl,
+                        luggageTagColorName: visitor.luggageTagColorName,
+                        luggageRedeemedDate: visitor.luggageRedeemedDate,
+                        ...boothStatuses,
+                        redemptionStatus
+                    };
+                });
+                setTableRows(transformedRows);
+            }
+        } catch (error) {
+            console.log('Error setting visitor tickets:', error);
+            showToast('Error setting visitor tickets.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // (2) Retrieve tag colors [ name & color hex ]
+    const getTagColors = async () => {
+        try {
+            const response = await http.get(`${apiUrl}/LuggageTagColors`, {
+            });
+    
+            if (response.status != 200) {
                 throw new Error('Failed to fetch tag colors from API');
             }
-
-            const data = await response.json();
+    
+            const data = await response.data;
             return data; // Return the colors data
         } catch (error) {
             console.log('Error retrieving luggage tag colors:', error);
@@ -512,38 +670,43 @@ function MasterAdmin() {
         }
     };
 
-    // (2a) API (PUT) call to create/update redemption information
+    // (3a) API (PUT) call to create/update redemption information
     const updateVisitorTag = async (ticketId, selectedColor) => {
-        setScannerLoading(true);
+        setLoading(true);
         const requestBody = {
             ticketId: ticketId,
             luggageTagColor: selectedColor.luggageTagColorName
         };
-
+    
         try {
-            const response = await fetch(`${apiUrl}/AdminRedemption`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: JSON.stringify(requestBody)
-            });
-            return response
+            const response = await http.put(`${apiUrl}/AdminRedemption`, requestBody);   
+            handleVisitorTagUpdate(response);
         } catch (error) {
+            handleVisitorTagUpdate(error);
             console.log('Error updating tag:', error);
         } finally {
-            setScannerLoading(false);
+            setLoading(false);
         }
     };
-
-    // (2b) Process API response and display content accordingly
+    
+    // (3b) Process API response and display content accordingly
     const handleVisitorTagUpdate = (response) => {
         switch (response.status) {
             case 200:
                 // Response 200: Successful update
                 showToast('Tag updated successfully!', 'success');
-                setIsPopupOpen(false);
+                setRedemptionFormVisible(false);
+                refreshTableData();
+    
+                // Update redemptionStatus UI (1s delay)
+                setTimeout(() => {
+                    setSelectedTicket(selectedTicket => ({
+                        ...selectedTicket, 
+                        redemptionStatus: selectedTicket.redemptionStatus === 'Unredeemed' ? 'Redeemed' : selectedTicket.redemptionStatus,  
+                        luggageTagColorName: selectedColor.luggageTagColorName,  
+                        luggageRedeemedDate: selectedTicket.luggageRedeemedDate || formatDate(new Date()) // Apply custom formatting
+                    }));
+                }, 1000); 
                 break;
             case 400:
                 // Response 400: Missing parameter or invalid luggage color
@@ -559,6 +722,51 @@ function MasterAdmin() {
         }
     };
 
+    // (4a) API (PUT) call to add booth stamp
+    const addBoothStamp = async (boothId) => {
+        setLoading(true);
+        const requestBody = {
+            ticketId: selectedTicket.ticketId,
+            boothId: boothId
+        };
+
+        try {
+            const response = await http.put(`${apiUrl}/AdminIssueStamp`, requestBody);
+            handleAddBoothStamp(response);
+        } catch (error) {
+            handleAddBoothStamp(error);
+            console.log('Error adding booth stamp:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // (4b) Process API response and diaplay toast content
+    const handleAddBoothStamp = (response) => {
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful issuance of stamp
+                showToast('Visitor Issued Stamp successfully.', 'success');
+                refreshTableData();
+                break;
+            case 404:
+                // Response 404: BoothID or TicketID not found
+                showToast('No Visitor with Ticket ID or no booth with the Booth Id found.', 'error');
+                break;
+            case 409:
+                // Response 409: Visitor already has stamp badge
+                showToast('Visitor have already been issued with the Stamp for the booth.', 'error');
+                break;
+            case 500:
+                // Response 500: Unexpected Exception
+                showToast('No idea wat happened.', 'error');
+                break;
+            default:
+                showToast(response.message || 'Failed to issue booth stamp, please try again.', 'error');
+                break;
+        }
+    }
+
     // Render a loading spinner if token not retrieved yet
     if (loading) {
         return (
@@ -571,8 +779,7 @@ function MasterAdmin() {
     return (
         <Box id="pageContentContainer" style={pageBodyStyle}>
             <Box id="mainContent" style={mainContentStyle}>
-                <Typography variant="h5" sx={{ textAlign: 'center', fontWeight: 700, marginY: '10px' }}>Master Admin</Typography>
-                <Box id="contentContainer" style={contentContainerStyle}>
+                <Box id="contentContainer" style={contentContainerStyle}> 
                     <Grid container spacing={1} sx={{ overflow: 'hidden' }}>
 
                         {/* Ticket Table */}
@@ -580,13 +787,13 @@ function MasterAdmin() {
                             <Paper sx={{ height: '100%', width: '100%' }}>
                                 <DataGrid
                                     columns={columns}
-                                    rows={rows}
-                                    getRowId={(row) => row.ticketid}
-                                    initialState={{ pagination: { paginationModel } }}
+                                    rows={tableRows}
+                                    getRowId={(row) => row.ticketId}
                                     pageSizeOptions={[10, 15, 30, 50]}
-                                    stickyHeader
-                                    sx={{
-                                        border: 0,
+                                    paginationModel={paginationModel}
+                                    onPaginationModelChange={handlePaginationModelChange}
+                                    sx={{ 
+                                        border: 0, 
                                         height: '100%'
                                     }}
                                 />
@@ -594,56 +801,58 @@ function MasterAdmin() {
                         </Grid>
 
                         {/* Selected Ticket associated information */}
-                        <Grid item xs={4} id="selectedTicketContent" style={ticketContainerStyle}>
-                            {/* Redemption Form popup Content */}
-                            <Popup open={isPopupOpen} onClose={closePopup} modal contentStyle={popupContentStyle}>
-                                {close => <RedemptionFormContent />}
-                            </Popup>
+                        <Grid item xs={4} id="selectedTicketContent" style={ticketContainerStyle}>     
 
                             {selectedTicket ? (
                                 <><Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center' }}>
-                                    Ticket ID: {selectedTicket.ticketid}
+                                    Ticket ID: {selectedTicket.ticketId}
                                 </Typography>
 
+                                {selectedTicket && (
+                                    <><Box id="actionPanel">
+                                        {/* Display associated profile picture */}
+                                        <VisitorProfilePhotoContent profilePhotoSrc={selectedTicket.profileImageUrl || noImageUploaded}/>
 
-                                    {selectedTicket && (
-                                        <><Box id="actionPanel">
-                                            {/* Display associated profile picture  */}
-                                            <VisitorProfilePhotoContent profilePhotoSrc={noImageUploaded} />
+                                        {/* Display ticket booths completion status */}
+                                        <Box id="boothStatusContent" style={ticketContentContainer}>
+                                            <Typography variant="body1" sx={{ fontWeight: 600 }}>Booth Status</Typography>
+                                            <Grid container spacing={1} sx={{ padding: '2%' }}>
+                                                <BoothStatus boothName="Cybersecurity Booth" boothId={1} status={selectedTicket.CsBooth.status} />
+                                                <BoothStatus boothName="Information Technology Booth" boothId={2} status={selectedTicket.ItBooth.status} />
+                                                <BoothStatus boothName="Financial Technology Booth" boothId={3} status={selectedTicket.FtBooth.status} />
+                                                <BoothStatus boothName="Artificial Intelligence Booth" boothId={4} status={selectedTicket.AiBooth.status} />
+                                            </Grid>
+                                        </Box>
 
-                                            {/* Display ticket booths completion status */}
-                                            <Box id="boothStatusContent" style={ticketContentContainer}>
-                                                <Typography variant="body1" sx={{ fontWeight: 600 }}>Booth Status</Typography>
-                                                <Grid container spacing={1} sx={{ padding: '2%' }}>
-                                                    <BoothStatus boothName="Cybersecurity Booth" status={selectedTicket.booth1} />
-                                                    <BoothStatus boothName="Data Analytics Booth" status={selectedTicket.booth2} />
-                                                    <BoothStatus boothName="Financial Technology Booth" status={selectedTicket.booth3} />
-                                                    <BoothStatus boothName="Artificial Intelligence Booth" status={selectedTicket.booth4} />
-                                                </Grid>
-                                            </Box>
+                                        {/* Display ticket redemption & collection status */}
+                                        <RedemptionStatus
+                                            key={selectedTicket.ticketId}
+                                            tagRedemptionStatus={selectedTicket.redemptionStatus || '---'}
+                                            collectionStatus="COLLECTED"
+                                            tagColor={selectedTicket.luggageTagColorName || '---'}
+                                            engravingText="qwertyy"
+                                            dateRedeemed={selectedTicket.luggageRedeemedDate || '---'}
+                                            datePendingCollection="2024-10-23 06:29:11"
+                                            dateCollected="2024-10-23 06:59:48"
+                                        />
+                                        
+                                        {/* Update Redemption Form */}
+                                        {isRedemptionFormVisible && (
+                                            <RedemptionFormContent closeForm={closeRedemptionForm} />
+                                        )}
 
-                                            {/* Display ticket redemption & collection status */}
-                                            <RedemptionStatus
-                                                tagRedemptionStatus="REDEEMED"
-                                                collectionStatus="COLLECTED"
-                                                tagColor="BLUE"
-                                                engravingText="qwertyy"
-                                                dateRedeemed="2024-10-23 05:45:35"
-                                                datePendingCollection="2024-10-23 06:29:11"
-                                                dateCollected="2024-10-23 06:59:48"
-                                            />
-                                        </Box></>
+                                    </Box></>
                                     )}
                                 </>
                             ) : (
                                 // Overlay prompt
                                 <Box sx={{
-                                    height: '100%',
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                    height: '100%', 
+                                    width: '100%', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    backgroundColor: 'rgba(0, 0, 0, 0.6)', 
                                     color: 'white'
                                 }}>
                                     <Typography variant="h6">Select a ticket to edit</Typography>
@@ -656,7 +865,7 @@ function MasterAdmin() {
                     <Snackbar open={openToast} autoHideDuration={3000} onClose={closeToast}>
                         <Alert
                             onClose={closeToast}
-                            severity={toastSeverity}
+                            severity= {toastSeverity}
                             variant="filled"
                             sx={{ width: 'auto' }}>
                             {toastMessage}
