@@ -130,7 +130,10 @@ namespace AWSServerless1.DAL
             {
                 using (var context = new Openhouse25Context())
                 {
-                    result.AddRange(context.Visitors.ToList());
+                    var qSortedVisitor = from q in context.Visitors
+                                         orderby q.VisitorId ascending
+                                         select q;
+                    result.AddRange(qSortedVisitor.ToList());
                 }
             }
             catch (Exception ex)
@@ -171,6 +174,34 @@ namespace AWSServerless1.DAL
             {
                 result = null;
                 Console.WriteLine($"An Exception have occurred in GetAllVisitorsAndVisitorBooths() - {ex.Message}");
+            }
+
+            return result;
+        }
+
+        internal static Visitor RemoveVisitorPhotoByVisitorId(int visitorId)
+        {
+            Visitor result = null;
+
+            try
+            {
+                using (var context = new Openhouse25Context())
+                {
+                    var qVisitorToUpdate = from q in context.Visitors
+                                           where q.VisitorId == visitorId
+                                           select q;
+                    if (qVisitorToUpdate != null)
+                    {
+                        var visitorToUpdate = qVisitorToUpdate.First();
+                        visitorToUpdate.ProfileImageUrl = null;
+                        context.SaveChanges();
+                        result = visitorToUpdate;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An Exception have occurred in RemoveVisitorPhotoByVisitorId(visitorId: {visitorId}) - {ex.Message}");
             }
 
             return result;

@@ -13,7 +13,7 @@ namespace AWSServerless1.WebSocket
     {
         public enum WEBSOCKET_GROUP_TYPES { VISITOR, BOOTHADMIN, MONTAGE };
         public enum WEBSOCKET_ACTION_TYPES { ping, direct, broadcast, register };
-        public enum WEBSOCKET_COMMAND_TYPES { UPDATE_PHOTO, UPDATE_STAMP, UPDATE_WORKSHOP, UPDATE_REDEMPTION_STATUS, JIGGLE, UPDATE_PHOTOS, UPDATE_QUEUES };
+        public enum WEBSOCKET_COMMAND_TYPES { UPDATE_PHOTO, UPDATE_STAMP, UPDATE_WORKSHOP, UPDATE_REDEMPTION_STATUS, JIGGLE, UPDATE_PHOTOS, UPDATE_QUEUES, REMOVE_PHOTO };
 
         private static readonly String authKey;
         private static readonly String wsURL;

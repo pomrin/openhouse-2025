@@ -48,6 +48,27 @@ namespace OHMontageUWP.ViewModel
             return result;
         }
 
+        internal bool InsertNewPhoto(int index, String imageUrl = null, String ticketId = null)
+        {
+            bool result = false;
+            if (this.Photos.Count() < DEFAULT_NUMBER_OF_PHOTOS_TO_DISPLAY)
+            {
+                var photoControlVM = new PhotoControlVM();
+                if (!String.IsNullOrEmpty(imageUrl))
+                {
+                    photoControlVM.ImageUrl = imageUrl;
+                }
+                if (!String.IsNullOrEmpty(ticketId))
+                {
+                    photoControlVM.TicketId = ticketId;
+                }
+                index = Math.Min(index, this.Photos.Count()); // If the index to insert is larger than the list, it will append to the last
+                this.Photos.Insert(index, photoControlVM);
+                result = true;
+            }
+            return result;
+        }
+
         public ObservableCollection<PhotoControlVM> Photos { get; private set; }
     }
 }
