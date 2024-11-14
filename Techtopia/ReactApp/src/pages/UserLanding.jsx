@@ -1001,10 +1001,10 @@ function UserLanding() {
                             </Box>
                         </Box>
                         <Box className="buttonsBorder" style={{marginTop:'20px'}}>
-                            <Button className="toggleButtons" onClick={() => toggleView('Stamps')} style={{ fontWeight:'bold', color:'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Stamps' ? '#ccc' : 'transparent' }}>
+                            <Button className="toggleButtons" onClick={() => toggleView('Stamps')} style={{ fontWeight:'bold', color: view === 'Stamps' ? 'white': 'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Stamps' ? '#0c4ca3' : 'transparent' }}>
                                 Stamps
                             </Button>
-                            <Button className="toggleButtons" onClick={() => toggleView('Workshops')} style={{fontWeight:'bold', color:'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Workshops' ? '#ccc' : 'transparent' }}>
+                            <Button className="toggleButtons" onClick={() => toggleView('Workshops')} style={{fontWeight:'bold', color: view === 'Workshops' ? 'white': 'black' ,border:'1px solid black', borderRadius:'10px 10px 0px 0px', padding: '10px', backgroundColor: view === 'Workshops' ? '#0c4ca3   ' : 'transparent' }}>
                                 Workshops
                             </Button>
                         </Box>
