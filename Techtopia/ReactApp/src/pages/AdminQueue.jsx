@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Typography, Grid, Modal, Button, FormControl, InputLabel, Select, MenuItem, TextField, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTimes } from 'react-icons/fa';
@@ -32,6 +32,8 @@ function AdminQueue() {
     const [errorMessageUpdate, setErrorMessage] = useState('');
     const [errorMessageDelete, setErrorMessageDelete] = useState('');
     const [selectedError, setSelectedError] = useState('');
+
+    const hasConnectedWebsocket = useRef(false);
 
 
 
@@ -204,8 +206,10 @@ function AdminQueue() {
 
                 const data = response.data;
 
-
-                dispatch(connectWebSocket({ ticketId: ticket_id, userGroup: "BOOTHADMIN", onMessageHandler }));
+                if (!hasConnectedWebsocket.current) {
+                    hasConnectedWebsocket.current = true; // Mark as fetched
+                    dispatch(connectWebSocket({ ticketId: ticket_id, userGroup: "BOOTHADMIN", onMessageHandler }));
+                }
 
                 setQueues({
                     queue: data.queue || [],

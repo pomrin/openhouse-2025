@@ -45,10 +45,12 @@ namespace AWSServerless1.Controllers
                 switch (currentQueueStatus)
                 {
                     case QueueDAL.QUEUE_STATUS.IN_QUEUE:
-                        // TODO: Update the Engraving text
+                        // Update the Engraving text
                         queue = QueueDAL.UpdateEngravingText(visitorEntity.VisitorId, adminEngravingTextDTO.EngravingText);
                         if (queue != null)
                         {
+                            // Broadcast message to update the queue
+                            var broadcastAdminTask = await WebsocketMessageHelper.BroadcastMessage(WebsocketMessageHelper.WEBSOCKET_GROUP_TYPES.BOOTHADMIN, WebsocketMessageHelper.WEBSOCKET_COMMAND_TYPES.UPDATE_QUEUES); // To update all the queues
                             return Ok(queue);
                         }
                         else
