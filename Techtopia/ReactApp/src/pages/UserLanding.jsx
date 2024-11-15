@@ -8,10 +8,10 @@ import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
 import itStamp from './../assets/images/it_stamp.svg';
-// import workshopAstamp from './../assets/images/workshopstamp.png'
-// import workshopBstamp from './../assets/images/workshopstamp.png'
-// import workshopCstamp from './../assets/images/workshopstamp.png'
-// import workshopDstamp from './../assets/images/workshopstamp.png'
+import workshopAstamp from './../assets/images/workshopstamp.png'
+import workshopBstamp from './../assets/images/workshopstamp.png'
+import workshopCstamp from './../assets/images/workshopstamp.png'
+import workshopDstamp from './../assets/images/workshopstamp.png'
 
 import commonStamp from './../assets/images/common_stamp.svg'
 import jiggle from './../assets/images/jiggle.png';
@@ -76,10 +76,10 @@ function UserLanding() {
     const [ftStampSource, setFtStampSource] = useState( ftStamp );
     const [itStampSource, setItStampSource] = useState(itStamp);
 
-    const [workshopAStampSource, setWorkshopAStampSource] = useState( null ); //workshopAstamp
-    const [workshopBStampSource, setWorkshopBStampSource] = useState( null );//workshopBstamp
-    const [workshopCStampSource, setWorkshopCStampSource] = useState( null );//workshopCstamp
-    const [workshopDStampSource, setWorkshopDStampSource] = useState( null );//workshopDstamp
+    const [workshopAStampSource, setWorkshopAStampSource] = useState( workshopAstamp ); //workshopAstamp
+    const [workshopBStampSource, setWorkshopBStampSource] = useState( workshopBstamp );//workshopBstamp
+    const [workshopCStampSource, setWorkshopCStampSource] = useState( workshopCstamp );//workshopCstamp
+    const [workshopDStampSource, setWorkshopDStampSource] = useState( workshopCstamp );//workshopDstamp
 
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
@@ -842,11 +842,18 @@ function UserLanding() {
             const timestamp = new Date().getTime();
             console.log(`${aiStamp}?t=${timestamp}`)
             fetchBoothStatus();
-            fetchWorkshopStatus();
             setAiStampSource(`${aiStamp}?t=${timestamp}`);
             setCsStampSource(`${csStamp}?t=${timestamp}`);
             setFtStampSource(`${ftStamp}?t=${timestamp}`);
             setItStampSource(`${itStamp}?t=${timestamp}`);
+            console.log("Stamps updated");
+        }, 2000); // 2000 milliseconds = 2 seconds
+    };
+
+    const refreshWorkshop = () => {
+        setTimeout(() => {
+            const timestamp = new Date().getTime();
+            fetchWorkshopStatus();
             setWorkshopAStampSource(`${workshopAstamp}?t=${timestamp}`);
              setWorkshopBStampSource(`${workshopBstamp}?t=${timestamp}`);
              setWorkshopCStampSource(`${workshopCstamp}?t=${timestamp}`);
@@ -887,6 +894,8 @@ function UserLanding() {
         // Call the functions if specific messages are received
         if (messageData.command === 'UPDATE_STAMP') {
             refreshStamps(messageData.message);
+        } else if (messageData.command === 'UPDATE_WORKSHOP') {
+            refreshWorkshop(messageData.message);
         } else if (messageData.command === 'UPDATE_PHOTO') {
             refreshProfilePicture(messageData.message);
         } else if (messageData.command === 'REMOVE_PHOTO') {
