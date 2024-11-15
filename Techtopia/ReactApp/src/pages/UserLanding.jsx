@@ -7,13 +7,15 @@ import 'reactjs-popup/dist/index.css';
 import aiStamp from './../assets/images/ai_stamp.svg';
 import csStamp from './../assets/images/cs_stamp.svg';
 import ftStamp from './../assets/images/ft_stamp.svg';
-import itStamp from './../assets/images/it_stamp.svg';
-import workshopAstamp from './../assets/images/workshopstamp.png'
-import workshopBstamp from './../assets/images/workshopstamp.png'
-import workshopCstamp from './../assets/images/workshopstamp.png'
-import workshopDstamp from './../assets/images/workshopstamp.png'
+import itStamp from './../assets/images/dit_stamp.png';
+import workshopAstamp from './../assets/images/ditworkshop.png'
+import workshopBstamp from './../assets/images/dbftworkshop.png'
+import workshopCstamp from './../assets/images/cyberworkshop.png'
+import workshopDstamp from './../assets/images/aiworkshop.png'
 
-import commonStamp from './../assets/images/common_stamp.svg'
+import commonStamp from './../assets/images/stampme.png';
+import commonWorkshopStamp from './../assets/images/joinworkshop.png'
+
 import jiggle from './../assets/images/jiggle.png';
 import clickHereStamp from './../assets/images/clickHere_stamp.svg';
 import noImageUploaded from './../assets/images/noImageUploaded.png';
@@ -71,15 +73,17 @@ function UserLanding() {
     const [boothButtonColor, setBoothButtonColor] = useState('red'); // Original color
 
     const [commonStampSource, setCommonStampSource] = useState( commonStamp );
+    const [commonWorkshopStampSource, setCommonWorkshopStampSource] = useState( commonWorkshopStamp );
+
     const [aiStampSource, setAiStampSource] = useState( aiStamp );
     const [csStampSource, setCsStampSource] = useState( csStamp );
     const [ftStampSource, setFtStampSource] = useState( ftStamp );
     const [itStampSource, setItStampSource] = useState(itStamp);
 
-    const [workshopAStampSource, setWorkshopAStampSource] = useState( workshopAstamp ); //workshopAstamp
-    const [workshopBStampSource, setWorkshopBStampSource] = useState( workshopBstamp );//workshopBstamp
-    const [workshopCStampSource, setWorkshopCStampSource] = useState( workshopCstamp );//workshopCstamp
-    const [workshopDStampSource, setWorkshopDStampSource] = useState( workshopCstamp );//workshopDstamp
+    const [workshopAStampSource, setWorkshopAStampSource] = useState( workshopAstamp ); 
+    const [workshopBStampSource, setWorkshopBStampSource] = useState( workshopBstamp );
+    const [workshopCStampSource, setWorkshopCStampSource] = useState( workshopCstamp );
+    const [workshopDStampSource, setWorkshopDStampSource] = useState( workshopDstamp );
 
     const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
@@ -277,10 +281,10 @@ function UserLanding() {
                      stampVisibility('W_SE');
                  }
                  if (values.includes(3)) {
-                     stampVisibility('W_Cloud');
+                     stampVisibility('W_CS');
                  }
                  if (values.includes(2)) {
-                     stampVisibility('W_DA');
+                     stampVisibility('W_FT');
                  }
                  if (values.includes(1) && values.includes(2) && values.includes(3) && values.includes(4)) {
                      refreshRedemptionStatus();
@@ -626,10 +630,10 @@ function UserLanding() {
             case 'W_SE':
                 setWorkshopAStampVisible(true);
                 break;
-            case 'W_DA':
+            case 'W_FT':
                 setWorkshopBStampVisible(true);
                 break;
-            case 'W_Cloud':
+            case 'W_CS':
                 setWorkshopCStampVisible(true);
                 break;
             case 'W_AI':
@@ -1065,19 +1069,19 @@ function UserLanding() {
                         <Box className="stampsWrap">
                         <Box className="stampsBox">
                             <Box className="stamps">
-                                <Typography variant="subtitle1">Workshop A</Typography>
+                                <Typography variant="subtitle1">Software Engineering</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isWorkshopAStampVisible ? workshopAStampSource : commonStampSource}
+                                    src={isWorkshopAStampVisible ? workshopAStampSource : commonWorkshopStampSource}
                                     alt="Astamps"
                                     width="100%"
                                 />
                             </Box>
                             <Box className="stamps">
-                                <Typography variant="subtitle1">Workshop B</Typography>
+                                <Typography variant="subtitle1">Fintech</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isWorkshopBStampVisible ? workshopBStampSource : commonStampSource}
+                                    src={isWorkshopBStampVisible ? workshopBStampSource : commonWorkshopStampSource}
                                     alt="Bstamps"
                                     width="100%"
                                 />
@@ -1085,19 +1089,19 @@ function UserLanding() {
                         </Box>
                         <Box className="stampsBox">
                             <Box className="stamps">
-                                <Typography variant="subtitle1">Workshop C</Typography>
+                                <Typography variant="subtitle1">Cyber Security</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isWorkshopCStampVisible ? workshopCStampSource : commonStampSource}
+                                    src={isWorkshopCStampVisible ? workshopCStampSource : commonWorkshopStampSource}
                                     alt="Cstamps"
                                     width="100%"
                                 />
                             </Box>
                             <Box className="stamps">
-                                <Typography variant="subtitle1">Workshop D</Typography>
+                                <Typography variant="subtitle1">Artificial Intelligence</Typography>
                                 <img
                                     className="stampImage"
-                                    src={isWorkshopDStampVisible ? workshopDStampSource : commonStampSource}
+                                    src={isWorkshopDStampVisible ? workshopDStampSource : commonWorkshopStampSource}
                                     alt="Dstamps"
                                     width="100%"
                                 />
