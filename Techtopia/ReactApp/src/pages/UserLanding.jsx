@@ -375,7 +375,7 @@ function UserLanding() {
                 // var data = JSON.parse(response);
                 // console.log(`data: ${response.data["profileImageUrl"]}`);
                 if (response.data["profileImageUrl"]) {
-                    console.log('LOAD USER: IAM FIRST')
+                    console.log('LOAD USER: IAM FIRST');
                     //var profileImageUrl = response.data["profileImageUrl"];
                     image = response.data["profileImageUrl"];
                     var fullPath = `${imageRepo}${ticket_id}/${image}?t=${new Date().getTime()}`;
@@ -432,6 +432,10 @@ function UserLanding() {
                     await fetchRedemption();
                     await fetchBoothStatus();
                     await fetchWorkshopStatus();
+                }
+                const photoUploadedStatus = JSON.parse(localStorage.getItem('isPhotoUploaded'));
+                if (photoUploadedStatus !== null) {
+                    setIsPhotoUploaded(photoUploadedStatus); // Update the state from localStorage
                 }
 
             } catch (error) {
@@ -855,11 +859,15 @@ function UserLanding() {
 
 
     const [imageSource, setImageSource] = useState('');
+    const [isPhotoUploaded, setIsPhotoUploaded] = useState(() => {
+        return JSON.parse(localStorage.getItem('isPhotoUploaded')) || true;
+    });
 
     // Function to refresh the profile picture
     const refreshProfilePicture = () => {
         setTimeout(() => {
-            console.log('Refresh pic: Iam first')
+            localStorage.setItem('isPhotoUploaded', JSON.stringify(true));
+            setIsPhotoUploaded(true);
             const photoLink = `${imageRepo}${ticket_id}/${image}`;
             console.log('second path', photoLink)
             LoadUserData(ticket_id);
@@ -868,12 +876,21 @@ function UserLanding() {
         }, 5000); // 5000 milliseconds = 5 seconds
     };
 
+    const removePhoto = () => {
+        setImageSource(noImageUploaded); // Set the image to fallback image
+        localStorage.setItem('isPhotoUploaded', JSON.stringify(false));
+        setJiggleVisible(false);
+        console.log("Photo removed");
+    };    
+
     function onMessageHandler(messageData) {
         // Call the functions if specific messages are received
         if (messageData.command === 'UPDATE_STAMP') {
             refreshStamps(messageData.message);
         } else if (messageData.command === 'UPDATE_PHOTO') {
             refreshProfilePicture(messageData.message);
+        } else if (messageData.command === 'REMOVE_PHOTO') {
+            removePhoto(messageData.message);
         } else if (messageData.command === 'UPDATE_QUEUES') {
             refreshQueueNumber(messageData.message);
         } else if (messageData.command === 'UPDATE_REDEMPTION_STATUS') {
@@ -942,7 +959,7 @@ function UserLanding() {
                             <a href={form_sg} target="_blank" rel="noopener noreferrer">
                                 <Box className={`profilePicture ${isHighlighted ? "rainbow-border" : ""}`} sx={{ position: "relative" }}>
                                     <img
-                                        src={imageSource}
+                                        src={isPhotoUploaded ? imageSource : noImageUploaded}
                                         alt="Profile"
                                         className="profileImage"
                                         onError={(e) => {
@@ -1179,6 +1196,14 @@ function UserLanding() {
                     sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
                 >
                     Clear Local Storage
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={removePhoto}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}
+                >
+                    remove photo
                 </Button>
             </Box>
         </Box>
