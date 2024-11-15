@@ -30,8 +30,8 @@ function Selectbooth() {
     { boothId: '5', boothName: 'Redemption' },
     { boothId: '6', boothName: 'Engraving' },
     { workshopId: '1', boothName: 'Software Engineering' },
-    { workshopId: '2', boothName: 'Data Analytics' },
-    { workshopId: '3', boothName: 'Cloud' },
+    { workshopId: '2', boothName: 'FinTech' },
+    { workshopId: '3', boothName: 'Cyber Security' },
     { workshopId: '4', boothName: 'Artificial Intelligence' },
   ];
 

@@ -166,8 +166,8 @@ function CustomSidebar() {
                       <SubMenu icon={<ReceiptLongIcon />} label="Scan Workshops">
                         {[
                           { workshopId: '1', boothName: 'Software Engineering' },
-                          { workshopId: '2', boothName: 'Data Analytics' },
-                          { workshopId: '3', boothName: 'Cloud' },
+                          { workshopId: '2', boothName: 'FinTech' },
+                          { workshopId: '3', boothName: 'Cyber Security' },
                           { workshopId: '4', boothName: 'Artificial Intelligence' },
                         ].map(booth => (
                           <MenuItem
