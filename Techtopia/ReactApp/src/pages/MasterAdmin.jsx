@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { Box, IconButton, Typography, Grid, Button, RadioGroup } from '@mui/material';
-import { DataGrid, selectedGridRowsSelector } from '@mui/x-data-grid';
+import { Box, IconButton, Typography, Grid, Button, RadioGroup, TextField } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -15,13 +15,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Completed Booth Icon
 import CancelIcon from '@mui/icons-material/Cancel'; // Uncompleted Booth Icon
 
-import noImageUploaded from './../assets/images/noImageUploaded.png';
-
 import http from './http.js';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-// Not ready > Remove profile img | Update/Display collection status
+// Not ready > Update/Display Queue status
 
 function MasterAdmin() {
     const navigate = useNavigate();
@@ -153,7 +151,6 @@ function MasterAdmin() {
     const [toastMessage, setToastMessage] = useState('');
     const [toastSeverity, setToastSeverity] = useState('info');
 
-
     const showToast = (message, severity) => {
         setToastMessage(message);
         setToastSeverity(severity);
@@ -222,7 +219,7 @@ function MasterAdmin() {
         padding: '1.5%'
     };
 
-    const redemptionFormContainer = {
+    const formContentContainer = {
         backgroundColor: 'rgb(235,235,235,0.9)',
         display: 'flex',
         flexDirection: 'column',
@@ -299,43 +296,51 @@ function MasterAdmin() {
         setSelectedTicket(ticketData); 
     };
 
-    // Visitor's profile picture 
+    // Visitor's profile picture ]
+    const removeProfilePicture = async () => {
+        await removeVisitorPicture(selectedTicket.ticketId);
+    };
+
+    // Conditional content rendering for visitor profile picture container
     const VisitorProfilePhotoContent = ({ profilePhotoSrc }) => {
         return (
             <Box id="visitorPictureContent" style={ticketContentContainer}>
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>Visitor's Profile Picture</Typography>
-                <Grid container spacing={1} sx={{ padding: '5pz', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Grid item xy={10} sx={{ height: '145px', width: '145px' }}>
-                    <img
-                        src={profilePhotoSrc}
-                        alt="Profile Image"
-                        className="profileImage"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = noImageUploaded; // Fallback image on error
-                        }}
-                    />
-                    </Grid>
-                    <Grid item xy={2}>
-                        <Button variant="outlined" color="error" onClick={removeProfilePicture} sx={{ my: '10px'}}>
-                            Remove Profile Picture
-                        </Button>
-                    </Grid>
+                <Grid container spacing={1} sx={{ padding: '5px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {profilePhotoSrc ? (
+                        <>
+                            {/* Visitor's profile image */}
+                            <Grid item xy={10} sx={{ height: '145px', width: '145px' }}>
+                                <img
+                                    src={profilePhotoSrc}
+                                    alt="Profile Image"
+                                    className="profileImage"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                    }}
+                                />
+                            </Grid>
+                            
+                            {/* Remove profile picture button */}
+                            <Grid item xy={2}>
+                                <Button 
+                                    variant="outlined" 
+                                    color="error" 
+                                    onClick={removeProfilePicture}
+                                    sx={{ my: '10px' }}
+                                >
+                                    Remove Profile Picture
+                                </Button>
+                            </Grid>
+                        </>
+                    ) : (
+                        <Typography variant="body1" color="textSecondary" sx={{ my: '10px' }}>
+                            No profile picture 
+                        </Typography>
+                    )}
                 </Grid>
             </Box>
-        )
-    };
-
-    // Delete visitor profile picture
-    const removeProfilePicture = async () => {
-        try {
-            console.log('api thingy happens');
-        } catch (error) {
-            console.log("Error deleting visitor's profile picture:", error);
-            showToast('An error occurred while removing profile picture. Please try again.', 'error');
-        } finally {
-            console.log('loader is gone~');
-        }
+        );
     };
 
     // Booth Statuses display on right panel
@@ -406,9 +411,19 @@ function MasterAdmin() {
         );
     };
 
-    // Redemption Form
+    // Redemption / Engraving Form
     const [isRedemptionFormVisible, setRedemptionFormVisible] = useState(false);
+    const [isUpdEngravingFormVisible, setUpdEngravingFormVisible] = useState(false);
+    const formRef = useRef(null);
 
+    // Auto scroll to any active form
+    useEffect(() => {
+        if (formRef.current && (isRedemptionFormVisible || isUpdEngravingFormVisible)) {
+            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [isRedemptionFormVisible, isUpdEngravingFormVisible]);
+
+    // Update Redemption Form
     const displayRedemptionForm = () => {
         setRedemptionFormVisible(true);
     };
@@ -416,87 +431,10 @@ function MasterAdmin() {
     const closeRedemptionForm = () => {
         setRedemptionFormVisible(false);
     };
-
-    // Ticket Redemption & Collection status [COLLECTION HARDCODED TEMPORARILY]
-    const RedemptionStatus = ({ tagRedemptionStatus, collectionStatus, tagColor, engravingText, dateRedeemed, datePendingCollection, dateCollected }) => {
-        return (
-            <Box id="redemptionStatusContent" style={ticketContentContainer}>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>Luggage Tag Redemption Status</Typography>
-                <Grid container spacing={1} sx={{ padding: '1%' }}>
-                    <Grid item xs={10} sx={{ marginLeft: '15px', display: 'flex', flexDirection: 'row' }}>
-                        <Typography sx={{ fontWeight: 500 }}>Redemption Status:</Typography>
-                        <Typography sx={{ fontWeight: 600, marginLeft: '10px' }}>{tagRedemptionStatus}</Typography>
-                    </Grid>
-
-                    {/* Redemption Status */}
-                    <Grid container id="redemptionInfo" style={redemptionInfoContainer}> 
-                        <Grid item xs={4} sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Luggage Tag Color:</Typography>
-                            <Typography variant="caption">{tagColor}</Typography>
-                        </Grid>
-                        <Grid item xs={4} sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Engraving Text:</Typography>
-                            <Typography variant="caption">{engravingText}</Typography>
-                        </Grid>
-                        <Grid item xs={4} sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Date Redeemed:</Typography>
-                            <Typography variant="caption">{dateRedeemed}</Typography>
-                        </Grid>
-                    </Grid>
-
-                    {/* Collection Status */}
-                    <Grid container id="collectionInfo" style={redemptionInfoContainer}>
-                        <Grid item xs={8} sx={{ margin: '-20px 0 18px 15px', display: 'flex', flexDirection: 'row' }}>
-                            <Typography sx={{ marginBottom: '5px', fontWeight: 500 }}>Collection Status:</Typography>
-                            <Typography sx={{ fontWeight: 600, marginLeft: '10px' }}>{collectionStatus}</Typography>
-                        </Grid>
-                        <Grid item xs={6} sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Date Pending Collection:</Typography>
-                            <Typography variant="caption">{datePendingCollection}</Typography>
-                        </Grid>
-                        <Grid item xs={6} sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Date Collected:</Typography>
-                            <Typography variant="caption">{dateCollected}</Typography>
-                        </Grid>
-                    </Grid>
-
-                    {/* Update Buttons Container [DISPLAY IF COLLECTION STATUS NOT COLLECTED] */}
-                    <Box id="buttonsContainer" style={btnContainerStyle}>
-                        <Button variant="contained" onClick={displayRedemptionForm} sx={{ 
-                            backgroundColor: '#FFA24A' ,
-                            '&:hover': { backgroundColor: '#e59444' } 
-                            }}>
-                            Update Redemption Info 
-                        </Button>
-                        <Button variant="contained" sx={{ 
-                            backgroundColor: 'white', 
-                            color: 'black',
-                            '&:hover': { backgroundColor: '#f2f2f2' }
-                            }}>
-                            Update Collection Status 
-                        </Button>
-                    </Box>
-                </Grid>
-            </Box>
-        );
-    };
-
-    // Handle tag color form submission
-    const submitUpdatesToRedemption = async () => {
-        try {
-            const result = await updateVisitorTag(selectedTicket.ticketId, selectedColor);
-
-        } catch (error) {
-            console.log('Error updating redemption status:', error);
-            showToast('An error occurred while updating the tag. Please try again.', 'error');
-        } finally {
-            setSelectedColor(null);
-        }
-    };
-
-    // RedemptionFormContent updates with close button
+    
+    // Redemption Form content
     const RedemptionFormContent = ({ closeForm }) => (
-        <Box id="updateRedemptionFormContent" style={redemptionFormContainer}>
+        <Box id="updateRedemptionFormContent" style={formContentContainer}>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>Update Redemption Information</Typography>
             <Typography variant="body2">TicketID: {selectedTicket.ticketId}</Typography>
             <FormControl component='fieldset' id="updateRedemptionForm" sx={{ alignItems: 'flex-start' }}>
@@ -520,6 +458,236 @@ function MasterAdmin() {
             </FormControl>
         </Box>
     );
+
+    // Handle tag color form submission
+    const submitUpdatesToRedemption = async () => {
+        try {
+            const result = await updateVisitorTag(selectedTicket.ticketId, selectedColor);
+
+        } catch (error) {
+            console.log('Error updating redemption status:', error);
+            showToast('An error occurred while updating the tag. Please try again.', 'error');
+        } finally {
+            setSelectedColor(null);
+        }
+    };
+    
+    // Update Engraving Form
+    const displayEngravingForm = () => {
+        setUpdEngravingFormVisible(true);
+    };
+
+    const closeEngravingForm = () => {
+        setUpdEngravingFormVisible(false);
+    };
+
+    // Engraving Form content
+    const EngravingFormContent = ({ closeForm }) => {
+        const [newEngravingText, setNewEngravingText] = useState('');
+        const [warning, setWarning] = useState('');
+    
+        // Validation rules for the text field
+        const validateEngravingText = (text) => {
+            if (!text) {
+                setWarning('Text field cannot be empty.');
+                return false;
+            }
+            if (text.length > 12) { // soft locked at 12 char
+                setWarning('Too many characters. Maximum is 12.');
+                return false;
+            }
+            setWarning(''); // No invalidation
+            return true;
+        };
+    
+        // Handle input change
+        const handleInputChange = (event) => {
+            const text = event.target.value;
+            setNewEngravingText(text);
+            validateEngravingText(text);
+        };
+    
+        // Handle form submission
+        const submitUpdatesToEngraving = async () => {
+            if (validateEngravingText(newEngravingText)) {
+                try {
+                    const result = await updateEngravingText(selectedTicket.ticketId, newEngravingText)
+                
+                } catch (error) {
+                    console.log('Error updating engraving text:', error)
+
+                }
+            }
+        };
+    
+        // Button disabled state
+        const isButtonDisabled = !newEngravingText || !!warning;
+    
+        return (
+            <Box id="updateEngravingFormContent" style={formContentContainer}>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    Update Engraving Text
+                </Typography>
+                <Typography variant="body2" sx={{ marginBottom: '2%' }}>
+                    TicketID: {selectedTicket.ticketId}
+                </Typography>
+                <FormControl component="fieldset" id="updateEngravingForm" fullWidth>
+                    <TextField
+                        required
+                        id="newEngravingText"
+                        label="Text to Engrave"
+                        autoComplete='off'
+                        onChange={handleInputChange}
+                        error={!!warning}
+                        helperText={warning || ' '}
+                    />
+                    {/* Form buttons container */}
+                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center', alignContent: 'center' }}>
+                        <Button
+                            style={isButtonDisabled ? disabledButtonStyle : submitFormBtnStyle}
+                            onClick={submitUpdatesToEngraving}
+                            disabled={isButtonDisabled}
+                        >
+                            Update
+                        </Button>
+    
+                        <Button onClick={closeForm} style={returnBtnStyle}>
+                            Cancel
+                        </Button>
+                    </Box>
+                </FormControl>
+            </Box>
+        );
+    };
+
+    // Queue
+    // Test cases | In queue - 0686 | Engraving - 0174 | Pending Collection - 0385TUE | Collected - 0076MON
+    const TicketDetails = ({ selectedTicket }) => {
+        const [queue, setQueue] = useState({
+            queueStatus: '',
+            engravingText: '',
+            datePendingCollection: '',
+            dateCollected: '',
+        });
+
+        useEffect(() => {
+            if (selectedTicket?.ticketId) {
+                const fetchQueueStatus = async () => {
+                    const data = await retrieveCollectionInformation(selectedTicket.ticketId);
+                    if (data) {
+                        setQueue({
+                            queueStatus: data.queueStatus || '---',
+                            engravingText: data.textToEngrave || '---',
+                            datePendingCollection: data.datePendingCollection || '---',
+                            dateCollected: data.dateCollected || '---',
+                        });
+                    }
+                };
+                fetchQueueStatus();
+            }
+        }, [selectedTicket]);
+
+        return { queue }; 
+    };
+
+    const { queue } = TicketDetails({ selectedTicket });
+
+    // Ticket Redemption & Queue status 
+    const RedemptionStatus = ({ tagRedemptionStatus, tagColor, dateRedeemed }) => {
+        return (
+            <Box id="redemptionStatusContent" style={ticketContentContainer}>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>Luggage Tag Redemption Status</Typography>
+                <Grid container spacing={1} sx={{ padding: '1%' }}>
+                    <Grid item xs={10} sx={{ marginLeft: '15px', display: 'flex', flexDirection: 'row' }}>
+                        <Typography sx={{ fontWeight: 500 }}>Redemption Status:</Typography>
+                        <Typography sx={{ fontWeight: 600, marginLeft: '10px' }}>{tagRedemptionStatus}</Typography>
+                    </Grid>
+    
+                    {/* Redemption Status */}
+                    <Grid container id="redemptionInfo" style={redemptionInfoContainer}>
+                        <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Luggage Tag Color:</Typography>
+                            <Typography variant="caption">{tagColor}</Typography>
+                        </Grid>
+                        <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Engraving Text:</Typography>
+                            <Typography variant="caption">{queue.engravingText || '---'}</Typography>
+                        </Grid>
+                        <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Date Redeemed:</Typography>
+                            <Typography variant="caption">{dateRedeemed}</Typography>
+                        </Grid>
+                    </Grid>
+    
+                    {/* Queue Status */}
+                    <Grid container id="QueueInfo" style={redemptionInfoContainer}>
+                        <Grid item xs={8} sx={{ margin: '-20px 0 18px 15px', display: 'flex', flexDirection: 'row' }}>
+                            <Typography sx={{ marginBottom: '5px', fontWeight: 500 }}>Queue Status:</Typography>
+                            <Typography sx={{ fontWeight: 600, marginLeft: '10px' }}>{queue.queueStatus || '---'}</Typography>
+                        </Grid>
+                        <Grid item xs={6} sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Date Pending Collection:</Typography>
+                            <Typography variant="caption">{queue.datePendingCollection || '---'}</Typography>
+                        </Grid>
+                        <Grid item xs={6} sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>Date Collected:</Typography>
+                            <Typography variant="caption">{queue.dateCollected || '---'}</Typography>
+                        </Grid>
+                    </Grid>
+    
+                    {/* Update Buttons Container */}
+                    <Box id="buttonsContainer" style={btnContainerStyle}>
+                        {/* Update Redemption Info Button */}
+                        {selectedTicket.redemptionStatus !== 'Redeemed' && (
+                            <Button
+                                variant="contained"
+                                onClick={displayRedemptionForm}
+                                sx={{
+                                    width: '30%',
+                                    backgroundColor: '#FFA24A',
+                                    color: 'white',
+                                    '&:hover': { backgroundColor: '#e59444' },
+                                }}
+                            >
+                                Update Redemption Info
+                            </Button>
+                        )}
+
+                        {/* Change Engraving Text Button */}
+                        {queue.queueStatus === 'In queue' && (
+                            <Button
+                                variant="contained"
+                                onClick={displayEngravingForm}
+                                sx={{
+                                    width: '30%',
+                                    backgroundColor: '#4CAF50',
+                                    color: 'white',
+                                    '&:hover': { backgroundColor: '#43A047' },
+                                }}
+                            >
+                                Change Engraving Text
+                            </Button>
+                        )}
+
+                        {/* Mark as Collected Button */}
+                        {queue.queueStatus === 'In queue' && (
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    width: '30%',
+                                    backgroundColor: 'white',
+                                    color: 'black',
+                                    '&:hover': { backgroundColor: '#f2f2f2' },
+                                }}
+                            >
+                                Mark as Collected
+                            </Button>
+                        )}
+                    </Box>
+                </Grid>
+            </Box>
+        );
+    };
 
     // Tag Color buttons for redemption/update form
     const TagColorsRadioBtns = ({ tagColors, selectedColor, setSelectedColor }) => {
@@ -581,8 +749,6 @@ function MasterAdmin() {
     
     // (1a) Retrieve tickets from API [ ticketID, booth statuses, redemption status ]
     const getVisitorTickets = async (offset, noOfRows) => {
-        setLoading(true);
-    
         try {
             const response = await http.get(`${apiUrl}/AdminVisitorWithBooths`, {
                 params: {
@@ -595,8 +761,6 @@ function MasterAdmin() {
         } catch (error) {
             console.log('Error fetching visitor tickets:', error);
             showToast('Error fetching visitor tickets.', 'error');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -722,7 +886,111 @@ function MasterAdmin() {
         }
     };
 
-    // (4a) API (PUT) call to add booth stamp
+    // (4) API call and retrieve collection information for a specific ticket ID
+    const retrieveCollectionInformation = async (ticketId) => {
+        try {
+            // Get queue information
+            const response = await http.get(`${apiUrl}/AdminQueue`, {
+                params: {
+                    limit: noOfRows
+                }
+            });
+
+            if (response.data) {
+                // Search and transform the data for the specific ticket ID
+                const allQueues = [
+                    ...response.data.queue,
+                    ...response.data.queueEngraving,
+                    ...response.data.queuePendingCollection,
+                    ...response.data.queueCollected
+                ];
+
+                const ticketInfo = allQueues.find(ticket => {
+                    return ticket.ticketId === ticketId;
+                });
+
+                if (ticketInfo) {
+                    let queueStatus = '';
+
+                    if (response.data.queue.some(ticket => ticket.ticketId === ticketId)) {
+                        queueStatus = 'In queue'; // In the "queue" list
+                    } else if (response.data.queueEngraving.some(ticket => ticket.ticketId === ticketId)) {
+                        queueStatus = 'Currently Engraving'; // In the "queueEngraving" list
+                    } else if (response.data.queuePendingCollection.some(ticket => ticket.ticketId === ticketId)) {
+                        queueStatus = 'Pending Collection'; // In the "queuePendingCollection" list
+                    } else if (response.data.queueCollected.some(ticket => ticket.ticketId === ticketId)) {
+                        queueStatus = 'Collected'; // In the "queueCollected" list
+                    }
+
+                    return {
+                        queueStatus,
+                        textToEngrave: ticketInfo.textToEngrave,
+                        datePendingCollection: ticketInfo.datePendingCollection,
+                        dateCollected: ticketInfo.dateCollected,
+                    };
+                } else {
+                    console.log('Ticket not found');
+                    return null; // Handle case where ticketId is not found
+                }
+            }
+        } catch (error) {
+            console.log('Error fetching or processing queue information:', error);
+            return null;
+        } finally {
+            console.log('Retrieved Collection Info');
+        }
+    };
+
+    // (5a) API (PUT) call to update engraving text
+    const updateEngravingText = async (ticketId, newEngravingText) => {
+        setLoading(true);
+        const requestBody = {
+            ticketId: ticketId,
+            engravingText: newEngravingText
+        };
+
+        try {
+            const response = await http.put(`${apiUrl}/AdminEngravingText`, requestBody);
+            handleEngravingTextUpdate(response, newEngravingText);
+        } catch (error) {
+            handleEngravingTextUpdate(error, newEngravingText);
+            console.log('Error updating engraving text:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // (5b) Process API response and display content accordingly
+    const handleEngravingTextUpdate = (response, newEngravingText) => {
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful update
+                showToast('Engraving text updated successfully!', 'success');
+                setUpdEngravingFormVisible(false);
+    
+                // Update redemptionStatus UI (1s delay)
+                setTimeout(() => {
+                    setSelectedTicket(selectedTicket => ({
+                        ...selectedTicket, 
+                        engravingText: newEngravingText,  
+                    }));
+                }, 1000); 
+                break;
+            case 400:
+                // Response 400: Not valid for update
+                showToast('Tag not qualified for engraving text update.', 'error');
+                break;
+            case 404:
+                // Response 404: Ticket ID not found
+                showToast('Ticket ID not found. Please try again.', 'error');
+                break;
+            default:
+                showToast(response.message || 'Failed to update engraving text, please try again.', 'error');
+                break;
+        }
+    };
+
+    // (6a) API (PUT) call to add booth stamp
     const addBoothStamp = async (boothId) => {
         setLoading(true);
         const requestBody = {
@@ -741,7 +1009,7 @@ function MasterAdmin() {
         }
     };
 
-    // (4b) Process API response and diaplay toast content
+    // (6b) Process API response and diaplay toast content
     const handleAddBoothStamp = (response) => {
         switch (response.status) {
             case 200:
@@ -765,7 +1033,43 @@ function MasterAdmin() {
                 showToast(response.message || 'Failed to issue booth stamp, please try again.', 'error');
                 break;
         }
-    }
+    };
+
+    // (7) API (PUT) to remove visitor's profile pic
+    const removeVisitorPicture = async (ticketId) => {
+        setLoading(true);
+        const requestBody = {
+            ticketId: ticketId
+        };
+
+        try {
+            const response = await http.put(`${apiUrl}/SuperAdminVisitorUpdate`, requestBody);
+
+            if (response.status === 404) {
+                showToast("Ticket ID not found.", 'error');
+                return;  
+            } else if (response.status !== 200) {
+                showToast("Error removing visitor's profile picture.", 'error');
+                throw new Error("Unexpected error occurred during API call");
+            }
+            
+            showToast("Successfully removed visitor's profile picture.", 'success')
+
+            // Update the selectedTicket profile picture (1s delay)
+            setTimeout(() => {
+                setSelectedTicket(selectedTicket => ({
+                    ...selectedTicket,
+                    profileImageUrl: null 
+                }));
+            }, 1000);
+
+        } catch (error) {
+            console.log("Error removing visitor's profile picture:", error)
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Render a loading spinner if token not retrieved yet
     if (loading) {
@@ -811,7 +1115,7 @@ function MasterAdmin() {
                                 {selectedTicket && (
                                     <><Box id="actionPanel">
                                         {/* Display associated profile picture */}
-                                        <VisitorProfilePhotoContent profilePhotoSrc={selectedTicket.profileImageUrl || noImageUploaded}/>
+                                        <VisitorProfilePhotoContent profilePhotoSrc={selectedTicket.profileImageUrl}/>
 
                                         {/* Display ticket booths completion status */}
                                         <Box id="boothStatusContent" style={ticketContentContainer}>
@@ -824,22 +1128,29 @@ function MasterAdmin() {
                                             </Grid>
                                         </Box>
 
-                                        {/* Display ticket redemption & collection status */}
+                                        {/* Display ticket redemption & queue status */}
                                         <RedemptionStatus
                                             key={selectedTicket.ticketId}
                                             tagRedemptionStatus={selectedTicket.redemptionStatus || '---'}
-                                            collectionStatus="COLLECTED"
                                             tagColor={selectedTicket.luggageTagColorName || '---'}
-                                            engravingText="qwertyy"
                                             dateRedeemed={selectedTicket.luggageRedeemedDate || '---'}
-                                            datePendingCollection="2024-10-23 06:29:11"
-                                            dateCollected="2024-10-23 06:59:48"
                                         />
-                                        
+                                                                    
                                         {/* Update Redemption Form */}
                                         {isRedemptionFormVisible && (
-                                            <RedemptionFormContent closeForm={closeRedemptionForm} />
+                                            <div ref={formRef}>
+                                                <RedemptionFormContent closeForm={closeRedemptionForm} />
+                                            </div>
                                         )}
+
+                                        {/* Update Engraving Text Form */}
+                                        {isUpdEngravingFormVisible && (
+                                            <div ref={formRef}>
+                                                <EngravingFormContent closeForm={closeEngravingForm} />
+                                            </div>
+                                        )}
+
+
 
                                     </Box></>
                                     )}
