@@ -148,7 +148,7 @@ function CustomSidebar() {
                       <SubMenu icon={<ReceiptLongIcon />} label="Scan Booths">
                         {[
                           { boothId: '1', boothName: 'Cyber Security' },
-                          { boothId: '2', boothName: 'Data Analytics' },
+                          { boothId: '2', boothName: 'IT' },
                           { boothId: '3', boothName: 'FinTech' },
                           { boothId: '4', boothName: 'AI' },
                           { boothId: '5', boothName: 'Redemption' },
