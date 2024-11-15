@@ -29,10 +29,10 @@ function Selectbooth() {
     { boothId: '4', boothName: 'AI' },
     { boothId: '5', boothName: 'Redemption' },
     { boothId: '6', boothName: 'Engraving' },
-    { workshopId: '1', boothName: 'Software Engineering' },
-    { workshopId: '2', boothName: 'Data Analytics' },
-    { workshopId: '3', boothName: 'Cloud' },
-    { workshopId: '4', boothName: 'Artificial Intelligence' },
+    { workshopId: '1', boothName: 'Software Engineering Workshop' },
+    { workshopId: '2', boothName: 'Fintech Workshop' },
+    { workshopId: '3', boothName: 'Cyber Security Workshop' },
+    { workshopId: '4', boothName: 'Artificial Intelligence Workshop' },
   ];
 
   const handleBoothClick = (boothId, boothName, workshopId) => {
