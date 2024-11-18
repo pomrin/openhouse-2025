@@ -811,7 +811,7 @@ function MasterAdmin() {
                         )}
 
                         {/* Update Queue Status Button */}
-                        {queue.queueStatus !== 'Collected' && (
+                        {(queue.queueStatus !== 'Collected' && selectedTicket.redemptionStatus === 'Redeemed') && (
                             <Button
                                 variant="contained"
                                 onClick={displayQueueStatusForm}
@@ -912,7 +912,7 @@ function MasterAdmin() {
         try {
             const response = await http.get(`${apiUrl}/AdminVisitorWithBooths`, {
                 params: {
-                    offset, offset,
+                    offset,
                     limit: noOfRows
                 }
             });
