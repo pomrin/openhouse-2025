@@ -19,8 +19,6 @@ import http from './http.js';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-// Not ready > Update/Display Queue status
-
 function MasterAdmin() {
     const navigate = useNavigate();
     const [accessToken, setAccessToken] = useState(null); 
@@ -44,6 +42,7 @@ function MasterAdmin() {
     const [tagColors, setTagColors] = useState([]);
     const [colorsFetched, setColorsFetched] = useState(false); // Track whether colors have been fetched
     const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedAction, setSelectedAction] = useState(null);
     
     // Fetch luggage tag colors from database
     const fetchColors = async () => {
@@ -290,6 +289,22 @@ function MasterAdmin() {
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     };
 
+    // Helper function that returns queue status
+    const getQueueStatus = (ticketId, queues) => {
+        if (queues.queue.some(ticket => ticket.ticketId === ticketId)) return 'In Queue';
+        if (queues.queueEngraving.some(ticket => ticket.ticketId === ticketId)) return 'Engraving';
+        if (queues.queuePendingCollection.some(ticket => ticket.ticketId === ticketId)) return 'Pending Collection';
+        if (queues.queueCollected.some(ticket => ticket.ticketId === ticketId)) return 'Collected';
+        return 'Not in Queue';
+    };
+
+    // Helper function that returns DEFAULT queue status info
+    const getDefaultQueueStatus = (statusMessage = 'Not in Queue') => ({
+        queueStatus: statusMessage,
+        textToEngrave: '---',
+        datePendingCollection: '---',
+        dateCollected: '---',
+    });
 
     // Select ticket to edit
     const editTicket = (ticketData) => {
@@ -414,14 +429,15 @@ function MasterAdmin() {
     // Redemption / Engraving Form
     const [isRedemptionFormVisible, setRedemptionFormVisible] = useState(false);
     const [isUpdEngravingFormVisible, setUpdEngravingFormVisible] = useState(false);
+    const [isQueueStatusFormVisible, setQueueStatusFormVisible] = useState(false);
     const formRef = useRef(null);
 
     // Auto scroll to any active form
     useEffect(() => {
-        if (formRef.current && (isRedemptionFormVisible || isUpdEngravingFormVisible)) {
+        if (formRef.current && (isRedemptionFormVisible || isUpdEngravingFormVisible || isQueueStatusFormVisible)) {
             formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, [isRedemptionFormVisible, isUpdEngravingFormVisible]);
+    }, [isRedemptionFormVisible, isUpdEngravingFormVisible, isQueueStatusFormVisible]);
 
     // Update Redemption Form
     const displayRedemptionForm = () => {
@@ -492,8 +508,8 @@ function MasterAdmin() {
                 setWarning('Text field cannot be empty.');
                 return false;
             }
-            if (text.length > 12) { // soft locked at 12 char
-                setWarning('Too many characters. Maximum is 12.');
+            if (text.length > 8) { // Max of 8 characters
+                setWarning('Too many characters. Maximum is 8.');
                 return false;
             }
             setWarning(''); // No invalidation
@@ -560,8 +576,70 @@ function MasterAdmin() {
         );
     };
 
+    // Update Queue Status Form
+    const displayQueueStatusForm = () => {
+        setQueueStatusFormVisible(true);
+    };
+
+    const closeQueueStatusForm = () => {
+        setQueueStatusFormVisible(false);
+    };
+
+    // Queue Status Form Content
+    const QueueStatusFormContent = ({ queue, closeForm }) => {
+        const [engravingText, setEngravingText] = useState(''); // Lifted state
+        const [selectedAction, setSelectedAction] = useState(null);
+    
+        return (
+            <Box id="updateQueuStatusFormContent" style={formContentContainer}>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>Update Queue Status</Typography>
+                <Typography variant="body2">TicketID: {selectedTicket.ticketId}</Typography>
+                <Typography variant="body2" sx={{ marginBottom: '10px' }}>
+                    Text to engrave: {queue.engravingText || 'N/A'}
+                </Typography>
+    
+                <FormControl component="fieldset" id="updateQueueStatusForm" sx={{ alignItems: 'flex-start' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 400 }}>Available Action(s):</Typography>
+                    <QueueStatusRadioBtns 
+                        queueStatus={queue.queueStatus}
+                        selectedAction={selectedAction}
+                        setSelectedAction={setSelectedAction}
+                        engravingText={engravingText} // Pass down
+                        setEngravingText={setEngravingText} // Pass down
+                    />
+    
+                    {/* Form buttons */}
+                    <Box sx={{ display: 'flex', gap: 2, width: '100%', justifyContent: 'center', alignContent: 'center' }}>
+                        <Button
+                            style={selectedAction ? submitFormBtnStyle : disabledButtonStyle}
+                            onClick={() => submitUpdateToQueueStatus(selectedAction, engravingText)} // Use engravingText here
+                            disabled={!selectedAction}
+                        >
+                            Update
+                        </Button>
+                        <Button onClick={closeForm} style={returnBtnStyle}>
+                            Cancel
+                        </Button>
+                    </Box>
+                </FormControl>
+            </Box>
+        );
+    };
+    
+    // Handle tag color form submission
+    const submitUpdateToQueueStatus = async (selectedAction, engravingText) => {
+        try {
+            const result = await updateQueueStatus(selectedAction, engravingText, selectedTicket.ticketId)
+
+        } catch (error) {
+            console.log('Error updating queue status:', error);
+            showToast('An error occurred while updating queue status. Please try again.', 'error');
+        } finally {
+            setSelectedAction(null);
+        }
+    };
+    
     // Queue
-    // Test cases | In queue - 0686 | Engraving - 0174 | Pending Collection - 0385TUE | Collected - 0076MON
     const TicketDetails = ({ selectedTicket }) => {
         const [queue, setQueue] = useState({
             queueStatus: '',
@@ -569,14 +647,14 @@ function MasterAdmin() {
             datePendingCollection: '',
             dateCollected: '',
         });
-
+    
         useEffect(() => {
             if (selectedTicket?.ticketId) {
                 const fetchQueueStatus = async () => {
                     const data = await retrieveCollectionInformation(selectedTicket.ticketId);
                     if (data) {
                         setQueue({
-                            queueStatus: data.queueStatus || '---',
+                            queueStatus: data.queueStatus || 'Not in Queue',
                             engravingText: data.textToEngrave || '---',
                             datePendingCollection: data.datePendingCollection || '---',
                             dateCollected: data.dateCollected || '---',
@@ -586,10 +664,89 @@ function MasterAdmin() {
                 fetchQueueStatus();
             }
         }, [selectedTicket]);
-
+    
         return { queue }; 
     };
 
+    // Buttons for Queue Status form
+    const QueueStatusRadioBtns = ({ queueStatus, selectedAction, setSelectedAction, engravingText, setEngravingText }) => {
+        const [warning, setWarning] = useState('');
+    
+        const actions = [
+            { id: 1, label: 'Remove from Queue', color: '#f44336', condition: queueStatus === 'In Queue' },
+            { id: 2, label: 'Add to Queue', color: '#2196f3', condition: queueStatus === 'Not in Queue' },
+            { id: 3, label: 'Engraving', color: '#ff9800', condition: queueStatus === 'In Queue' },
+            { id: 4, label: 'Pending Collection', color: '#ffc107', condition: queueStatus === 'Engraving' },
+            { id: 5, label: 'Collected', color: '#4caf50', condition: queueStatus === 'Pending Collection' },
+        ];
+    
+        const handleStatusChange = (actionId) => {
+            setSelectedAction(actionId);
+            if (actionId !== 2) setEngravingText(''); // Clear engravingText if action changes
+        };
+    
+        const validateEngravingText = (text) => {
+            if (!text) {
+                setWarning('Text field cannot be empty.');
+                return false;
+            }
+            if (text.length > 8) {
+                setWarning('Too many characters. Maximum is 8.');
+                return false;
+            }
+            setWarning('');
+            return true;
+        };
+    
+        const handleInputChange = (e) => {
+            const text = e.target.value;
+            setEngravingText(text); 
+            validateEngravingText(text);
+        };
+    
+        return (
+            <Box sx={{ width: '100%', display: 'flex', gap: 2, justifyContent: 'flex-start', flexWrap: 'wrap', margin: '2% 0' }}>
+                {actions.map(({ id, label, color, condition }) =>
+                    condition && (
+                        <Button
+                            key={id}
+                            onClick={() => handleStatusChange(id)}
+                            sx={{
+                                width: 90,
+                                height: 90,
+                                backgroundColor: color,
+                                color: 'white',
+                                fontWeight: 'bold',
+                                textTransform: 'none',
+                                borderRadius: 5,
+                                boxShadow: selectedAction === id ? '0 0 10px rgba(0,0,0,0.5), 0 0 5px black' : 'none',
+                                '&:hover': { backgroundColor: color, opacity: 0.9 },
+                                transition: 'all 0.3s ease',
+                            }}
+                        >
+                            {label}
+                        </Button>
+                    )
+                )}
+    
+                {/* Show engraving text input when 'Add to Queue' is selected */}
+                {selectedAction === 2 && (
+                    <Box sx={{ marginTop: 2 }}>
+                        <Typography variant="body2">Text to Engrave:</Typography>
+                        <TextField
+                            value={engravingText}
+                            onChange={handleInputChange}
+                            id="engravingText"
+                            autoComplete="off"
+                            error={!!warning}
+                            helperText={warning || ' '}
+                        />
+                    </Box>
+                )}
+            </Box>
+        );
+    };    
+    
     const { queue } = TicketDetails({ selectedTicket });
 
     // Ticket Redemption & Queue status 
@@ -638,7 +795,7 @@ function MasterAdmin() {
                     {/* Update Buttons Container */}
                     <Box id="buttonsContainer" style={btnContainerStyle}>
                         {/* Update Redemption Info Button */}
-                        {selectedTicket.redemptionStatus !== 'Redeemed' && (
+                        {(queue.queueStatus === 'Not in Queue' || queue.queueStatus === 'In Queue') && (
                             <Button
                                 variant="contained"
                                 onClick={displayRedemptionForm}
@@ -653,11 +810,11 @@ function MasterAdmin() {
                             </Button>
                         )}
 
-                        {/* Change Engraving Text Button */}
-                        {queue.queueStatus === 'In queue' && (
+                        {/* Update Queue Status Button */}
+                        {queue.queueStatus !== 'Collected' && (
                             <Button
                                 variant="contained"
-                                onClick={displayEngravingForm}
+                                onClick={displayQueueStatusForm}
                                 sx={{
                                     width: '30%',
                                     backgroundColor: '#4CAF50',
@@ -665,14 +822,15 @@ function MasterAdmin() {
                                     '&:hover': { backgroundColor: '#43A047' },
                                 }}
                             >
-                                Change Engraving Text
+                                Update Queue Status
                             </Button>
                         )}
 
-                        {/* Mark as Collected Button */}
-                        {queue.queueStatus === 'In queue' && (
+                        {/* Update Engraving Text Button */}
+                        {(queue.queueStatus === 'In Queue' && queue.engravingText) && (
                             <Button
                                 variant="contained"
+                                onClick={displayEngravingForm}
                                 sx={{
                                     width: '30%',
                                     backgroundColor: 'white',
@@ -680,9 +838,10 @@ function MasterAdmin() {
                                     '&:hover': { backgroundColor: '#f2f2f2' },
                                 }}
                             >
-                                Mark as Collected
+                                Update Engraving Text
                             </Button>
                         )}
+
                     </Box>
                 </Grid>
             </Box>
@@ -747,6 +906,7 @@ function MasterAdmin() {
         );
     };
     
+    // API call functions
     // (1a) Retrieve tickets from API [ ticketID, booth statuses, redemption status ]
     const getVisitorTickets = async (offset, noOfRows) => {
         try {
@@ -816,7 +976,54 @@ function MasterAdmin() {
         }
     };
 
-    // (2) Retrieve tag colors [ name & color hex ]
+    // (2) API call and retrieve collection information for a specific ticket ID
+    const retrieveCollectionInformation = async (ticketId) => {
+
+        try {
+            // Fetch queue data
+            const response = await http.get(`${apiUrl}/AdminQueue`, {
+                params: { 
+                    limit: 5000 // test
+                },
+            });
+    
+            if (response.data) {
+                const { queue, queueEngraving, queuePendingCollection, queueCollected } = response.data;
+    
+                // Combine all queues into a single list
+                const allQueues = [
+                    ...queue,
+                    ...queueEngraving,
+                    ...queuePendingCollection,
+                    ...queueCollected,
+                ];
+    
+                // Find the ticket information
+                const ticketInfo = allQueues.find(ticket => ticket.ticketId === ticketId);
+    
+                if (ticketInfo) {
+                    const queueStatus = getQueueStatus(ticketId, { queue, queueEngraving, queuePendingCollection, queueCollected });
+    
+                    return {
+                        queueStatus,
+                        textToEngrave: ticketInfo.textToEngrave || '---',
+                        datePendingCollection: ticketInfo.datePendingCollection || '---',
+                        dateCollected: ticketInfo.dateCollected || '---',
+                    };
+                }
+    
+                return getDefaultQueueStatus();
+            }
+    
+            console.log('No data received from API');
+            return getDefaultQueueStatus();
+        } catch (error) {
+            console.error('Error fetching queue information:', error);
+            return getDefaultQueueStatus('Error retrieving queue status');
+        }
+    };
+    
+    // (3) Retrieve tag colors [ name & color hex ]
     const getTagColors = async () => {
         try {
             const response = await http.get(`${apiUrl}/LuggageTagColors`, {
@@ -834,208 +1041,7 @@ function MasterAdmin() {
         }
     };
 
-    // (3a) API (PUT) call to create/update redemption information
-    const updateVisitorTag = async (ticketId, selectedColor) => {
-        setLoading(true);
-        const requestBody = {
-            ticketId: ticketId,
-            luggageTagColor: selectedColor.luggageTagColorName
-        };
-    
-        try {
-            const response = await http.put(`${apiUrl}/AdminRedemption`, requestBody);   
-            handleVisitorTagUpdate(response);
-        } catch (error) {
-            handleVisitorTagUpdate(error);
-            console.log('Error updating tag:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    // (3b) Process API response and display content accordingly
-    const handleVisitorTagUpdate = (response) => {
-        switch (response.status) {
-            case 200:
-                // Response 200: Successful update
-                showToast('Tag updated successfully!', 'success');
-                setRedemptionFormVisible(false);
-                refreshTableData();
-    
-                // Update redemptionStatus UI (1s delay)
-                setTimeout(() => {
-                    setSelectedTicket(selectedTicket => ({
-                        ...selectedTicket, 
-                        redemptionStatus: selectedTicket.redemptionStatus === 'Unredeemed' ? 'Redeemed' : selectedTicket.redemptionStatus,  
-                        luggageTagColorName: selectedColor.luggageTagColorName,  
-                        luggageRedeemedDate: selectedTicket.luggageRedeemedDate || formatDate(new Date()) // Apply custom formatting
-                    }));
-                }, 1000); 
-                break;
-            case 400:
-                // Response 400: Missing parameter or invalid luggage color
-                showToast('Invalid color or missing parameter. Please try again.', 'error');
-                break;
-            case 404:
-                // Response 404: Ticket ID not found
-                showToast('Ticket ID not found. Please try again.', 'error');
-                break;
-            default:
-                showToast(response.message || 'Failed to update tag, please try again.', 'error');
-                break;
-        }
-    };
-
-    // (4) API call and retrieve collection information for a specific ticket ID
-    const retrieveCollectionInformation = async (ticketId) => {
-        try {
-            // Get queue information
-            const response = await http.get(`${apiUrl}/AdminQueue`, {
-                params: {
-                    limit: noOfRows
-                }
-            });
-
-            if (response.data) {
-                // Search and transform the data for the specific ticket ID
-                const allQueues = [
-                    ...response.data.queue,
-                    ...response.data.queueEngraving,
-                    ...response.data.queuePendingCollection,
-                    ...response.data.queueCollected
-                ];
-
-                const ticketInfo = allQueues.find(ticket => {
-                    return ticket.ticketId === ticketId;
-                });
-
-                if (ticketInfo) {
-                    let queueStatus = '';
-
-                    if (response.data.queue.some(ticket => ticket.ticketId === ticketId)) {
-                        queueStatus = 'In queue'; // In the "queue" list
-                    } else if (response.data.queueEngraving.some(ticket => ticket.ticketId === ticketId)) {
-                        queueStatus = 'Currently Engraving'; // In the "queueEngraving" list
-                    } else if (response.data.queuePendingCollection.some(ticket => ticket.ticketId === ticketId)) {
-                        queueStatus = 'Pending Collection'; // In the "queuePendingCollection" list
-                    } else if (response.data.queueCollected.some(ticket => ticket.ticketId === ticketId)) {
-                        queueStatus = 'Collected'; // In the "queueCollected" list
-                    }
-
-                    return {
-                        queueStatus,
-                        textToEngrave: ticketInfo.textToEngrave,
-                        datePendingCollection: ticketInfo.datePendingCollection,
-                        dateCollected: ticketInfo.dateCollected,
-                    };
-                } else {
-                    console.log('Ticket not found');
-                    return null; // Handle case where ticketId is not found
-                }
-            }
-        } catch (error) {
-            console.log('Error fetching or processing queue information:', error);
-            return null;
-        } finally {
-            console.log('Retrieved Collection Info');
-        }
-    };
-
-    // (5a) API (PUT) call to update engraving text
-    const updateEngravingText = async (ticketId, newEngravingText) => {
-        setLoading(true);
-        const requestBody = {
-            ticketId: ticketId,
-            engravingText: newEngravingText
-        };
-
-        try {
-            const response = await http.put(`${apiUrl}/AdminEngravingText`, requestBody);
-            handleEngravingTextUpdate(response, newEngravingText);
-        } catch (error) {
-            handleEngravingTextUpdate(error, newEngravingText);
-            console.log('Error updating engraving text:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // (5b) Process API response and display content accordingly
-    const handleEngravingTextUpdate = (response, newEngravingText) => {
-        switch (response.status) {
-            case 200:
-                // Response 200: Successful update
-                showToast('Engraving text updated successfully!', 'success');
-                setUpdEngravingFormVisible(false);
-    
-                // Update redemptionStatus UI (1s delay)
-                setTimeout(() => {
-                    setSelectedTicket(selectedTicket => ({
-                        ...selectedTicket, 
-                        engravingText: newEngravingText,  
-                    }));
-                }, 1000); 
-                break;
-            case 400:
-                // Response 400: Not valid for update
-                showToast('Tag not qualified for engraving text update.', 'error');
-                break;
-            case 404:
-                // Response 404: Ticket ID not found
-                showToast('Ticket ID not found. Please try again.', 'error');
-                break;
-            default:
-                showToast(response.message || 'Failed to update engraving text, please try again.', 'error');
-                break;
-        }
-    };
-
-    // (6a) API (PUT) call to add booth stamp
-    const addBoothStamp = async (boothId) => {
-        setLoading(true);
-        const requestBody = {
-            ticketId: selectedTicket.ticketId,
-            boothId: boothId
-        };
-
-        try {
-            const response = await http.put(`${apiUrl}/AdminIssueStamp`, requestBody);
-            handleAddBoothStamp(response);
-        } catch (error) {
-            handleAddBoothStamp(error);
-            console.log('Error adding booth stamp:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // (6b) Process API response and diaplay toast content
-    const handleAddBoothStamp = (response) => {
-        switch (response.status) {
-            case 200:
-                // Response 200: Successful issuance of stamp
-                showToast('Visitor Issued Stamp successfully.', 'success');
-                refreshTableData();
-                break;
-            case 404:
-                // Response 404: BoothID or TicketID not found
-                showToast('No Visitor with Ticket ID or no booth with the Booth Id found.', 'error');
-                break;
-            case 409:
-                // Response 409: Visitor already has stamp badge
-                showToast('Visitor have already been issued with the Stamp for the booth.', 'error');
-                break;
-            case 500:
-                // Response 500: Unexpected Exception
-                showToast('No idea wat happened.', 'error');
-                break;
-            default:
-                showToast(response.message || 'Failed to issue booth stamp, please try again.', 'error');
-                break;
-        }
-    };
-
-    // (7) API (PUT) to remove visitor's profile pic
+    // (4) API (PUT) to remove visitor's profile pic
     const removeVisitorPicture = async (ticketId) => {
         setLoading(true);
         const requestBody = {
@@ -1068,6 +1074,265 @@ function MasterAdmin() {
             throw error;
         } finally {
             setLoading(false);
+        }
+    };
+
+    // (5a) API (PUT) call to add booth stamp
+    const addBoothStamp = async (boothId) => {
+        setLoading(true);
+        const requestBody = {
+            ticketId: selectedTicket.ticketId,
+            boothId: boothId
+        };
+
+        try {
+            const response = await http.put(`${apiUrl}/AdminIssueStamp`, requestBody);
+            handleAddBoothStamp(response);
+        } catch (error) {
+            handleAddBoothStamp(error);
+            console.log('Error adding booth stamp:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // (5b) Process API response and diaplay toast content
+    const handleAddBoothStamp = (response) => {
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful issuance of stamp
+                showToast('Visitor Issued Stamp successfully.', 'success');
+                refreshTableData();
+                break;
+            case 404:
+                // Response 404: BoothID or TicketID not found
+                showToast('No Visitor with Ticket ID or no booth with the Booth Id found.', 'error');
+                break;
+            case 409:
+                // Response 409: Visitor already has stamp badge
+                showToast('Visitor have already been issued with the Stamp for the booth.', 'error');
+                break;
+            case 500:
+                // Response 500: Unexpected Exception
+                showToast('No idea wat happened.', 'error');
+                break;
+            default:
+                showToast(response.message || 'Failed to issue booth stamp, please try again.', 'error');
+                break;
+        }
+    };
+
+    // (6a) API (PUT) call to create/update redemption information
+    const updateVisitorTag = async (ticketId, selectedColor) => {
+        setLoading(true);
+        const requestBody = {
+            ticketId: ticketId,
+            luggageTagColor: selectedColor.luggageTagColorName
+        };
+    
+        try {
+            const response = await http.put(`${apiUrl}/AdminRedemption`, requestBody);   
+            handleVisitorTagUpdate(response);
+        } catch (error) {
+            handleVisitorTagUpdate(error);
+            console.log('Error updating tag:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    // (6b) Process API response and display content accordingly
+    const handleVisitorTagUpdate = (response) => {
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful update
+                showToast('Tag updated successfully!', 'success');
+                setRedemptionFormVisible(false);
+                refreshTableData();
+    
+                // Update redemptionStatus UI (1s delay)
+                setTimeout(() => {
+                    setSelectedTicket(selectedTicket => ({
+                        ...selectedTicket, 
+                        redemptionStatus: selectedTicket.redemptionStatus === 'Unredeemed' ? 'Redeemed' : selectedTicket.redemptionStatus,  
+                        luggageTagColorName: selectedColor.luggageTagColorName,  
+                        luggageRedeemedDate: selectedTicket.luggageRedeemedDate || formatDate(new Date()) // Apply custom formatting
+                    }));
+                }, 1000); 
+                break;
+            case 400:
+                // Response 400: Missing parameter or invalid luggage color
+                showToast('Invalid color or missing parameter. Please try again.', 'error');
+                break;
+            case 404:
+                // Response 404: Ticket ID not found
+                showToast('Ticket ID not found. Please try again.', 'error');
+                break;
+            default:
+                showToast(response.message || 'Failed to update tag, please try again.', 'error');
+                break;
+        }
+    };
+
+    // (7a) API (PUT) call to update engraving text
+    const updateEngravingText = async (ticketId, newEngravingText) => {
+        setLoading(true);
+        const requestBody = {
+            ticketId: ticketId,
+            engravingText: newEngravingText
+        };
+
+        try {
+            const response = await http.put(`${apiUrl}/AdminEngravingText`, requestBody);
+            handleEngravingTextUpdate(response, newEngravingText);
+        } catch (error) {
+            handleEngravingTextUpdate(error, newEngravingText);
+            console.log('Error updating engraving text:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // (7b) Process API response and display content accordingly
+    const handleEngravingTextUpdate = (response, newEngravingText) => {
+        switch (response.status) {
+            case 200:
+                // Response 200: Successful update
+                showToast('Engraving text updated successfully!', 'success');
+                setUpdEngravingFormVisible(false);
+    
+                // Update redemptionStatus UI (1s delay)
+                setTimeout(() => {
+                    setSelectedTicket(selectedTicket => ({
+                        ...selectedTicket, 
+                        engravingText: newEngravingText,  
+                    }));
+                }, 1000); 
+                break;
+            case 400:
+                // Response 400: Not valid for update
+                showToast('Tag not qualified for engraving text update.', 'error');
+                break;
+            case 404:
+                // Response 404: Ticket ID not found
+                showToast('Ticket ID not found. Please try again.', 'error');
+                break;
+            default:
+                showToast(response.message || 'Failed to update engraving text, please try again.', 'error');
+                break;
+        }
+    };
+
+    // (8) API (POST/PUT) call to update collection status 
+    const updateQueueStatus = async (selectedAction, engravingText, ticketId) => {
+        setLoading(true);
+
+        let requestBody = {
+            ticketId: ticketId,
+        };
+    
+        if (selectedAction === 2) {
+            // 'Add to Queue' action
+            requestBody = { ...requestBody, luggageTagColor: selectedTicket.luggageTagColorName, engravingText: engravingText };
+        } else {
+            // For other actions 
+            requestBody = { ...requestBody, queue_status_to_update: (selectedAction - 1) };
+        }
+    
+        const url = `${apiUrl}/AdminQueue`;
+        const method = selectedAction === 2 ? 'post' : 'put'; // POST for 'Add to Queue', PUT for other actions
+
+        try {
+            const response = await http[method](url, requestBody);
+            if (selectedAction === 2) {
+                handleAddToQueueStatusUpdate(response);
+            } else {
+                handleQueueStatusUpdate(response, selectedAction); // Pass selectedAction for mapping
+            }
+        } catch (error) {
+            console.log('Error updating queue status:', error);
+            showToast('Failed to update tag status, please try again.', 'error');
+        } finally {
+            setSelectedAction(null);
+            setLoading(false);
+        }
+    };
+    
+    // (8a) Handle API response when status action = Add to Queue
+    const handleAddToQueueStatusUpdate = (response) => {
+        switch (response.status) {
+            case 201: // Response 203: Successful addition into queue
+                showToast('Tag added to queue successfully!', 'success');
+                setQueueStatusFormVisible(false);
+                refreshTableData();
+
+                setTimeout(() => {
+                setSelectedTicket(selectedTicket => ({
+                    ...selectedTicket, 
+                    queueStatus: 'In Queue'
+                    }));
+                }, 1000);
+                break;
+            case 400: // Response 400: Missing parameter or already in queue
+                showToast('Missing parameter or tag is already in a queue.', 'error');
+                break;
+            case 404: // Response 404: Ticket ID not found
+                showToast('Ticket ID not found. Please try again.', 'error');
+                break;
+        }
+    };
+    
+    // (8b) Handle API response for all other status actions
+    const handleQueueStatusUpdate = (response, selectedAction) => {  
+        const actionMap = {
+            1: 'Not in Queue',
+            2: 'Engraving',
+            3: 'Pending Collection',
+            4: 'Collected',
+        };  
+
+        switch (response.status) {
+            case 200: // Response 200: Successful status update
+                showToast('Tag status updated successfully!', 'success');
+                setQueueStatusFormVisible(false);
+                refreshTableData();
+
+                setTimeout(() => {
+                    // Update queue state with the new status and hardcoded values
+                    setQueue(queue => {
+                        const updatedQueue = {
+                            ...queue,
+                            queueStatus: actionMap[selectedAction] || 'Unknown',
+                            ...(selectedAction === 3 && { datePendingCollection: formatDate(new Date()) }),
+                            ...(selectedAction === 4 && { dateCollected: formatDate(new Date()) })
+                        };
+                        return updatedQueue;
+                    });
+                }, 1000);         
+                break;
+            case 204: // Response 204: Queue removed
+                showToast('Successfully removed tag from queue.', 'success');
+                setQueueStatusFormVisible(false);
+                refreshTableData();
+
+                setTimeout(() => {
+                    // Update queue state with the new status and hardcoded values
+                    setQueue(queue => {
+                        const updatedQueue = {
+                            ...queue,
+                            queueStatus: 'Not in Queue',
+                            };
+                        return updatedQueue;
+                    });
+                }, 1000);         
+                break;
+            case 400: // Response 400: Invalid Queue status
+                showToast(response.message, 'error');
+                break;
+    
+            case 404: // Response 404: Ticket ID not found
+                showToast('Ticket ID not found. Please try again.', 'error');
+                break;
         }
     };
 
@@ -1150,7 +1415,12 @@ function MasterAdmin() {
                                             </div>
                                         )}
 
-
+                                        {/* Update Queue Status Form */}
+                                        {isQueueStatusFormVisible && (
+                                            <div ref={formRef}>
+                                                <QueueStatusFormContent queue={queue} closeForm={closeQueueStatusForm} />
+                                            </div>
+                                        )}
 
                                     </Box></>
                                     )}
