@@ -156,8 +156,6 @@ function CustomSidebar() {
                           { boothId: '2', boothName: 'IT' },
                           { boothId: '3', boothName: 'FinTech' },
                           { boothId: '4', boothName: 'AI' },
-                          { boothId: '5', boothName: 'Redemption' },
-                          { boothId: '6', boothName: 'Engraving' }
                         ].map(booth => (
                           <MenuItem
                             key={booth.boothId}
@@ -182,6 +180,9 @@ function CustomSidebar() {
                             {booth.boothName}
                           </MenuItem>
                         ))}
+                      </SubMenu>
+                      <SubMenu icon={<ReceiptLongIcon />} label="Redemption">
+                      <MenuItem active={location.pathname === "/redemption"} title="Redemption" onClick={() => handleMenuItemClick("/Redemption")}> Redemption </MenuItem>
                       </SubMenu>
                       <SubMenu icon={<ReceiptLongIcon />} label="Engraving">
                       <MenuItem active={location.pathname === "/AdminQueue"} title="Admin Queue Management" onClick={() => handleMenuItemClick("/AdminQueue")}> Queue Management </MenuItem>
