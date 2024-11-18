@@ -54,7 +54,7 @@ function CustomSidebar() {
     navigate(path); // Navigate to the new path
   };
 
-  const handleBoothClick = (boothId, boothName) => {
+  const handleBoothClick = (boothId, boothName, workshopId) => {
     setIsExpanded(false); // Close the navbar after selection
     console.log(`${boothName} clicked`);
     // Separate Engraving and Redemption booths from other booths via if else statement
@@ -64,8 +64,13 @@ function CustomSidebar() {
     } else if (boothName === 'Redemption') {
       // Redirect to the redemption page
       navigate('/redemption');
-    } else {
+    } else if (workshopId) {
+      navigate('/qrcodescanner', { state: { workshopId, boothName }});
+      window.location.reload();
+    }
+    else {
       navigate('/qrcodescanner', { state: { boothId, boothName } });
+      window.location.reload();
     }
   };
 
@@ -171,9 +176,9 @@ function CustomSidebar() {
                           { workshopId: '4', boothName: 'Artificial Intelligence' },
                         ].map(booth => (
                           <MenuItem
-                            key={booth.boothId}
-                            onClick={() => handleBoothClick(booth.workshopId, booth.boothName)}
-                          >
+                            key={booth.boothId || booth.workshopId}
+                            onClick={() => handleBoothClick(booth.boothId || booth.workshopId, booth.boothName, booth.workshopId)}
+                            >
                             {booth.boothName}
                           </MenuItem>
                         ))}
