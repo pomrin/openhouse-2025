@@ -1,0 +1,2 @@
+Redemption Module (harmless bug)
+- Scanner timeout still runs in background while popup content is displayed.
