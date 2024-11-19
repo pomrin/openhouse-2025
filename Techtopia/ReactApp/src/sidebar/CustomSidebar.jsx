@@ -54,7 +54,7 @@ function CustomSidebar() {
     navigate(path); // Navigate to the new path
   };
 
-  const handleBoothClick = (boothId, boothName) => {
+  const handleBoothClick = (boothId, boothName, workshopId) => {
     setIsExpanded(false); // Close the navbar after selection
     console.log(`${boothName} clicked`);
     // Separate Engraving and Redemption booths from other booths via if else statement
@@ -64,8 +64,13 @@ function CustomSidebar() {
     } else if (boothName === 'Redemption') {
       // Redirect to the redemption page
       navigate('/redemption');
-    } else {
+    } else if (workshopId) {
+      navigate('/qrcodescanner', { state: { workshopId, boothName }});
+      window.location.reload();
+    }
+    else {
       navigate('/qrcodescanner', { state: { boothId, boothName } });
+      window.location.reload();
     }
   };
 
@@ -151,8 +156,6 @@ function CustomSidebar() {
                           { boothId: '2', boothName: 'IT' },
                           { boothId: '3', boothName: 'FinTech' },
                           { boothId: '4', boothName: 'AI' },
-                          { boothId: '5', boothName: 'Redemption' },
-                          { boothId: '6', boothName: 'Engraving' }
                         ].map(booth => (
                           <MenuItem
                             key={booth.boothId}
@@ -171,12 +174,15 @@ function CustomSidebar() {
                           { workshopId: '4', boothName: 'Artificial Intelligence' },
                         ].map(booth => (
                           <MenuItem
-                            key={booth.boothId}
-                            onClick={() => handleBoothClick(booth.workshopId, booth.boothName)}
-                          >
+                            key={booth.boothId || booth.workshopId}
+                            onClick={() => handleBoothClick(booth.boothId || booth.workshopId, booth.boothName, booth.workshopId)}
+                            >
                             {booth.boothName}
                           </MenuItem>
                         ))}
+                      </SubMenu>
+                      <SubMenu icon={<ReceiptLongIcon />} label="Redemption">
+                      <MenuItem active={location.pathname === "/redemption"} title="Redemption" onClick={() => handleMenuItemClick("/Redemption")}> Redemption </MenuItem>
                       </SubMenu>
                       <SubMenu icon={<ReceiptLongIcon />} label="Engraving">
                       <MenuItem active={location.pathname === "/AdminQueue"} title="Admin Queue Management" onClick={() => handleMenuItemClick("/AdminQueue")}> Queue Management </MenuItem>

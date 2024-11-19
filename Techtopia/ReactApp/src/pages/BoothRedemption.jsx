@@ -140,13 +140,22 @@ function RedemptionPage() {
         color: 'black'
     };
 
-    const submitFormBtnStyle = {
+    const submitEligibleFormBtnStyle = {
         width: '90%',
         padding: '5px',
         backgroundColor: '#008080',
         color: 'white',
         border: '1px solid black',
-        marginLeft: '4%'
+        marginLeft: '1%'
+    };
+
+    const submitUpdateFormBtnStyle = {
+        width: '90%',
+        padding: '5px',
+        backgroundColor: '#008080',
+        color: 'white',
+        border: '1px solid black',
+        marginLeft: '5%'
     };
 
     const startQRscannerBtn = {
@@ -297,27 +306,27 @@ function RedemptionPage() {
                             <FormControl component='fieldset' id="tagColorForm" sx={{ alignItems: 'flex-start', paddingY: '5% 5% 1% 5%', margin: '2% 0 1% 4%' }}>
                                 <Typography variant="body1">Preferred Color: </Typography>
                                 <TagColorsRadioBtns tagColors={tagColors} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
-                                <Box sx={{ width: '100%', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                                <Box sx={{ width: '100%', margin: '0 0 10px -1%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
                                     <Typography variant="body1">Selected color:</Typography>
-                                    <Box
-                                        sx={{
-                                            width: '30px',
-                                            height: '30px',
-                                            backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent',
-                                            borderRadius: '50%',
-                                            border: '1px solid black',
-                                            marginLeft: '3%'
-                                        }}
-                                    />
-                                    <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
-                                        {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
-                                    </Typography>
-                                </Box>
-                                {selectedColor && (
-                                    <Button style={submitFormBtnStyle} onClick={submitUserRedemption}>
-                                        Proceed with Redemption
-                                    </Button>
-                                )}
+                                        <Box
+                                            sx={{
+                                                width: '30px',
+                                                height: '30px',
+                                                backgroundColor: selectedColor ? selectedColor.luggageTagColorCode : 'transparent',
+                                                borderRadius: '50%',
+                                                border: '1px solid black',
+                                                marginLeft: '3%'
+                                            }}
+                                        />
+                                        <Typography variant="body1" id='CurrentSelectedColor' sx={{ fontWeight: 500, marginLeft: '2%' }}>
+                                            {selectedColor ? selectedColor.luggageTagColorName : '-'}  {/* Display selected color name */}
+                                        </Typography>
+                                    </Box>
+                                    {selectedColor && (
+                                        <Button style={submitEligibleFormBtnStyle} onClick={submitUserRedemption}>
+                                            Proceed with Redemption
+                                        </Button>
+                                    )}
                             </FormControl>
                         </Box></>
                 );
@@ -372,7 +381,7 @@ function RedemptionPage() {
                                     </Typography>
                                 </Box>
                                 {selectedColor && selectedColor.luggageTagColorName !== currentColor && (
-                                    <Button style={submitFormBtnStyle} onClick={submitUpdatedTagColor}>
+                                    <Button style={submitUpdateFormBtnStyle} onClick={submitUpdatedTagColor}>
                                         Update Tag Color
                                     </Button>
                                 )}

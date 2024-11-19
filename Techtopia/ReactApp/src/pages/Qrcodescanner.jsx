@@ -59,9 +59,6 @@ function Qrcodescanner() {
     setQrCodeResult(result);
     setSnackbarOpen(true);
 
-    // Send the "Stamp" API request
-    stampApiRequest(result);
-
      // Wait for the API request to finish and then open the dialog
      await stampApiRequest(result);
 
@@ -76,6 +73,7 @@ function Qrcodescanner() {
     // Reset scanner to allow scanning at the another booth
     setQrCodeResult('');
     setApiResponseMessage('');
+    setApiResponseError(false); // Clear any error state
     
     // Reset the scanner
     if (qrScannerRef.current) {
@@ -135,8 +133,11 @@ function Qrcodescanner() {
         setApiResponseMessage('Failed to add stamp. Please try again.');
       }
       setApiResponseError(true);
-      setDialogOpen(true)
-
+      //setDialogOpen(true)
+    }
+    finally {
+      // Open dialog-box after setting the message regardless of successful or error (fail) message
+      setDialogOpen(true);
     }
   };
 
