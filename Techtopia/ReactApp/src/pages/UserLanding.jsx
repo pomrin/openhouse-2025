@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////
+/// To the next batch doing this project, GOODLUCK lol there are thousand lines of code including different pages
+/// GG GOOD GAME GOODNIGHT, YOU'RE COOKED
+///
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, Link, Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
