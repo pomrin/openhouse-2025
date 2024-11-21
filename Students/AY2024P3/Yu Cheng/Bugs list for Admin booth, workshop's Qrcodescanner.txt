@@ -1,0 +1,6 @@
+1. Qrcodescanner dialogue message pop-up (if missed out the successful message, it will cause confusion)
+
+- The successful message shown sometimes will quickly switch another message named: Visitor ticket has already been stamped for this booth.
+
+- ^ this will cause a confusion to the boothadmin because if they missed out looking at the successful message, they will be misled into thinking that the Visitor already scanned the booth (twice).
+
