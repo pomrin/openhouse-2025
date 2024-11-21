@@ -11,13 +11,13 @@
 
     <Grid >
         <Grid.Background>
-            <ImageBrush ImageSource="/Images/OpenHouse_Background.png" Stretch="Fill"/>
+            <ImageBrush ImageSource="/Images/OpenHouse_Background01.jpg" Stretch="Fill"/>
         </Grid.Background>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="0.8*" />
-            <RowDefinition Height="0.05*" />
-            <RowDefinition Height="0.*" />
+            <RowDefinition Height="0.0" />
+            <RowDefinition Height="0.0" />
         </Grid.RowDefinitions>
         <mycustomusercontrols:Montage Grid.Row="0" DataContext="{Binding MontageViewModel}" 
                                       HorizontalAlignment="Stretch" 

@@ -8,17 +8,16 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-    <Grid Width="30px" Height="30px" Background="{Binding BackgroundColor}" >
+    <Grid Width="50px" Height="50px" Background="{Binding BackgroundColor}" >
         <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0">
-            <Image Source="{Binding ImageUrl}" Opacity="0.7" Stretch="Uniform">
+            <Image Source="{Binding ImageUrl}" Stretch="Uniform" Opacity="{Binding Opacity}">
                 <ToolTipService.ToolTip>
                     <HyperlinkButton Content="{Binding TicketId}"/>
                 </ToolTipService.ToolTip>
             </Image>
         </Border>
         <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0"  Visibility="{Binding IsJiggleVisibility}">
-            <Image  x:Name="imgAnimation"  Source="{Binding AnimationImageUrl}" Stretch="Uniform"
-                    />
+            <Image  x:Name="imgAnimation"  Source="{Binding AnimationImageUrl}" Stretch="Uniform"                    />
         </Border>
     </Grid>
 </UserControl>

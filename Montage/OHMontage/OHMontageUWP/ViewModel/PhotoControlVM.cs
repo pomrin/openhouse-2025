@@ -19,9 +19,14 @@ namespace OHMontageUWP.ViewModel
     {
         public static readonly String DEFAULT_TICKET_ID = "Empty";
 
-        DispatcherTimer timer = new DispatcherTimer()
+        private DispatcherTimer timer = new DispatcherTimer()
         {
             Interval = new TimeSpan(0, 0, 3),
+        };
+
+        private DispatcherTimer opacityTimer = new DispatcherTimer()
+        {
+            Interval = new TimeSpan(0, 0, 0, 0, 100)
         };
 
 
@@ -44,6 +49,25 @@ namespace OHMontageUWP.ViewModel
             this.AnimationImageUrl = "";
             timer.Tick += Timer_Tick;
             this.IsJiggle = false;
+            this.opacity = 1;
+
+            this.opacityTimer.Tick += OpacityTimer_Tick;
+            //this.opacityTimer.Start();
+        }
+
+        private void OpacityTimer_Tick(object sender, object e)
+        {
+            this.Opacity += opacityDiff;
+            if (this.Opacity >= 1)
+            {
+                this.Opacity = 1;
+                opacityDiff = opacityDiff * -1;
+            }
+            else if (this.Opacity <= 0.5)
+            {
+                this.Opacity = 0.5;
+                opacityDiff = opacityDiff * -1;
+            }
         }
 
         private void Timer_Tick(object sender, object e)
@@ -80,6 +104,17 @@ namespace OHMontageUWP.ViewModel
             //this.BackgroundColor = new SolidColorBrush(newColor);
         }
 
+        public void startOpacityAnimation()
+        {
+            this.opacityTimer.Start();
+        }
+
+        public void stopOpacityAnimation()
+        {
+            this.Opacity = 1;
+            this.opacityTimer.Stop();
+        }
+
         /// <summary>
         /// Defauult animation time in seconds.
         /// </summary>
@@ -94,6 +129,10 @@ namespace OHMontageUWP.ViewModel
         private String animationImageUrl;
 
         private String ticketId;
+
+        private Double opacity;
+
+        private double opacityDiff = 0.05;
 
         public string ImageUrl
         {
@@ -239,6 +278,31 @@ namespace OHMontageUWP.ViewModel
                     this.ticketId = value;
                     NotifyPropertyChanged();
                 }
+            }
+        }
+
+        public double Opacity
+        {
+            get
+            {
+                return opacity;
+            }
+
+            set
+            {
+                if (value != this.opacity)
+                {
+                    opacity = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public bool OpacityTimerStatus
+        {
+            get
+            {
+                return this.opacityTimer.IsEnabled;
             }
         }
 

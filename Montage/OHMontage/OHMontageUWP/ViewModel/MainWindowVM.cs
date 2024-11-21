@@ -33,8 +33,7 @@ namespace OHMontageUWP.ViewModel
             //}
 
             timer.Tick += Timer_Tick1;
-            timer.Interval = new TimeSpan(0, 0, 0, 0, 10);
-            timer.Start();
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 1);
 
             WebsocketMessageHelper helper = new WebsocketMessageHelper();
             helper.AddMessageListener(LoadUserImage);
@@ -91,6 +90,8 @@ namespace OHMontageUWP.ViewModel
                     this.MontageViewModel.AddNewPhoto();
                 }
             }
+
+            timer.Start();
 
         }
 
@@ -293,6 +294,20 @@ namespace OHMontageUWP.ViewModel
             //for (int i = 0; i < 50; i++)
             //{
             //}
+
+
+            var qCurrentAnimation = from q in this.MontageViewModel.Photos
+                                    where q.OpacityTimerStatus == false
+                                    select q;
+            if (qCurrentAnimation != null)
+            {
+                int random = new Random().Next(0, qCurrentAnimation.Count());
+                this.MontageViewModel.Photos[random].startOpacityAnimation();
+            }
+            else
+            {
+                this.timer.Stop();
+            }
         }
 
         public ViewModel.MontageVM MontageViewModel { get; set; }
