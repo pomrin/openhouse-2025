@@ -170,7 +170,17 @@
     <Content Include="Images\JiggleAnimationResources\floating_balloon3.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\JiggleAnimationResources\hearts.gif" />
+    <Content Include="Images\JiggleAnimationResources\jiggle.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\JiggleAnimationResources\man.png" />
+    <Content Include="Images\JiggleAnimationResources\stars.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\JiggleAnimationResources\wavy.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\nyp_sit.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -14,7 +14,7 @@ namespace OHMontageUWP
         public static readonly String JIGGLE_ANIMATION_RESOURCE_PATH = "JiggleAnimationResources";
         public static readonly String DEFAULT_USER_IMAGE_NAME = "defaultuser.png";
 
-        
+
 
         static ProjectHelper()
         {
@@ -83,6 +83,50 @@ namespace OHMontageUWP
             if (jiggleFolder != null)
             {
                 folderPath = Path.Combine(jiggleFolder, "floating_balloon3.gif");
+            }
+            return folderPath;
+        }
+
+        public static String GetDefaultAnimationUrl4()
+        {
+            String folderPath = null;
+            var jiggleFolder = GetProjectJiggleFolder();
+            if (jiggleFolder != null)
+            {
+                folderPath = Path.Combine(jiggleFolder, "hearts.gif");
+            }
+            return folderPath;
+        }
+
+        public static String GetDefaultAnimationUrl5()
+        {
+            String folderPath = null;
+            var jiggleFolder = GetProjectJiggleFolder();
+            if (jiggleFolder != null)
+            {
+                folderPath = Path.Combine(jiggleFolder, "jiggle.gif");
+            }
+            return folderPath;
+        }
+
+        public static String GetDefaultAnimationUrl6()
+        {
+            String folderPath = null;
+            var jiggleFolder = GetProjectJiggleFolder();
+            if (jiggleFolder != null)
+            {
+                folderPath = Path.Combine(jiggleFolder, "stars.gif");
+            }
+            return folderPath;
+        }
+
+        public static String GetDefaultAnimationUrl7()
+        {
+            String folderPath = null;
+            var jiggleFolder = GetProjectJiggleFolder();
+            if (jiggleFolder != null)
+            {
+                folderPath = Path.Combine(jiggleFolder, "wavy.gif");
             }
             return folderPath;
         }

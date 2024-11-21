@@ -17,7 +17,7 @@
             </Image>
         </Border>
         <Border BorderBrush="Black" BorderThickness="1,1,1,1" Grid.Column="0" Grid.Row="0"  Visibility="{Binding IsJiggleVisibility}">
-            <Image  x:Name="imgAnimation"  Source="{Binding AnimationImageUrl}" Stretch="Uniform"                    />
+            <Image  x:Name="imgAnimation"  Source="{Binding AnimationImageUrl}" Stretch="UniformToFill"                    />
         </Border>
     </Grid>
 </UserControl>

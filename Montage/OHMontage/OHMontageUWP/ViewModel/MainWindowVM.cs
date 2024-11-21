@@ -291,18 +291,15 @@ namespace OHMontageUWP.ViewModel
             //    this.MontageViewModel.Photos[random].IsJiggle = true;
             //}
 
-            //for (int i = 0; i < 50; i++)
-            //{
-            //}
 
-
-            var qCurrentAnimation = from q in this.MontageViewModel.Photos
-                                    where q.OpacityTimerStatus == false
-                                    select q;
-            if (qCurrentAnimation != null)
+            var qOpacityAnimator = from q in this.MontageViewModel.Photos
+                                   where q.OpacityTimerStatus == false
+                                   select q;
+            if (qOpacityAnimator != null)
             {
-                int random = new Random().Next(0, qCurrentAnimation.Count());
+                int random = new Random().Next(0, qOpacityAnimator.Count());
                 this.MontageViewModel.Photos[random].startOpacityAnimation();
+                //this.MontageViewModel.Photos[random].IsJiggle = true;
             }
             else
             {

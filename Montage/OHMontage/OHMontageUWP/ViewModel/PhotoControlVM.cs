@@ -17,6 +17,10 @@ namespace OHMontageUWP.ViewModel
 {
     internal class PhotoControlVM : INotifyPropertyChanged
     {
+
+        public static readonly double MAX_OPACITIY = 0.9;
+        public static readonly double MIN_OPACITIY = 0.6;
+
         public static readonly String DEFAULT_TICKET_ID = "Empty";
 
         private DispatcherTimer timer = new DispatcherTimer()
@@ -49,7 +53,7 @@ namespace OHMontageUWP.ViewModel
             this.AnimationImageUrl = "";
             timer.Tick += Timer_Tick;
             this.IsJiggle = false;
-            this.opacity = 1;
+            this.opacity = MAX_OPACITIY;
 
             this.opacityTimer.Tick += OpacityTimer_Tick;
             //this.opacityTimer.Start();
@@ -58,14 +62,14 @@ namespace OHMontageUWP.ViewModel
         private void OpacityTimer_Tick(object sender, object e)
         {
             this.Opacity += opacityDiff;
-            if (this.Opacity >= 1)
+            if (this.Opacity >= MAX_OPACITIY)
             {
-                this.Opacity = 1;
+                this.Opacity = MAX_OPACITIY;
                 opacityDiff = opacityDiff * -1;
             }
-            else if (this.Opacity <= 0.5)
+            else if (this.Opacity <= MIN_OPACITIY)
             {
-                this.Opacity = 0.5;
+                this.Opacity = MIN_OPACITIY;
                 opacityDiff = opacityDiff * -1;
             }
         }
@@ -169,7 +173,7 @@ namespace OHMontageUWP.ViewModel
                         if (!this.timer.IsEnabled)
                         {
                             this.timer.Start();
-                            switch (new Random().Next(1, 4))
+                            switch (new Random().Next(1, 8))
                             {
                                 case 1:
                                     this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl();
@@ -179,6 +183,18 @@ namespace OHMontageUWP.ViewModel
                                     break;
                                 case 3:
                                     this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl3();
+                                    break;
+                                case 4:
+                                    this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl4();
+                                    break;
+                                case 5:
+                                    this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl5();
+                                    break;
+                                case 6:
+                                    this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl6();
+                                    break;
+                                case 7:
+                                    this.AnimationImageUrl = ProjectHelper.GetDefaultAnimationUrl7();
                                     break;
                             }
                         }
