@@ -1,0 +1,63 @@
+const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, DeleteCommand } = require("@aws-sdk/lib-dynamodb");
+const { ApiGatewayManagementApiClient, PostToConnectionCommand } = require("@aws-sdk/client-apigatewaymanagementapi");
+
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
+const apiGatewayClient = new ApiGatewayManagementApiClient({
+  endpoint: "https://ygfo8jqflc.execute-api.ap-southeast-1.amazonaws.com/production"
+});
+
+exports.handler = async function () {
+  const tableName = process.env.TABLE_NAME;
+
+  try {
+    // Retrieve all connections from DynamoDB
+    const scanCommand = new ScanCommand({
+      TableName: tableName,
+      ProjectionExpression: "connectionId"
+    });
+
+    const connections = await docClient.send(scanCommand);
+
+    for (const item of connections.Items) {
+      const connectionId = item.connectionId.S;
+
+      try {
+        // Attempt to send a test message to check if the connection is active
+        const pingCommand = new PostToConnectionCommand({
+          ConnectionId: connectionId,
+          Data: JSON.stringify({ action: "ping" })
+        });
+
+        await apiGatewayClient.send(pingCommand);
+      } catch (error) {
+        // If the connection is stale, delete it from DynamoDB
+        if (error.name === "GoneException") {
+          console.log(`Stale connection detected: ${connectionId}, deleting from DynamoDB.`);
+
+          try {
+            const deleteCommand = new DeleteCommand({
+              TableName: tableName,
+              Key: { connectionId: connectionId }
+            });
+
+            await docClient.send(deleteCommand);
+            console.log(`Deleted stale connectionId: ${connectionId}`);
+          } catch (deleteError) {
+            console.error(`Failed to delete connectionId: ${connectionId}`, deleteError);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error scanning connections:", err);
+    return {
+      statusCode: 500,
+    };
+  }
+
+  return {
+    statusCode: 200,
+  };
+};
