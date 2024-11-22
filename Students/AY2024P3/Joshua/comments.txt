@@ -1,0 +1,4 @@
+Current bugs/issues:
+ - Some part of the code or AWS side may be causing lag where the websocket message isn't sent to the page, so a temp fix is made by adding a 5 second delay after the formSG is uploaded and another 5 second delay after receiving the "UPDATE_IMAGE" message before triggering the function.
+ - The map in the wayfinder isn't fully updated yet.
+ - There may be some timeout issues if the user comes back with the same ticketID after a few days.
